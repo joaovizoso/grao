@@ -106,10 +106,14 @@ Currently the booth runs on an iPad in Safari (or wherever the HTML is opened). 
 - **Display:** 15.6" touchscreen monitor (InnoView or ELECROW)
 - **Camera:** Canon EOS M50 Mark II mirrorless via `gphoto2`, OR Obsbot Tiny 2 webcam as a simpler `getUserMedia`-compatible alternative
 - **Mic:** Maono AU-GM10 USB gooseneck mic
-- **Printer:** Canon Selphy CP1500 via CUPS on Linux (this is why the photo strip is sized 1800×1200px)
+- **Printer:** Canon Selphy CP1500 via CUPS on Linux (this is why the photo strip is sized 1200×2400px portrait)
 - **Enclosure:** Modular aluminium frame (40×40mm profiles, Motedis system) with 5mm black matte Forex panels
 - **Power:** Jackery 240Wh power bank, for fully portable/off-grid setups
 - **Connectivity:** 4G/5G hotspot (TP-Link M7350)
+
+**iPad camera/audio reality check (2026-07-31):** Safari on iPadOS 17+ *does* support external USB (UVC) cameras — they appear in `enumerateDevices()` and are selectable via `getUserMedia()` alongside the built-in cameras (USB-C iPads only; Lightning has no path). But `index.html`'s four `getUserMedia` call sites all hardcode `facingMode: 'user'`, so plugging in a UVC camera today would still pull the built-in front camera — camera source selection is unbuilt and belongs in the priority #4 config layer, not assumed to work for free. External USB *audio* is the opposite story: OS-level support since early iOS, but no reliable app-level way to pick which USB mic gets used (iPadOS routes to the last-connected input; a non-class-compliant device is silently ignored) — so the real external-mic risk isn't compatibility, it's a knocked cable silently falling back to the built-in mic. Mitigate with a visible input-level meter, not a device-ID constraint.
+
+**Camera-upgrade spending rule:** if/when a camera upgrade actually happens, that money should go toward the Pi5/Chromium target above, not toward bolting external camera hardware onto the iPad — Linux/Chromium has mature, full UVC driver support and sidesteps gphoto2/Magic-Lantern-era workarounds entirely. This rule isn't triggered by anything today (no confirmed next booking, priority #4 still open) — it's guidance for whenever hardware spend is actually justified, not a signal to accelerate the Pi5 rebuild now.
 
 Implication for the app: once camera capture moves from `getUserMedia` (webcam/Obsbot) to `gphoto2` (Canon EOS M50), and printing moves from "download a JPG" to "send to CUPS," the app will need a local backend (Python/Node) to bridge the browser UI to hardware it can't reach directly. Don't build that bridge speculatively — the current getUserMedia + download flow should keep working standalone until that hardware integration is actually being wired up.
 
