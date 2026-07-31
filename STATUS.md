@@ -17,7 +17,8 @@ Live tracking of in-flight work: known-issue state and proposed-feature state. T
 
 | Feature | Status | Plan tier | File |
 |---|---|---|---|
-| QR code + remote recording | 🟡 Discussing | Premium (already sold, unbuilt) | [features/qr-remote-recording.md](features/qr-remote-recording.md) |
+| Backend infrastructure (file hosting + instant guest share) | 🟡 Discussing | Cross-cutting (delivery: both plans; instant share: Premium-adjacent) | [features/backend-infrastructure.md](features/backend-infrastructure.md) |
+| QR code + remote recording | 🟡 Discussing | Premium (already sold, unbuilt) | [features/qr-remote-recording.md](features/qr-remote-recording.md) — architecture now consolidated into backend-infrastructure.md |
 | Multi-language guest UI (PT/EN) | ⚪ Deferred | Basic+/Premium | [features/multilingual-ui.md](features/multilingual-ui.md) |
 | Auto-backup/sync during event | ⚪ Deferred | Internal/reliability | [features/auto-backup-sync.md](features/auto-backup-sync.md) |
 | Live gallery / reception slideshow | ⚪ Deferred | New upsell | [features/live-gallery-slideshow.md](features/live-gallery-slideshow.md) |
