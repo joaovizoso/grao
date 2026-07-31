@@ -1,167 +1,152 @@
 # Hardware Reference Pricing Log
 
 **Date of this pass:** 2026-07-31
-**Prepared by:** procurement, against [features/hardware-upgrade-plan.md](../features/hardware-upgrade-plan.md) (architect-strategy's framing, 2026-07-31)
-**Status:** Reference pricing only. **No vendor contacted, no order placed, nothing purchased.** No confirmed next booking exists yet per STATUS.md/the architect's framing — this is capex planning, not a shopping list to execute today.
+**Prepared by:** procurement, against [features/hardware-upgrade-plan.md](../features/hardware-upgrade-plan.md) (architect-strategy's restructured Option 1 / Option 2 framing, 2026-07-31)
+**Status:** Reference pricing only. **No vendor contacted, no order placed, nothing purchased.** Per STATUS.md and the hardware plan, there is still no confirmed second booking — this is capex planning against a trigger condition, not a shopping list to execute today.
 
-This file establishes the running hardware-pricing log pattern; future procurement passes should append a new dated section below rather than overwriting this one, so prices can be diffed over time.
-
-## How to read the tracks
-
-- **Track A — buy-now candidates.** Usable with the current iPad rig today, no software changes (one flagged exception, see A.3). These are the only items this pass treats as "could actually be bought soon," and even these are gated on the architect's €0 evidence steps (review J&C footage, confirm a real next booking, run the mic device test below) before spending anything.
-- **Track B — reference only, not recommended yet.** Dedicated camera path. Stranded on unbuilt Priority #5 software; do not buy.
-- **Track C — reference only, not recommended yet.** Booth enclosure, bought or DIY. Architect recommends a styled presentation layer instead for now; priced here anyway per founder's explicit request for full reference numbers.
-
-Every price below is dated and sourced. Where an automated fetch was blocked by anti-bot/JS rendering on the retailer's page (noted explicitly per item), I've given a market-rate estimate from comparable listings instead of inventing a precise figure — flagged as **[estimate, not confirmed]** and should be re-verified on the actual product page before any purchase decision.
+**Restructure note (2026-07-31):** This file previously used a Track A / Track B / Track C structure mirroring the now-retired plan document. Per the founder's direction, it is fully rewritten below into the same **Option 1 (iPad-based) / Option 2 (dedicated rig)** framing as the plan, each priced as one coherent kit rather than a scattered parts list. Nothing from the prior pass was silently dropped — figures that still hold (Obsbot Tiny 2, Canon M50 II, mic, panel light) are carried forward with their original sourcing dates; anything re-checked live this pass is dated 2026-07-31 again and marked as such.
 
 ---
 
-## Track A — buy-now candidates
+## At a glance
 
-### A.1 Tripod / support
-
-Requirement per architect's brief: rigid, repeatable framing, adjustable for standing/seated/child height, does not read as an amateur tripod visibly in frame.
-
-| Option | Price | Source / date | Notes |
-|---|---|---|---|
-| **Manfrotto Befree (kit w/ head)** | €199.99 list, **€119.97 on sale** | [Worten.pt](https://www.worten.pt/fotografia-e-drones/tripes-e-estabilizadores/tripes/kit-tripe-manfrotto-befree-5559834), checked 2026-07-31 | Max height 144cm, 1.4kg, 4kg payload. Reputable brand, black, folds compact — clears the "doesn't look amateur" bar (this is the line professional videographers actually use). Worten is a PT retailer, B2B invoice (fatura com IVA) available at checkout, in-stock/PT delivery. |
-| **Manfrotto Compact Action (MKCOMPACTACN-BK)** | **~€49–90 [estimate, not confirmed]** | [Amazon.es listing](https://www.amazon.es/Manfrotto-Compact-Action-Tr%C3%ADpode-completo/dp/B00K0P047E) — page price not extractable via automated fetch (JS-rendered), figure taken from cross-referenced customer/price-tracker mentions, checked 2026-07-31 | Cheaper Manfrotto line, lower max payload (2kg) and height reach — plausible for an iPad but tighter margin for standing-height framing across varied guest heights. Amazon.es ships to PT, VAT invoice available. **Re-check exact price on the live page before buying — this number is not fetch-confirmed.** |
-| **Generic/no-name adjustable tripod (~€25–35 class)** | Not itemized here | — | Explicitly not recommended: this is the category the architect's amateur-tell checklist calls out ("a consumer tripod with a visible clamp"). Skip even though cheapest. |
-
-**Recommendation for costing purposes: Manfrotto Befree kit, €119.97 (Worten.pt, sale price, 2026-07-31 — verify sale is still live at purchase time).**
-
-### A.2 Lighting
-
-Architect's framing: lighting is the top leverage point for low-light quality, ahead of a camera/sensor upgrade, because a controlled key light solves the noise-floor problem a large sensor solves at 10x the cost — and it's usable today with zero software changes.
-
-| Option | Price | Source / date | Notes |
-|---|---|---|---|
-| **Neewer dual LED panel kit (2x panel + mini tripods + color filters)** | **~€40–60 [estimate, not confirmed]** | [Worten.pt product page](https://www.worten.pt/produtos/painel-led-iluminador-neewer-fotografia-e-video-com-tripes-e-filtros-2-unidades-mrkean-0810038370132) found via search, checked 2026-07-31; exact price blocked by anti-bot 403 on fetch. Spec confirmed via search snippet: 66 LEDs, ~1000 lumens, 5600K, 10–100% dimmable, USB (5V/2A) powered, height 22.5cm–1.16m. | Dimmable and battery/USB-powered (matches the "independent of venue lighting" requirement); fixed 5600K only (no bi-color/CCT adjustment to blend with warm venue ambience) — a real limitation against the architect's requirement that colour temperature should be adjustable to match warm reception lighting rather than fight it. Two units gives redundancy/fill+key. |
-| **Neewer/Viltrox bi-color CRI95+ single panel (e.g. NL-116AI or VL-162T class)** | **$110–160 (~€100–150) [US pricing, estimate]** | [Amazon.com listings](https://www.amazon.com/3200K-5600K-Photography-Recording-Streaming-NL-116AI/dp/B0D9W57M4Y), checked 2026-07-31 — no PT/EU retailer price found in this pass | Adjustable 3200–5600K (blends with warm venue tungsten/LED), CRI95+, USB-C powered — better spec fit to the architect's "blend with venue ambience, high colour accuracy" requirement than the fixed-5600K Neewer kit above. Not found on a PT retailer in this search; would likely need Amazon.de/.es ordering, still EU-shipped so no import duty, but price not PT-confirmed. |
-
-**Recommendation for costing purposes: budget ~€50–80 for a single small dimmable, ideally bi-color, on-camera/panel light. Confirm exact SKU and PT/EU price before buying — this category has many near-identical rebadged panels at different price points and the CCT-adjustable spec matters more here than brand.** Per the brief: this beats a sensor/camera upgrade on leverage-per-euro because the failure mode (dim venue reception lighting) is a lighting problem, not a sensor problem.
-
-### A.3 External mic — flagged pre-purchase test required
-
-**Do not buy a mic before running the test below.** Per architect-strategy's framing: Safari on iPad does not expose a device picker for `getUserMedia`, and iOS may not default to an external USB/USB-C mic as the recording input. If it silently defaults to the iPad's built-in mic in a noisy reception, nobody finds out until after the wedding — the exact silent-failure class CLAUDE.md treats as worst-case.
-
-**The €0 test to run first (developer, not procurement):** plug any USB-C class-compliant mic already at hand (or borrow one) into the actual kiosk iPad, load the booth in Safari, record 15 seconds with the mic covered/uncovered to make the source audibly obvious, and confirm from the resulting file which mic captured. If Safari defaults to the wrong device, the fix (an `enumerateDevices`/`deviceId` constraint) is small but must be known before money is committed.
-
-| Option | Price | Source / date | Notes |
-|---|---|---|---|
-| **Maono AU-GM10 gooseneck mic** (already named in CLAUDE.md's Hardware Roadmap for the future Pi5 kiosk) | **~€25–35 [estimate; India/US listings only found, ₹899–1199 / rebadged variants, no direct EU price confirmed]** | [Amazon.in](https://www.amazon.in/MAONO-AU-GM10-Condenser-Microphone-Conference/dp/B08BZST39C), spec cross-check via search, checked 2026-07-31 | **Correction to earlier assumption worth flagging:** this mic connects via **USB-C** (ships with a USB-A-to-C cable), not USB-A-only as might be assumed — meaning it is plausibly the same mic for both the Track A iPad test *and* the eventual Track B Pi5 kiosk, a genuine two-track fit if the Safari test passes. Fixed gooseneck mount also suits the architect's "fixed, known, close mic-to-mouth distance beats capsule quality" requirement directly. **This should be the first unit bought for the device test, precisely because it isn't a single-use purchase if it works.** |
-| **Saramonic SmartMic5 UC** (USB-C micro-shotgun, marketed explicitly for iPad Pro/Air USB-C) | **~$75 (was $99) (~€70) [US pricing, no EU price found]** | [Adorama](https://www.adorama.com/saramonic-smartmic5uc-unidirectional-micro-shotgun-microphone-usb-c/p/sarsmamic5uc), checked 2026-07-31 | Purpose-built for iPad USB-C, directional. Higher spec/price than the Maono; better fit if the fixed gooseneck mount isn't practical for the booth's physical layout, worse fit against the architect's "fixed-position mount beats anything handheld/clip-adjacent" preference since this is camera/device-mounted rather than boom-mounted. |
-| **Comica CVM-VS09TC** (USB-C cardioid shotgun) | **~$79 (~€75) [US pricing, no EU price found]** | [B&H](https://www.bhphotovideo.com/c/product/1552613-REG/comica_audio_cvm_vs09_tc_cardioid_smartphone_microphone_for.html), checked 2026-07-31 | Similar category/price to the Saramonic; no PT/EU retailer found stocking it in this pass, would likely ship from a non-EU seller — check import VAT before ordering. |
-
-**Recommendation for costing purposes: buy the Maono AU-GM10 (~€30) first and run the developer device test before buying anything else in this category** — it's the cheapest option, doubles as roadmap hardware if it works, and answers the compatibility question the other two options don't (a shotgun mounted on the iPad itself doesn't test the fixed-gooseneck placement the architect actually recommends).
-
-### Track A running subtotal (buy-now candidates, if founder proceeds after the €0 evidence steps)
-
-| Item | Price (best estimate) | Confidence |
+| | **Option 1 — iPad shell** (recommended) | **Option 2 — dedicated rig** (reference only) |
 |---|---|---|
-| Manfrotto Befree tripod kit | €119.97 | Confirmed, Worten.pt, 2026-07-31 |
-| Lighting (single dimmable panel, spec TBD) | ~€50–80 | Estimate — confirm SKU/price before buying |
-| Maono AU-GM10 mic (for device test) | ~€25–35 | Estimate — no PT/EU retailer price confirmed |
-| **Track A total (before device test outcome)** | **~€195–235** | Mixed confidence — re-price lighting and mic on live retailer pages before committing |
-
-This is consistent with the architect's framing of Track A as "low-hundreds of euros against a 349–599€ ticket" — well inside a one-booking payback.
-
----
-
-## Track B — reference only, not recommended to buy
-
-Per the architect's framing: a dedicated camera bought today produces no better output at the next booking (the iPad path can't use it without unbuilt software), and `gphoto2` is a stills/tethering protocol poorly suited to grao's primary both-plans feature (60s video), better suited to the Premium-only photo strip. **These two options are not equivalent "camera" line items — presented separately below, priced for forward planning only.**
-
-### B.1 Canon EOS M50 Mark II (roadmap's named body, gphoto2 path)
-
-| Retailer | Price | Source / date | Notes |
-|---|---|---|---|
-| Worten.pt, Fnac.pt, PCComponentes.pt, Auchan.pt (kit w/ EF-M 15-45mm lens) | **Price not extracted this pass** — pages exist and are in-stock at all four PT retailers, but automated fetch was blocked (403/410) on every attempt | [Worten.pt](https://www.worten.pt/produtos/maquina-fotografica-canon-eos-m50-mark-ii-ef-m-15-45-aps-c-7389573), [Fnac.pt](https://www.fnac.pt/Canon-EOS-M50-Mark-II-EF-M-15-45mm-f-3-5-6-3-IS-STM-Preto-Camara-Fotografica-Digital-Camara-CSC-Mirrorless/a8529754), [PCComponentes.pt](https://www.pccomponentes.pt/canon-m50-mark-ii-241mp-wifi-preta-objetiva-15-45mm-f35-63-is-stm), checked 2026-07-31 | This body + kit lens has held roughly **€650–800** at PT retailers through 2025 based on general market tracking; **treat as an unconfirmed estimate, not a quote** — the exact current figure needs a manual page visit since none of the four retailer pages would render a price through automated fetch. All four are PT-based, B2B invoice capable, no import duty (EU stock). |
-| Refurbed.pt (refurbished) | Listed "up to 40% cheaper than new" | [Refurbed.pt](https://www.refurbed.pt/p/canon-eos-m50-mark-ii-black/), checked 2026-07-31 | Worth checking directly if Track B is ever greenlit — refurbished mirrorless is a reasonable way to de-risk a purchase that per the architect may need re-specifying anyway (see gphoto2 caveat below). |
-
-**Critical caveat carried over from the architect's framing, not procurement's own judgment:** `gphoto2` tethers as a stills/capture protocol. Live-preview video recording over it means `--capture-movie` piped into `v4l2loopback` — laggy and fragile, a poor fit for grao's 60-second **both-plans** video feature. It's a good fit for the Premium-only photo strip. **This is an architecture question, not a pricing question — flagging that CLAUDE.md's Hardware Roadmap line naming the M50 II may need amending before this camera is bought for the reason the roadmap currently states.** Loop in architect-strategy/developer before treating this body as "the" camera decision.
-
-### B.2 Obsbot Tiny 2 (getUserMedia-compatible alternative)
-
-| Retailer | Price | Source / date | Notes |
-|---|---|---|---|
-| Obsbot official EU store | **€369 (VAT included)** | [obsbot.com/store](https://www.obsbot.com/store/products/tiny-2), checked 2026-07-31 | Confirmed EU-priced, VAT-inclusive listing, 3–5 working day delivery stated on the page (destination not PT-specific but store serves EU). B2B invoicing needs confirming directly with Obsbot at order time. |
-| Obsbot Tiny 2 (Prime Day low, US) | **$229 (historic low, was $329)** | [Yanko Design](https://www.yankodesign.com/2026/06/19/obsbot-ai-cameras-are-on-sale-for-prime-day-2026-and-the-tiny-2-webcam-just-hit-its-lowest-price-ever/), [The Gadgeteer](https://the-gadgeteer.com/2026/06/24/obsbot-prime-day-2026-the-tiny-3-drops-to-296-and-the-tiny-2-hits-a-historic-low/), both checked 2026-07-31 | US promotional price (~€210 at spot FX) — not orderable at that price from Portugal without a US intermediary, and would incur import VAT/duties + shipping that likely erase the saving vs. the EU store price. Reference only. |
-
-**Fit note (not procurement's call to resolve, but worth surfacing alongside price):** the Obsbot is `getUserMedia`-compatible out of the box — no new hardware-bridge software needed, unlike the M50 II's `gphoto2`/CUPS-style integration. If/when Track B is revisited, the Obsbot is the closer fit to what already runs today (`joao-constanca-booth.html`'s existing capture code), while the M50 II requires the backend bridge CLAUDE.md flags as not-yet-built. This is exactly the kind of camera tradeoff the procurement brief says not to resolve alone — flagging for architect-strategy/developer, consistent with the M50-II gphoto2 caveat above.
-
-### B.3 Canon EOS 600D (founder-owned — €0, reference feasibility only)
-
-The founder already owns this body (2011 APS-C DSLR, "Rebel T3i") and asked whether it can substitute for B.1/B.2 rather than buying either. Full research and verdict logged in [features/hardware-upgrade-plan.md](../features/hardware-upgrade-plan.md#addendum-canon-eos-600d-founder-owned-feasibility-research---2026-07-31) (developer, 2026-07-31) — summary here for the pricing table:
-
-| Integration path | Feasibility verdict |
-|---|---|
-| **gphoto2 tethering** | Stills: fine, well-supported. Video: `--capture-movie` on this generation is a laggy (~0.5–5s), low/inconsistent-fps (~4–25fps) MJPEG preview hack, not real recorded video — unusable for the 60s guest-message feature. A proper onboard-record trigger (`movierecordtarget=Card`) may exist on this camera generation but is **unverified** for the 600D's specific gphoto2 driver — needs an on-device `gphoto2 --list-config` check, not assumed. Same architectural problem the architect already flagged for the M50 II, arguably worse. |
-| **HDMI capture card as UVC webcam** | Stock firmware has overlay-cluttered HDMI, not a clean feed — clean output requires **Magic Lantern** (unofficial third-party firmware), a real reliability risk for unattended wedding-day use. Safari on iPadOS 17+ **does** support external UVC cameras via `enumerateDevices()` and `getUserMedia()` on **USB-C iPads only** (confirmed by WebKit's Safari 17 release notes and corroborated by real-world capture-card test on iPad 10th gen; see Addendum 2 §2.1 in features/hardware-upgrade-plan.md). However, this does not make the 600D viable for this rig without resolving Magic Lantern's reliability (a real risk for unattended use) and the 600D's own ~30-minute live-view thermal ceiling, both of which are camera-specific problems, not platform incompatibility. |
-| **Image quality (either path)** | APS-C sensor + real lens would meaningfully outperform the iPad camera and Obsbot Tiny 2 in low light — but only if an integration path delivers that output cleanly, which neither path does today without the unresolved items above. |
-
-> **Safari UVC support correction — 2026-07-31, per Addendum 2 §2.1 of features/hardware-upgrade-plan.md:** The original HDMI row (superseded above) claimed Safari UVC support was "unverified" — i.e., it might not work in Safari on iPadOS. This has been corrected: WebKit's own Safari 17 release notes explicitly confirm "WebKit now supports USB cameras on iPadOS 17" and that they are "included in the output of `enumerateDevices()` and selectable with `getUserMedia()`" on USB-C iPads. Independently corroborated by a real-world test of a USB video capture device on an iPad 10th gen, iPadOS 17, in Safari. The original "unverified" status is retired. The overall recommendation — "do not buy a capture card for the iPad" — stands, but the reasoning has changed from "platform incompatibility" to "camera-specific problems (Magic Lantern reliability, thermal ceiling) and economics (camera upgrade euros belong to the Pi5 target per the spending rule in Addendum 2 §2.4)," not compatibility grounds. Updated 2026-07-31 for clarity about what changed and why.
-
-**Verdict: not usable on the current iPad/Safari rig today. Not automatically better-suited to the future Pi5/Chromium kiosk either, but the HDMI-capture-card path becomes low-risk on that future desktop-class OS (no iPadOS/Safari gate) if Magic Lantern's clean-HDMI output proves reliable on the bench.** Recommended action before any capture-card purchase: (1) **€0 test:** bench-test Magic Lantern's clean-HDMI-out stability over several unattended hours before relying on it at a live event; (2) **€0 check:** confirm whether the kiosk iPad is USB-C or Lightning (this gates whether the UVC path is even compatible with the specific iPad hardware). If pursued at all, slot this camera into Track B's camera role via the HDMI-capture-card path only (not gphoto2) — ahead of spending on B.1/B.2 — once Track B is actually greenlit.
-
-**Price: €0 (already owned).** Does not change the standing recommendation against buying Track B hardware now.
-
-### Track B running total (reference only)
-
-| Item | Price | Confidence |
-|---|---|---|
-| Canon EOS M50 Mark II + kit lens | ~€650–800 [unconfirmed estimate] | Low — re-check live retailer price |
-| Obsbot Tiny 2 | €369 | Confirmed, obsbot.com, 2026-07-31 |
-| Canon EOS 600D (founder-owned) | €0 — but not usable today on either integration path without unresolved prerequisites (Magic Lantern bench-reliability test; camera-specific thermal ceiling; 30-min live-view limit) | See B.3 verdict above |
-
-Neither recommended for purchase now. Both priced for forward planning only, per the architect's trigger conditions (Priorities #1–4 genuinely closed, plus a rental-validated quality gain, print-on-site actually sold, or booking volume making the iPad rig the binding constraint).
+| **Total cost, best estimate** | **~€500–1,300** as a complete kit — see gap flag below, no single in-stock listing confirms the low end today | **~€1,500–3,500+** DIY-housed, or **~€3,500–6,500+** bought-shell-housed (and still the wrong aesthetic even then) |
+| **Lead time** | 2–5 weeks (EU shipping), faster if a PT/EU seller has stock; unconfirmed for the specific SKU that meets spec (see below) | Months — not shipping-bound, blocked on unbuilt software and an enclosure that can't be designed until contents are fixed |
+| **Software readiness** | Works today, zero code changes (`index.html` as-is) | Blocked on CLAUDE.md priority #5 (hardware bridge), and wants priority #4 (config layer) done first |
+| **Brand fit (boutique black/white/gold)** | Better — small, refined object; matte-black/neutral units exist in the category | Worse by default — every bought all-in-one shell found this pass is RGB-lit, sheet-metal/wood-grain, and reads as generic "party photo booth," not "video guestbook" |
+| **Meets founder's "off-the-shelf, not RGB, integrated light" bar today, in stock, at the two named sellers?** | **No — flagged, not silently substituted.** See §1.2. | **No.** Confirmed by direct product data below, not assumed. |
 
 ---
 
-## Track C — reference only, not recommended to buy or build yet
+## 1. Option 1 — iPad-based booth
 
-Architect's recommendation: skip both paths for now in favour of a styled presentation layer (backdrop/plinth/signage/cable management) that doesn't lock in dimensions before Track B is decided. Priced below anyway per founder's request for full reference numbers.
+### 1.1 What's being priced
 
-### C.1 Pre-made photo-booth/kiosk shell (buy path)
+Per the plan: the existing iPad in a purpose-built shell with a ring light **integrated into the shell**, on a stand (separate or supplied), using the iPad's own camera and mic. No external camera. External mic is **explicitly not priced as a certainty** — it's gated on the founder's free audio test (plan §2.4/§5); if that test fails, "Option 1b" (an internal USB mic) becomes a candidate, priced separately below for reference only.
 
-| Vendor | Price | Source / date | Notes |
-|---|---|---|---|
-| RBA Photo Booths (US manufacturer) — Beautipad iPad shell | **$1,300** | [rbaphotobooths.com](https://www.rbaphotobooths.com/collections/rba-photo-booth-shell-for-sale), checked 2026-07-31 | Purpose-built for an iPad-in-a-shell format, closest fit to grao's current iPad rig of anything found. **US-based — add import VAT (23% IVA) + customs duty + international freight + customs clearance time on top of sticker price; realistic landed cost likely $1,300 + ~€400–600 in duty/VAT/freight, and several weeks' lead time.** Not brand-neutral (RBA branding/aesthetic, described by the architect as "party" aesthetic that fights grao's boutique positioning) — would need to confirm rebrandability. |
-| RBA — T11/T12/T20R DSLR-style shells | $1,600–2,200 | Same source, same date | Built for DSLR + ring-light "party photo booth" aesthetic (mirror/LED trim options) — the architect's flagged mismatch with grao's black/white/gold boutique positioning is visually obvious on these models. Not a good aesthetic fit regardless of price. |
-| EU-based brand-neutral matte shell | **Not found in this pass** | Searched (Flashmat.pt, Photo Booth Europe, 360-photo-booth.com), checked 2026-07-31 | The PT/EU results returned were photo-booth **rental service providers** (e.g. Flashmat), not enclosure manufacturers selling shells outright — no EU-based seller of a brand-neutral, rebrandable matte shell was found. This directly confirms the architect's open question in the framing doc: **no evidence yet that a matte, EU-shipped, brand-neutral shell exists at a competitive price** — the bought-shell path currently only has US options with the import-cost and aesthetic problems above. |
+### 1.2 Direct findings — photoboothshop.eu and photoboothstore.eu, checked 2026-07-31
 
-### C.2 DIY: Motedis 40×40mm aluminium frame + 5mm black matte Forex panels
+**photoboothshop.eu (Hulshout, Belgium)** — three iPad-shell products found on live product pages:
 
-| Component | Price | Source / date | Notes |
-|---|---|---|---|
-| Motedis 40×40 B-type (slot 10) aluminium profile | **Price not extracted — page renders "xx,xx€" placeholders through automated fetch** on both motedis.com and motedis.pt | [motedis.com](https://www.motedis.com/en/Profile-40x40-B-type-slot-10), [motedis.pt](https://www.motedis.pt/es/Perfil-40x40-Tipo-B-ranura-10mm), checked 2026-07-31 | Confirmed: cut-to-length available 50mm–1980mm (or up to 6000mm for large-customer orders), standard stock lengths at 500/1000/1500/1980mm price better than custom cuts, delivery "3–6 business days Ex Works." Motedis ships to PT (site redirects EU customers to their .pt storefront) and issues proper VAT invoices. **Rough market-rate estimate for this profile class: €12–18/meter [estimate, not confirmed] — visit the live Motedis.pt configurator and add actual booth dimensions before costing this seriously**, since price also depends on corner brackets (~€1–3 each), T-nuts (~€0.20–0.50 each), and end caps, all sold separately. |
-| 5mm black matte Forex (PVC foam board) panels | **Price not extracted** — found a PT-based supplier but page didn't render pricing | [Moldiber](https://moldiber.com/pt/pvc-espumado-forex/) (PT/ES supplier, comercial@moldiber.com, +34 976 503 252), checked 2026-07-31; also [Modulor.de](https://www.modulor.de/en/forex-color-pvc-foam-board-coloured-5-0-x-1560-x-3050-mm-black-ral-9004-qm.html) stocks black 5mm Forex in large sheets (1560×3050mm) | **Rough market-rate estimate: €20–35/m² for 5mm black matte Forex cut to size [estimate, not confirmed]** based on comparable listings for this board class; large full sheets (1560×3050mm ≈ 4.76m²) from a supplier like Modulor would work out cheaper per m² than small cut-to-size orders but require in-house cutting. **A concrete quote requires knowing the booth's actual panel dimensions — which per the architect's core objection don't exist yet, because Track B's contents (screen size, camera body, printer footprint) aren't decided.** This is the practical proof of the architect's sequencing point, not just a theoretical one: procurement cannot even fully price the DIY materials list without Track B being resolved first. |
-| **Rough DIY total, illustrative only** | **~€250–450** for a modest single-person booth frame (a few meters of profile + connectors + a handful of Forex panels) | Derived from the estimates above, not vendor-quoted | **Do not treat this as a real budget number.** It's an order-of-magnitude placeholder assembled from unconfirmed per-unit estimates against an undefined bill of materials (no cut list exists because no dimensions exist). A real quote needs a designed cut list first. |
+| Product | Price | Ring light | Stand | Material/finish | Stock | iPad fit | Meets founder's bar? |
+|---|---|---|---|---|---|---|---|
+| **iPad Booth Standard** | €1,190 (list €1,200) | **Integrated** — 19" swivel & lift ringlite | **Yes, integral** (swivel/lift column) | White or black shell, ~23kg, 2 faceplates fit "most iPad models" (not model-specific) | **Sold out** at last check | Generic faceplate fit — not confirmed against a specific iPad generation | **Closest structural fit** (light + stand in one purchase) but the ring light is **RGB**, which fails the founder's explicit no-RGB requirement as sold, and it's currently unavailable to buy |
+| **Video Gastenboek (Guestbook) Photobooth** | €1,950 (VAT incl.) | **Not integrated — not present.** Product copy makes no mention of a ring light; it ships with a phone-style handset instead | **Not included** | Not detailed beyond handset colour options | 1 in stock | Built specifically for 12.9" iPad Pro M2; **iPad not included** | Closest **name** match to grao's product category, but **fails the core "integrated ring light" spec outright** — buying this would still require sourcing and mounting a separate light, which reintroduces exactly the "assembled parts" look Option 1 exists to avoid |
+| **PB5 Vintage iPad Booth** | Not confirmed — product page 404'd on direct fetch this pass; price not recoverable via search | Light **not integrated** — product copy describes "a base for external lighting equipment," i.e. bring your own | Unclear | **Solid red oak** — a wood finish, not matte black | Unclear | 12.9" iPad Pro / 13" iPad Pro (V2) | Wood finish and non-integrated light fail two of the founder's explicit filters independently of price |
 
-### Lead time comparison
+**photoboothstore.eu** — checked 2026-07-31. **No standalone iPad-shell product found at all.** Their relevant listing is the "All-In-One Photo Booth Set 1" at €4,700 ex-VAT — but that's a full mini-PC-based kiosk (13.3" touch display, mini-PC, camera, printer, ring light, wooden tripod shell), not an iPad shell. It's priced under Option 2 below (§2.2) as a bought-shell reference point instead, since it isn't a candidate for this option at all.
 
-| Path | Lead time |
-|---|---|
-| RBA pre-made shell (US) | Manufacturing + international freight + PT customs clearance — realistically **3–6 weeks**, not confirmed by vendor |
-| Motedis DIY materials | **3–6 business days Ex Works** (vendor-stated) for the aluminium once a cut list exists, plus separate lead time for Forex panels and, per the architect's point, whatever time fabrication (drilling, cutting, finishing) actually takes — unquantified since no cut list exists |
+### 1.3 The explicit gap — flagged, not papered over
 
-Both paths confirm the architect's recommendation to defer Track C: the bought shell is slow, expensive to land, and aesthetically mismatched; the DIY path can't even be fully priced yet because it has no dimensions to price against.
+**Neither of the two named EU sellers currently has, in stock, a matte-black-or-brand-neutral, non-RGB, integrated-ring-light iPad shell that meets the founder's stated bar.** The one unit that structurally matches the requirement (iPad Booth Standard: integrated light + integral stand, one purchase) is RGB and sold out. The one that matches grao's product category by name (Video Guestbook Photobooth) has no integrated light at all and no stand — buying it would mean sourcing a separate light and stand, which is precisely the "shopping list of parts" problem this option is supposed to solve, not the coherent single-purchase kit the founder asked for.
+
+Two live paths forward, neither purchasable today at the stated bar:
+
+1. **Ask photoboothshop.eu directly** (draft below, §1.6) when the iPad Booth Standard restocks, and whether its ring light has a fixed white/warm-only mode (RGB-capable hardware run permanently in white mode may satisfy the founder's actual requirement — "no RGB mode ever enabled" — even if the unit is nominally an "RGB" product; this needs the vendor's confirmation, not an assumption).
+2. **Fall back to the marketplace tier** (Etsy/CyraTok/WideMeet/360Spinbooths-class listings) that architect-strategy's own research already identified as the ~€400–800 category with non-RGB, matte-black, brand-neutral units and no bundled software. **Procurement has not independently re-verified a specific live listing, price, or stock status in this category this pass** — that verification is the concrete next step, not a number to treat as confirmed today.
+
+### 1.4 Stand / tripod question
+
+- iPad Booth Standard: stand is **integral** to the unit — no separate purchase, if bought.
+- Video Guestbook Photobooth: **no stand included** — would need a separate stand/tripod purchase on top of the €1,950, which (combined with no integrated light) moves this specific product further from "one coherent purchase," not closer.
+- PB5 Vintage: unclear from available product copy; treat as unresolved.
+- **Net: only the RGB, currently-sold-out iPad Booth Standard resolves stand + light as part of one purchase today.** This is the practical proof of the gap in §1.3.
+
+### 1.5 Required founder input before ordering anything
+
+**Confirm the exact iPad model, and which physical edge its front camera sits on**, before ordering any shell (10th-gen and later moved the front camera to the landscape/long edge; earlier models have it on the portrait/short edge). None of the listings above can be validated against the correct aperture position without this — it's a founder-owned €0 check, not something procurement can resolve from a product page.
+
+### 1.6 Draft — vendor email to photoboothshop.eu
+
+> Subject: iPad Booth Standard — restock timing and ring-light colour mode
+>
+> Hello,
+>
+> I'm evaluating the iPad Booth Standard for a wedding video-guestbook booth in Portugal, and have two questions before I can decide whether it fits:
+>
+> 1. It currently shows as sold out — do you have a restock date, and can I pre-order for the next batch?
+> 2. Can the integrated ring light be fixed to a plain white or warm-white output only (i.e. disable the RGB colour-cycling mode permanently), or is colour-cycling the only mode available?
+>
+> Separately: does the unit ship with a VAT invoice suitable for a Portuguese business (IVA-compliant fatura), and what's the landed cost/lead time to mainland Portugal?
+>
+> Thank you,
+> [founder name], grao
+
+### 1.7 Branding and external mic — carried forward, not re-priced
+
+- **Branding vinyl/foil monogram:** ~€50–100 locally (Portuguese sign shops) — unchanged estimate, no new sourcing needed this pass.
+- **External mic (Option 1b, contingency only):** Maono AU-GM10-class USB mic, ~€25–35 (no confirmed EU retail price found in this or the prior pass — only US/India listings), plus a ~€25–40 powered USB-C PD hub so the iPad can still charge. **Not priced as part of the Option 1 total** — it's contingent on the founder's audio test failing, per the plan's explicit instruction not to price this as a certainty.
+
+### 1.8 VAT / invoicing note
+
+photoboothshop.eu is Belgium-based (EU). For an intra-EU B2B purchase, if grao has a valid Portuguese VAT number registered for intra-community transactions (VIES), the Belgian seller may zero-rate the invoice under the reverse-charge mechanism, with grao self-assessing 23% Portuguese IVA. If grao is not VIES-registered (e.g. trading under a simplified regime), the seller may instead charge Belgian VAT at checkout. **Confirm actual treatment with an accountant/Finanças before ordering** — this changes the real landed cost by double digits of euros either way, and neither seller's product page addresses it.
+
+### 1.9 Option 1 total — "as it would actually ship"
+
+Two honest scenarios, since no single confirmed in-stock listing meets the bar today:
+
+- **If iPad Booth Standard restocks and the vendor confirms a fixed-white light mode:** €1,190 (shell + integrated light + stand) + ~€75 branding ≈ **~€1,265**, EU-to-EU shipping (no import duty), lead time unconfirmed for this SKU while sold out (a comparable in-stock photoboothshop.eu listing quoted ~14 days).
+- **If falling back to the marketplace tier (Etsy/CyraTok-class):** architect's own estimate of ~€400–800 landed still stands as the working number, but it is **not yet backed by a procurement-verified live listing, price, or PT shipping check** — that's the concrete next research task, not a total to commit to.
+
+**Best current single estimate, consistent with the architect's plan: ~€500–1,300.** The material finding of this pass is not the number — it's that **neither named EU seller currently has the exact spec-meeting unit in stock**, so this range is not yet anchored to one purchasable listing the way the founder asked for. Closing that gap (vendor reply, or a verified marketplace listing) is this file's top open item.
 
 ---
 
-## Summary by track
+## 2. Option 2 — dedicated rig (reference only, not recommended near-term)
 
-| Track | Recommendation this pass | Approx. cost if proceeding |
-|---|---|---|
-| **A — tripod, lighting, mic** | Buy-now candidate, gated on the architect's €0 evidence steps (J&C footage review, confirmed next booking, Safari mic device test) | ~€195–235 (mixed confidence, see item notes) |
-| **B — camera (M50 II, Obsbot Tiny 2, or founder-owned 600D)** | Reference only, do not buy/deploy | €0 (600D, owned but not usable today on either integration path — see B.3) to €369 (Obsbot, confirmed) to ~€650–800 (M50 II, unconfirmed estimate) |
-| **C — enclosure (bought or DIY)** | Reference only, do not buy or build; architect recommends a styled presentation layer instead | $1,300–2,200 (bought, US, + import costs) or ~€250–450 (DIY, illustrative placeholder only — no real BOM exists) |
+Per the plan: blocked on CLAUDE.md priority #5 (unbuilt hardware bridge) regardless of price. Priced here purely as a comparison point, per the founder's request for full reference numbers — **not a near-term recommendation.**
 
-## Open items for a future pricing pass
+### 2.1 Camera — carry forward the Obsbot vs. Canon M50 tradeoff, unresolved
 
-- Re-confirm the Canon EOS M50 Mark II PT retail price directly (all four retailer pages blocked automated price extraction this pass).
-- Get a live Motedis.pt configurator quote once/if Track B dimensions exist.
-- Get a direct quote from Moldiber (PT/ES Forex supplier) rather than estimating.
-- Confirm whether any EU-based photo-booth shell manufacturer sells a brand-neutral matte shell (none found this pass; only US party-aesthetic shells and PT/EU rental-service providers, which are not the same thing as a shell for sale).
-- Re-price the lighting and mic categories on live PT/EU retailer pages before any purchase — several figures in Track A are cross-referenced estimates, not fetch-confirmed prices, and this is the one track actually being considered for near-term spend.
-- Canon EOS 600D (B.3): Run one €0 feasibility test before any capture-card spend — bench-test Magic Lantern's clean-HDMI-out reliability over several unattended hours to ensure it doesn't crash mid-recording (a wedding-day failure mode). Also check the 600D's specific libgphoto2 driver for `movierecordtarget` support (`gphoto2 --list-config`) before assuming the gphoto2-video path is even theoretically viable. Separately: confirm whether the kiosk iPad is USB-C or Lightning (the UVC path only works on USB-C; Lightning closes this option entirely).
+| Camera | Price | Source/date | Note |
+|---|---|---|---|
+| **Obsbot Tiny 2** | €369 (VAT incl.) | [obsbot.com/store](https://www.obsbot.com/store/products/tiny-2), confirmed 2026-07-31 | UVC/`getUserMedia`-compatible out of the box — no new backend bridge needed, keeps today's capture code path unchanged. |
+| **Canon EOS M50 Mark II** (kit lens) | ~€650–800 [unconfirmed PT estimate, not re-checked this pass] | PT retailer pages (Worten/Fnac/PCComponentes) blocked automated price extraction in the prior pass; not re-attempted this pass since Option 2 remains non-near-term | `gphoto2` is a stills/tethering protocol — good for the Premium-only photo strip, **poorly suited to grao's primary 60s video feature** per architect's finding. |
+
+**This is exactly the kind of tradeoff flagged at the top of procurement's brief as beyond a pure price comparison** — it has real integration-complexity consequences for developer (backend bridge vs. none), not just a €300–400 sticker difference. Not resolved here; loop in developer/architect-strategy before treating either as decided.
+
+### 2.2 Bought all-in-one shells — direct evidence of the aesthetic mismatch, from the same two named sellers
+
+| Product | Seller | Price | What it is | Why it doesn't fit grao's look |
+|---|---|---|---|---|
+| **T1 Photobooth** | photoboothshop.eu | €2,995 | 15.6" touchscreen, DSLR Canon camera, dedicated PC (i5/Ryzen 7), ring light **+ RGB light strip**, printer drawer, 35kg, ~14-day delivery, bundled demo Lumabooth software | Sheet metal with a **wood-grain motif** housing, RGB lighting, and bundled software grao doesn't want — fails the "buy the shell, not the platform" filter and the no-RGB filter both |
+| **T2 Photobooth** | photoboothshop.eu | €2,495 | 15.6" touchscreen, mini-PC (i7/Ryzen 7), **built-in RGB + ring-fill light**, optional Canon R100, printer tray, 35kg, ~2-week delivery | Sheet steel construction, RGB lighting, bundled Lumabooth demo software — same two failures as T1 |
+| **All-In-One Photo Booth Set 1** | photoboothstore.eu | €4,700 ex-VAT (was €5,000) | 13.3" touch display, mini-PC, camera, printer, integrated ring light, wooden tripod shell | Wood-finish "party booth" aesthetic, and a 13.3" screen (smaller than the CLAUDE.md-specced 15.6") bundled with a fixed hardware/software combo grao would need to partially discard |
+
+**These three confirm the architect's finding directly, from live product data rather than assumption: every bought all-in-one shell found this pass is RGB-lit, sheet-metal/steel or wood-grain finished, and bundles a software platform grao doesn't need.** None meets the founder's boutique black/white/gold bar as bought. This leaves commissioned fabrication or the DIY Motedis+Forex path as the only routes to the right aesthetic — consistent with, and now further evidenced beyond, the plan's conclusion.
+
+### 2.3 Self-assembled component kit (if the DIY/commissioned housing route were taken)
+
+| Component | Price | Source/date | Note |
+|---|---|---|---|
+| Raspberry Pi 5 (4GB) + case/PSU/SD | ~€70–95 board + ~€30–40 accessories [estimate, not confirmed] | Raspberry Pi Foundation's own 2026 pricing-change announcements note memory-driven price rises across the 4GB+ lineup; no exact current PT/EU retail figure was extractable this pass (kubii.com page didn't render a price via fetch) | Re-check kubii.com or a PT electronics distributor directly before costing precisely. |
+| 15.6" capacitive touchscreen (HDMI) | **€186.62 incl. VAT / €149.30 ex-VAT** | [RaspberryPi.dk](https://raspberrypi.dk/en/product/15-6-capacitive-touch-screen-lcd-hdmi-ips/) (Denmark, EU), confirmed 2026-07-31 | Better-sourced than the CLAUDE.md-named InnoView/ELECROW candidates — neither could be pinned to a confirmed EU/PT retail price this pass (only found USD listings, e.g. ELECROW CrowVi ~$129, not VAT-inclusive or PT-shipping-confirmed). Re-price InnoView/ELECROW directly if Option 2 is ever greenlit. |
+| Camera | €369 (Obsbot) or ~€650–800 (M50 II, unconfirmed) | See §2.1 | — |
+| Mic (Maono AU-GM10-class) | ~€25–35 [estimate, not confirmed] | No EU retail price found in this or the prior pass — only US/India listings | Same gap as Option 1's contingency mic pricing. |
+| Light (bi-colour dimmable panel) | ~€50–150 | Carried forward from prior pass, not re-priced this round | Depends on CCT-adjustable spec chosen. |
+| Printer (Selphy CP1500, only if print-on-site sold) | ~€150–200 + consumables | Carried forward, not re-priced this pass | Adds housing volume and a service door regardless of sensor/compute choice. |
+
+### 2.4 Housing — three routes, none precisely costable yet
+
+- **(a) Bought shell:** €2,495–4,700+ per §2.2 — wrong aesthetic at any of these price points.
+- **(b) Commissioned Portuguese fabrication:** open-ended, realistically four figures, multi-week-to-multi-month, and requires a design that doesn't exist yet.
+- **(c) DIY Motedis 40×40 + 5mm Forex:** ~€250–450 illustrative only — **not a real bill of materials**, because no cut list exists until final component dimensions (screen, camera body, printer footprint) are fixed. This is the same sequencing problem the architect flagged: you can't cost a box before you've chosen its contents.
+
+### 2.5 Option 2 total reference range
+
+- **Components only** (Pi5 + screen + camera + mic + light + cabling): roughly **€700–1,300** (Obsbot path) or **~€1,000–1,600** (M50 II path).
+- **Plus housing:** +€2,495–4,700 (bought, wrong aesthetic) / +€250–450 materials-only, labour/finish risk unquantified (DIY) / open-ended four figures (commissioned).
+- **Total reference range: ~€1,500–3,500+ if DIY-housed, or ~€3,500–6,500+ if bought-shell-housed** (and still not matching grao's aesthetic even at that higher price). **Clearly not recommended near-term** — blocked on CLAUDE.md priority #5 (unbuilt hardware bridge) regardless of budget, and wants priority #4 (config layer) closed first.
+
+---
+
+## 3. Open items for the next procurement pass
+
+- **Top priority:** verify a specific, in-stock, matte-black/brand-neutral, non-RGB, integrated-ring-light iPad shell in the ~€400–800 marketplace tier (Etsy/CyraTok/WideMeet/360Spinbooths-class) with a live price, stock check, and shipping-to-Portugal quote — this is the gap flagged in §1.3 and the single most valuable thing this file is missing.
+- Send the draft email in §1.6 to photoboothshop.eu re: iPad Booth Standard restock timing and fixed-white light mode; log the reply here when it arrives.
+- Confirm exact IVA/VAT treatment for an EU B2B purchase from Belgium (reverse charge vs. Belgian VAT at checkout) with an accountant before any Option 1 order.
+- Re-confirm Canon EOS M50 Mark II PT retail price directly (blocked by anti-bot pages in two passes now).
+- Re-price Raspberry Pi 5 (4GB), Maono AU-GM10, and InnoView/ELECROW 15.6" touchscreens on live PT/EU retailer pages if Option 2 is ever actually greenlit — none of these are near-term spend today, so they were not chased further than a market-rate estimate this pass.
+- Confirm the founder's exact iPad model and front-camera edge (§1.5) — required before any Option 1 order regardless of which shell is chosen.
