@@ -1,0 +1,1323 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>J & C — Booth</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #5a6b4a; --green-light: #7a8f67; --green-pale: #c8d4be;
+    --green-faint: #edf0e9; --cream: #f7f4ef; --brown: #3a3028;
+    --brown-mid: #6b5d50; --brown-light: #a89880; --white: #ffffff;
+    --font-display: 'Cormorant Garamond', serif; --font-body: 'Jost', sans-serif;
+  }
+  html, body { width:100%; height:100%; overflow:hidden; background:var(--cream);
+    font-family:var(--font-body); color:var(--brown);
+    -webkit-tap-highlight-color:transparent; user-select:none; }
+
+  .screen { position:absolute; inset:0; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; opacity:0; pointer-events:none;
+    transition:opacity 0.6s ease; }
+  .screen.active { opacity:1; pointer-events:all; }
+
+  /* ── WELCOME ── */
+  #screen-welcome { background:var(--cream); }
+  #screen-welcome .bg-pattern { position:absolute; inset:0;
+    background-image: radial-gradient(circle at 20% 20%, rgba(90,107,74,0.06) 0%, transparent 50%),
+      radial-gradient(circle at 80% 80%, rgba(90,107,74,0.08) 0%, transparent 50%); }
+  .monogram-ring { position:relative; width:200px; height:200px; margin-bottom:32px; }
+  .monogram-ring svg { position:absolute; inset:0; width:100%; height:100%; animation:spin 30s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
+  .monogram-inner { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
+  .monogram-letters { font-family:var(--font-display); font-size:68px; font-weight:300;
+    color:var(--green); line-height:1; letter-spacing:-2px; }
+  .welcome-names { font-family:var(--font-display); font-size:38px; font-weight:300;
+    color:var(--brown); letter-spacing:3px; margin-bottom:6px; text-align:center; }
+  .welcome-subtitle { font-size:12px; font-weight:200; letter-spacing:4px; text-transform:uppercase;
+    color:var(--brown-mid); margin-bottom:48px; }
+
+  /* mode picker */
+  .mode-picker { display:flex; flex-direction:column; gap:14px; position:relative; z-index:1; align-items:center; }
+  .mode-btn-main { display:flex; align-items:center; justify-content:center; gap:14px;
+    width:320px; padding:26px 20px; background:var(--green); border:none;
+    cursor:pointer; transition:background 0.2s, transform 0.15s; position:relative; }
+  .mode-btn-main::before { content:''; position:absolute; inset:-4px; border:1px solid var(--green-pale); }
+  .mode-btn-main:active { transform:scale(0.97); background:var(--green-light); }
+  .mode-btn-main .mode-icon { font-size:28px; line-height:1; }
+  .mode-btn-main .mode-label { font-size:12px; font-weight:300; letter-spacing:4px;
+    text-transform:uppercase; color:var(--white); }
+  .mode-btn-secondary-row { display:flex; gap:14px; }
+  .mode-btn-small { display:flex; align-items:center; justify-content:center; gap:10px;
+    width:153px; padding:20px 16px; background:transparent; border:1px solid var(--green-pale);
+    cursor:pointer; transition:background 0.2s, transform 0.15s; }
+  .mode-btn-small:active { transform:scale(0.97); background:var(--green-faint); }
+  .mode-btn-small .mode-icon { font-size:22px; line-height:1; }
+  .mode-btn-small .mode-label { font-size:11px; font-weight:300; letter-spacing:4px;
+    text-transform:uppercase; color:var(--green); }
+
+  /* corner svgs */
+  .corner-svg { position:absolute; width:180px; height:180px; pointer-events:none; }
+  .corner-tl { top:0; left:0; }
+  .corner-br { bottom:0; right:0; transform:rotate(180deg); }
+
+  /* ── INSTRUCTIONS (shared) ── */
+  .instr-screen { background:var(--green); }
+  .instr-screen .bg-texture { position:absolute; inset:0;
+    background-image:radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08) 0%, transparent 60%); }
+  .instr-back { position:absolute; top:24px; left:24px; background:transparent;
+    border:none; color:rgba(255,255,255,0.75); font-family:var(--font-body);
+    font-size:11px; font-weight:300; letter-spacing:3px; text-transform:uppercase;
+    cursor:pointer; padding:8px 14px 8px 0; z-index:3;
+    transition:color 0.2s, transform 0.15s; }
+  .instr-back:active { transform:translateX(-2px); color:#fff; }
+  .instr-back .arrow { display:inline-block; margin-right:8px; font-size:14px; line-height:1; vertical-align:-1px; }
+  .instr-eyebrow { font-size:11px; font-weight:300; letter-spacing:5px; text-transform:uppercase;
+    color:var(--green-pale); margin-bottom:32px; position:relative; z-index:1; }
+  .instr-title { font-family:var(--font-display); font-size:48px; font-weight:300; color:var(--white);
+    text-align:center; line-height:1.15; margin-bottom:44px; position:relative; z-index:1; }
+  .instr-steps { display:flex; flex-direction:column; gap:0; margin-bottom:52px;
+    position:relative; z-index:1; width:360px; }
+  .instr-step { display:flex; align-items:center; gap:20px; padding:14px 0;
+    border-bottom:1px solid rgba(255,255,255,0.12); }
+  .instr-step:first-child { border-top:1px solid rgba(255,255,255,0.12); }
+  .instr-step-num { font-family:var(--font-display); font-size:26px; font-weight:300;
+    color:var(--green-pale); min-width:26px; text-align:center; }
+  .instr-step-text { font-size:14px; font-weight:300; color:rgba(255,255,255,0.85); line-height:1.4; }
+
+  .btn-main { font-family:var(--font-body); font-size:12px; font-weight:300; letter-spacing:4px;
+    text-transform:uppercase; color:var(--white); background:var(--green); border:none;
+    padding:18px 52px; cursor:pointer; transition:background 0.3s, transform 0.15s;
+    position:relative; z-index:1; }
+  .btn-main:active { transform:scale(0.97); background:var(--green-light); }
+  .btn-main::before { content:''; position:absolute; inset:-4px; border:1px solid var(--green-pale); }
+  .btn-light { font-family:var(--font-body); font-size:12px; font-weight:300; letter-spacing:4px;
+    text-transform:uppercase; color:var(--green); background:var(--white); border:none;
+    padding:18px 52px; cursor:pointer; transition:background 0.3s, transform 0.15s;
+    position:relative; z-index:1; }
+  .btn-light:active { transform:scale(0.97); background:var(--green-faint); }
+  .btn-light::before { content:''; position:absolute; inset:-4px; border:1px solid rgba(255,255,255,0.4); }
+
+  /* ── VIDEO COUNTDOWN ── */
+  #screen-countdown { background:#1c2218; }
+  .cam-preview { position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; opacity:0.35; transform:scaleX(-1); }
+  .countdown-overlay { position:relative; z-index:2; display:flex; flex-direction:column;
+    align-items:center; text-align:center; padding:60px 80px; max-width:720px; }
+  .countdown-label { font-size:11px; font-weight:300; letter-spacing:5px; text-transform:uppercase;
+    color:var(--green-pale); margin-bottom:24px; }
+  .question-text { font-family:var(--font-display); font-size:42px; font-weight:300; font-style:italic;
+    color:var(--white); line-height:1.3; margin-bottom:14px; }
+  .question-hint { font-size:13px; font-weight:200; color:rgba(200,212,190,0.7); letter-spacing:1px; margin-bottom:52px; }
+  .countdown-number { font-family:var(--font-display); font-size:110px; font-weight:300;
+    color:var(--green-pale); line-height:1; min-width:130px; text-align:center; }
+  .countdown-number.pulse { animation:countpulse 0.5s ease; }
+  @keyframes countpulse { 0%{transform:scale(1.3);opacity:0.5} 100%{transform:scale(1);opacity:1} }
+
+  /* ── VIDEO RECORDING ── */
+  #screen-recording { background:#1c2218; }
+  .rec-cam-preview { position:absolute; inset:0; width:100%; height:100%;
+    object-fit:cover; opacity:0.55; transform:scaleX(-1); }
+  .rec-overlay { position:relative; z-index:2; width:100%; height:100%; display:flex;
+    flex-direction:column; align-items:center; justify-content:space-between; padding:48px 60px; }
+  .rec-top { display:flex; align-items:center; justify-content:space-between; width:100%; }
+  .rec-indicator { display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.45);
+    padding:8px 18px; border-radius:40px; }
+  .rec-dot-live { width:10px; height:10px; border-radius:50%; background:#e05555;
+    animation:recpulse 1s ease-in-out infinite; }
+  @keyframes recpulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .rec-label { font-size:12px; font-weight:300; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.9); }
+  .rec-stop { display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.45);
+    border:1px solid rgba(255,255,255,0.18); padding:8px 18px; border-radius:40px;
+    color:rgba(255,255,255,0.9); font-family:var(--font-body); font-size:12px;
+    font-weight:300; letter-spacing:3px; text-transform:uppercase; cursor:pointer;
+    transition:background 0.2s, transform 0.15s; }
+  .rec-stop:active { background:rgba(0,0,0,0.65); transform:scale(0.96); }
+  .rec-stop .stop-icon { width:9px; height:9px; background:#e05555; display:inline-block; }
+  .rec-question-area { text-align:center; max-width:620px; }
+  .rec-question-text { font-family:var(--font-display); font-size:34px; font-style:italic;
+    font-weight:300; color:var(--white); line-height:1.4; margin-bottom:10px; text-shadow:0 2px 20px rgba(0,0,0,0.5); }
+  .rec-question-hint { font-size:13px; font-weight:200; color:rgba(200,212,190,0.65); letter-spacing:1px; }
+  .rec-timer-area { display:flex; flex-direction:column; align-items:center; gap:12px; }
+  .timer-ring { position:relative; width:100px; height:100px; }
+  .timer-ring svg { position:absolute; inset:0; width:100%; height:100%; }
+  .timer-ring-bg { stroke:rgba(255,255,255,0.15); fill:none; stroke-width:3; }
+  .timer-ring-fg { stroke:var(--green-pale); fill:none; stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
+  .timer-ring-num { font-family:var(--font-display); font-size:34px; font-weight:300; fill:var(--white); }
+
+  /* ── PHOTO COUNTDOWN ── */
+  #screen-photo-countdown { background:#1c2218; }
+  .photo-countdown-overlay { position:relative; z-index:2; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; width:100%; height:100%; }
+  .photo-counter-label { font-size:11px; font-weight:300; letter-spacing:5px; text-transform:uppercase;
+    color:var(--green-pale); margin-bottom:20px; }
+  .photo-big-num { font-family:var(--font-display); font-size:160px; font-weight:300;
+    color:var(--white); line-height:1; animation:photopulse 0.4s ease; }
+  @keyframes photopulse { 0%{transform:scale(1.4);opacity:0.3} 100%{transform:scale(1);opacity:1} }
+  .photo-dots { display:flex; gap:12px; margin-top:40px; }
+  .photo-dot { width:12px; height:12px; border-radius:50%; background:rgba(255,255,255,0.2); transition:background 0.3s; }
+  .photo-dot.taken { background:var(--green-pale); }
+  .photo-dot.next { background:var(--white); box-shadow:0 0 0 3px rgba(255,255,255,0.3); }
+  .flash-overlay { position:absolute; inset:0; background:white; opacity:0; pointer-events:none; z-index:10;
+    transition:opacity 0.05s; }
+  .flash-overlay.flash { opacity:1; }
+
+  /* ── PHOTO STRIP PREVIEW ── */
+  #screen-strip { background:var(--cream); }
+  #screen-strip .bg-pattern { position:absolute; inset:0;
+    background-image: radial-gradient(circle at 30% 30%, rgba(90,107,74,0.05) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(90,107,74,0.07) 0%, transparent 50%); }
+  .strip-content { position:relative; z-index:1; display:flex; flex-direction:row;
+    align-items:center; gap:40px; }
+  .double-strip-frame { background:var(--white); padding:10px;
+    box-shadow:0 4px 40px rgba(58,48,40,0.12); display:flex; flex-direction:row;
+    gap:0; position:relative; }
+  .single-strip { display:flex; flex-direction:column; padding:8px 8px 18px 8px; position:relative; }
+  .single-strip + .single-strip { border-left: 2px dashed #bbb; }
+  .cut-icon { position:absolute; top:50%; left:-13px; transform:translateY(-50%);
+    font-size:16px; background:var(--white); padding:2px 0; line-height:1; }
+  .strip-photo { display:block; width:130px; height:174px; object-fit:cover;
+    margin-bottom:6px; filter:grayscale(100%); }
+  .strip-photo:last-of-type { margin-bottom:0; }
+  .strip-monogram { position:relative; width:84px; height:84px; margin:14px auto 0; }
+  .strip-monogram svg { position:absolute; inset:0; width:100%; height:100%;
+    animation:spin 30s linear infinite; }
+  .strip-monogram .mini-letters { position:absolute; inset:0; display:flex;
+    align-items:center; justify-content:center;
+    font-family:var(--font-display); font-size:30px; font-weight:300;
+    color:var(--green); letter-spacing:-1px; line-height:1; }
+  .strip-actions { display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
+  .strip-title { font-family:var(--font-display); font-size:34px; font-weight:300; color:var(--green); margin-bottom:4px; }
+  .strip-sub { font-size:13px; font-weight:200; color:var(--brown-mid); line-height:1.6; max-width:220px; margin-bottom:24px; }
+
+  /* ── THANKS ── */
+  #screen-thanks { background:var(--cream); }
+  #screen-thanks .bg-pattern { position:absolute; inset:0;
+    background-image: radial-gradient(circle at 30% 30%, rgba(90,107,74,0.05) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(90,107,74,0.07) 0%, transparent 50%); }
+  .thanks-content { position:relative; z-index:1; display:flex; flex-direction:column;
+    align-items:center; text-align:center; }
+  .thanks-icon { font-size:52px; margin-bottom:24px; animation:heartbeat 2s ease-in-out infinite; }
+  @keyframes heartbeat { 0%,100%{transform:scale(1)} 30%{transform:scale(1.12)} 60%{transform:scale(1.05)} }
+  .thanks-title { font-family:var(--font-display); font-size:56px; font-weight:300;
+    color:var(--green); line-height:1; margin-bottom:14px; }
+  .thanks-sub { font-size:14px; font-weight:300; color:var(--brown-mid); letter-spacing:1px;
+    line-height:1.6; max-width:340px; margin-bottom:44px; }
+  .thanks-countdown { font-size:12px; font-weight:200; letter-spacing:3px; text-transform:uppercase; color:var(--brown-light); }
+  .thanks-countdown span { font-family:var(--font-display); font-size:18px; color:var(--green); }
+
+  canvas#strip-canvas { display:none; }
+  canvas#boom-canvas  { display:none; }
+
+  /* ── BOOMERANG PROCESSING ── */
+  #screen-boom-processing { background:#1c2218; }
+  .boom-processing-inner { position:relative; z-index:2; display:flex; flex-direction:column;
+    align-items:center; gap:20px; text-align:center; }
+  .boom-spinner { width:56px; height:56px; border:3px solid rgba(200,212,190,0.2);
+    border-top-color:var(--green-pale); border-radius:50%;
+    animation:spin 0.8s linear infinite; }
+  .boom-processing-label { font-size:13px; font-weight:200; letter-spacing:4px;
+    text-transform:uppercase; color:var(--green-pale); }
+
+  /* ── VIDEO REVIEW ── */
+  #screen-video-review { background:var(--cream); }
+  #screen-video-review .bg-pattern { position:absolute; inset:0;
+    background-image: radial-gradient(circle at 30% 30%, rgba(90,107,74,0.05) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(90,107,74,0.07) 0%, transparent 50%); }
+  .video-review-inner { position:relative; z-index:1; display:flex; flex-direction:row;
+    align-items:center; gap:48px; padding:0 32px; max-width:100%; }
+  .video-review-frame { background:var(--white); padding:12px;
+    box-shadow:0 4px 40px rgba(58,48,40,0.12); flex-shrink:0; }
+  #video-review-player { display:block; width:420px; max-width:50vw; height:auto;
+    background:#1c2218; }
+  .video-review-actions { display:flex; flex-direction:column; align-items:flex-start; }
+  .video-review-title { font-family:var(--font-display); font-size:34px; font-weight:300;
+    color:var(--green); margin-bottom:4px; }
+  .video-review-sub { font-size:13px; font-weight:200; color:var(--brown-mid); line-height:1.6;
+    max-width:240px; margin-bottom:24px; }
+  .btn-retry { margin-top:8px; background:transparent; border:none;
+    font-family:var(--font-body); font-size:11px; letter-spacing:3px; text-transform:uppercase;
+    color:var(--brown-light); cursor:pointer; padding:8px 0; }
+  .video-review-hint { margin-top:28px; font-size:11px; font-weight:300; letter-spacing:3px;
+    text-transform:uppercase; color:var(--brown-light); }
+  .video-review-hint span { font-family:var(--font-display); font-size:16px; color:var(--green); }
+
+  /* ── BOOMERANG PREVIEW ── */
+  #screen-boom-preview { background:var(--cream); }
+  #screen-boom-preview .bg-pattern { position:absolute; inset:0;
+    background-image: radial-gradient(circle at 30% 30%, rgba(90,107,74,0.05) 0%, transparent 50%),
+      radial-gradient(circle at 70% 70%, rgba(90,107,74,0.07) 0%, transparent 50%); }
+  .boom-preview-inner { position:relative; z-index:1; display:flex; flex-direction:row;
+    align-items:center; gap:48px; }
+  .boom-video-frame { background:var(--white); padding:12px;
+    box-shadow:0 4px 40px rgba(58,48,40,0.12); }
+  #boom-preview-video { display:block; width:280px; height:280px; object-fit:cover; }
+  .boom-actions { display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
+  .boom-title { font-family:var(--font-display); font-size:34px; font-weight:300;
+    color:var(--green); margin-bottom:4px; }
+  .boom-sub { font-size:13px; font-weight:200; color:var(--brown-mid); line-height:1.6;
+    max-width:220px; margin-bottom:24px; }
+</style>
+</head>
+<body>
+
+<!-- hidden canvas for compositing the strip -->
+<canvas id="strip-canvas"></canvas>
+
+<!-- ══ SCREEN 1: WELCOME ══ -->
+<div id="screen-welcome" class="screen active">
+  <div class="bg-pattern"></div>
+  <svg class="corner-svg corner-tl" viewBox="0 0 180 180" fill="none" opacity="0.2">
+    <path d="M10,170 Q10,10 170,10" stroke="#5a6b4a" stroke-width="0.8" fill="none"/>
+    <path d="M25,170 Q25,25 170,25" stroke="#5a6b4a" stroke-width="0.5" fill="none"/>
+    <circle cx="30" cy="30" r="3" fill="#5a6b4a"/>
+    <circle cx="50" cy="20" r="2" fill="#5a6b4a"/>
+    <circle cx="20" cy="50" r="2" fill="#5a6b4a"/>
+    <path d="M40,15 Q45,8 52,12 Q55,18 48,22 Q41,20 40,15Z" fill="#7a8f67"/>
+    <path d="M15,42 Q10,35 16,30 Q23,28 26,35 Q24,42 15,42Z" fill="#7a8f67"/>
+    <path d="M60,10 Q68,5 74,10 Q78,17 70,20 Q63,18 60,10Z" fill="#5a6b4a"/>
+    <path d="M10,62 Q5,54 10,48 Q17,44 22,50 Q21,58 10,62Z" fill="#5a6b4a"/>
+  </svg>
+  <svg class="corner-svg corner-br" viewBox="0 0 180 180" fill="none" opacity="0.2">
+    <path d="M10,170 Q10,10 170,10" stroke="#5a6b4a" stroke-width="0.8" fill="none"/>
+    <path d="M25,170 Q25,25 170,25" stroke="#5a6b4a" stroke-width="0.5" fill="none"/>
+    <circle cx="30" cy="30" r="3" fill="#5a6b4a"/>
+    <path d="M40,15 Q45,8 52,12 Q55,18 48,22 Q41,20 40,15Z" fill="#7a8f67"/>
+    <path d="M15,42 Q10,35 16,30 Q23,28 26,35 Q24,42 15,42Z" fill="#7a8f67"/>
+  </svg>
+
+  <div class="monogram-ring">
+    <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+      <path id="circle-path" d="M110,110 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0" fill="none"/>
+      <text font-family="Jost, sans-serif" font-size="11" font-weight="200" fill="#7a8f67" letter-spacing="8">
+        <textPath href="#circle-path">CASAMENTO  ✦  JOÃO  &  CONSTANÇA  ✦  </textPath>
+      </text>
+    </svg>
+    <div class="monogram-inner">
+      <div class="monogram-letters">J&C</div>
+    </div>
+  </div>
+
+  <div class="welcome-names">João & Constança</div>
+  <div class="welcome-subtitle">Deixa a tua memória</div>
+
+  <div class="mode-picker">
+    <button class="mode-btn-main" onclick="startMode('video')">
+      <div class="mode-icon">🎬</div>
+      <div class="mode-label">Vídeo</div>
+    </button>
+    <div class="mode-btn-secondary-row">
+      <button class="mode-btn-small" onclick="startMode('photo')">
+        <div class="mode-icon">📸</div>
+        <div class="mode-label">Fotografia</div>
+      </button>
+      <button class="mode-btn-small" onclick="startMode('boomerang')">
+        <div class="mode-icon">🔁</div>
+        <div class="mode-label">Boomerang</div>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 2A: VIDEO INSTRUCTIONS ══ -->
+<div id="screen-instructions-video" class="screen instr-screen">
+  <div class="bg-texture"></div>
+  <button class="instr-back" onclick="goTo('welcome')"><span class="arrow">‹</span>Voltar</button>
+  <div class="instr-eyebrow">Video guestbook</div>
+  <div class="instr-title">Como funciona</div>
+  <div class="instr-steps">
+    <div class="instr-step">
+      <div class="instr-step-num">1</div>
+      <div class="instr-step-text">Surge uma sugestão de tema — lê com calma</div>
+    </div>
+    <div class="instr-step">
+      <div class="instr-step-num">2</div>
+      <div class="instr-step-text">A câmara liga — tens <strong style="font-weight:400;color:white;">1 minuto</strong> para falar</div>
+    </div>
+    <div class="instr-step">
+      <div class="instr-step-num">3</div>
+      <div class="instr-step-text">Fala alto, ri-te, é para recordar para sempre</div>
+    </div>
+  </div>
+  <button class="btn-light" onclick="startCameraAndCountdown()">Estou pronto</button>
+</div>
+
+<!-- ══ SCREEN 2B: PHOTO INSTRUCTIONS ══ -->
+<div id="screen-instructions-photo" class="screen instr-screen">
+  <div class="bg-texture"></div>
+  <button class="instr-back" onclick="goTo('welcome')"><span class="arrow">‹</span>Voltar</button>
+  <div class="instr-eyebrow">Photo strip</div>
+  <div class="instr-title">Como funciona</div>
+  <div class="instr-steps">
+    <div class="instr-step">
+      <div class="instr-step-num">1</div>
+      <div class="instr-step-text">Vais tirar <strong style="font-weight:400;color:white;">3 fotos</strong> seguidas</div>
+    </div>
+    <div class="instr-step">
+      <div class="instr-step-num">2</div>
+      <div class="instr-step-text">Conta 3… 2… 1… sorri! — repete três vezes</div>
+    </div>
+    <div class="instr-step">
+      <div class="instr-step-num">3</div>
+      <div class="instr-step-text">As fotos ficam numa strip para descarregar</div>
+    </div>
+  </div>
+  <button class="btn-light" onclick="startPhotoSession()">Estou pronto</button>
+</div>
+
+<!-- ══ SCREEN 3: VIDEO COUNTDOWN ══ -->
+<div id="screen-countdown" class="screen">
+  <video id="cam-preview" class="cam-preview" autoplay muted playsinline></video>
+  <div class="countdown-overlay">
+    <div class="countdown-label">A tua pergunta</div>
+    <div class="question-text" id="countdown-question">…</div>
+    <div class="question-hint">É só uma sugestão, fala do que te apetecer</div>
+    <div class="countdown-number" id="countdown-num">5</div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 4: VIDEO RECORDING ══ -->
+<div id="screen-recording" class="screen">
+  <video id="rec-preview" class="rec-cam-preview" autoplay muted playsinline></video>
+  <div class="rec-overlay">
+    <div class="rec-top">
+      <div class="rec-indicator">
+        <div class="rec-dot-live"></div>
+        <div class="rec-label">A gravar</div>
+      </div>
+      <button class="rec-stop" onclick="stopRecording()">
+        <span class="stop-icon"></span>
+        Terminar
+      </button>
+    </div>
+    <div class="rec-question-area">
+      <div class="rec-question-text" id="rec-question">…</div>
+      <div class="rec-question-hint">É só uma sugestão, fala do que te apetecer</div>
+    </div>
+    <div class="rec-timer-area">
+      <div class="timer-ring">
+        <svg viewBox="0 0 100 100">
+          <g transform="rotate(-90 50 50)">
+            <circle class="timer-ring-bg" cx="50" cy="50" r="44"/>
+            <circle class="timer-ring-fg" id="timer-ring-fg" cx="50" cy="50" r="44"
+              stroke-dasharray="276.5" stroke-dashoffset="0"/>
+          </g>
+          <text id="timer-num" class="timer-ring-num" x="50" y="50"
+            text-anchor="middle" dy=".35em">60</text>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: VIDEO REVIEW ══ -->
+<div id="screen-video-review" class="screen">
+  <div class="bg-pattern"></div>
+  <div class="video-review-inner">
+    <div class="video-review-frame">
+      <video id="video-review-player" autoplay loop muted playsinline controls></video>
+    </div>
+    <div class="video-review-actions">
+      <div class="video-review-title">A tua mensagem</div>
+      <div class="video-review-sub">Vê o teu vídeo. Queres guardar ou tentar outra vez?</div>
+      <button class="btn-main" onclick="saveAndFinishVideo()">Guardar</button>
+      <button class="btn-retry" onclick="tryVideoAgain()">Repetir</button>
+      <div class="video-review-hint">Guarda em <span id="video-review-count">10</span>s</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 5: PHOTO COUNTDOWN ══ -->
+<div id="screen-photo-countdown" class="screen">
+  <video id="photo-preview" class="cam-preview" autoplay muted playsinline></video>
+  <div class="flash-overlay" id="flash-overlay"></div>
+  <div class="photo-countdown-overlay">
+    <div class="photo-counter-label" id="photo-counter-label">Foto 1 de 3</div>
+    <div class="photo-big-num" id="photo-big-num">3</div>
+    <div class="photo-dots">
+      <div class="photo-dot next" id="dot-0"></div>
+      <div class="photo-dot" id="dot-1"></div>
+      <div class="photo-dot" id="dot-2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 6: STRIP PREVIEW ══ -->
+<div id="screen-strip" class="screen">
+  <div class="bg-pattern"></div>
+  <svg class="corner-svg corner-tl" viewBox="0 0 180 180" fill="none" opacity="0.15">
+    <path d="M10,170 Q10,10 170,10" stroke="#5a6b4a" stroke-width="0.8" fill="none"/>
+    <circle cx="30" cy="30" r="3" fill="#5a6b4a"/>
+    <path d="M40,15 Q45,8 52,12 Q55,18 48,22 Q41,20 40,15Z" fill="#7a8f67"/>
+  </svg>
+  <div class="strip-content">
+    <div class="double-strip-frame">
+      <!-- strip A -->
+      <div class="single-strip">
+        <img class="strip-photo" id="strip-img-0" src="" alt="foto 1"/>
+        <img class="strip-photo" id="strip-img-1" src="" alt="foto 2"/>
+        <img class="strip-photo" id="strip-img-2" src="" alt="foto 3"/>
+        <div class="strip-monogram">
+          <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+            <path id="strip-cp-A" d="M110,110 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0" fill="none"/>
+            <text font-family="Jost, sans-serif" font-size="11" font-weight="200" fill="#7a8f67" letter-spacing="8">
+              <textPath href="#strip-cp-A">CASAMENTO  ✦  JOÃO  &amp;  CONSTANÇA  ✦  </textPath>
+            </text>
+          </svg>
+          <div class="mini-letters">J&amp;C</div>
+        </div>
+      </div>
+      <!-- strip B (identical) -->
+      <div class="single-strip">
+        <img class="strip-photo" id="strip-img-3" src="" alt="foto 1"/>
+        <img class="strip-photo" id="strip-img-4" src="" alt="foto 2"/>
+        <img class="strip-photo" id="strip-img-5" src="" alt="foto 3"/>
+        <div class="strip-monogram">
+          <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
+            <path id="strip-cp-B" d="M110,110 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0" fill="none"/>
+            <text font-family="Jost, sans-serif" font-size="11" font-weight="200" fill="#7a8f67" letter-spacing="8">
+              <textPath href="#strip-cp-B">CASAMENTO  ✦  JOÃO  &amp;  CONSTANÇA  ✦  </textPath>
+            </text>
+          </svg>
+          <div class="mini-letters">J&amp;C</div>
+        </div>
+      </div>
+    </div>
+    <div class="strip-actions">
+      <div class="strip-title">A vossa strip!</div>
+      <div class="strip-sub">Duas cópias — uma para guardar, outra para levar. Cortar na linha.</div>
+      <button class="btn-main" onclick="downloadStrip()">Imprimir</button>
+      <button style="margin-top:8px; background:transparent; border:none; font-family:var(--font-body);
+        font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--brown-light);
+        cursor:pointer; padding:8px 0;" onclick="retakePhotos()">Repetir fotos</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN 7: THANKS ══ -->
+<div id="screen-thanks" class="screen">
+  <div class="bg-pattern"></div>
+  <svg class="corner-svg corner-tl" viewBox="0 0 180 180" fill="none" opacity="0.15">
+    <path d="M10,170 Q10,10 170,10" stroke="#5a6b4a" stroke-width="0.8" fill="none"/>
+    <circle cx="30" cy="30" r="3" fill="#5a6b4a"/>
+    <path d="M40,15 Q45,8 52,12 Q55,18 48,22 Q41,20 40,15Z" fill="#7a8f67"/>
+    <path d="M15,42 Q10,35 16,30 Q23,28 26,35 Q24,42 15,42Z" fill="#7a8f67"/>
+  </svg>
+  <svg class="corner-svg corner-br" viewBox="0 0 180 180" fill="none" opacity="0.15">
+    <path d="M10,170 Q10,10 170,10" stroke="#5a6b4a" stroke-width="0.8" fill="none"/>
+    <circle cx="30" cy="30" r="3" fill="#5a6b4a"/>
+    <path d="M40,15 Q45,8 52,12 Q55,18 48,22 Q41,20 40,15Z" fill="#7a8f67"/>
+  </svg>
+  <div class="thanks-content">
+    <div class="thanks-icon">🌿</div>
+    <div class="thanks-title">Obrigado</div>
+    <div class="thanks-sub" id="thanks-sub">A tua mensagem vai fazer parte de uma memória que o João e a Constança vão guardar para sempre.</div>
+    <div class="thanks-countdown">A voltar em <span id="thanks-count">5</span>s</div>
+  </div>
+</div>
+
+<script>
+  const QUESTIONS = [
+    "Que conselho darias ao casal para daqui a 20 anos?",
+    "Faz um brinde — improvisa o discurso que nunca darias ao microfone.",
+    "Conta uma memória tua com um dos noivos que nunca vais esquecer."
+  ];
+
+  let currentMode = 'video';
+  let currentQuestion = '';
+  let mediaStream = null;
+  let mediaRecorder = null;
+  let recordedChunks = [];
+  let countdownTimer = null;
+  let recordingTimer = null;
+  let thanksTimer = null;
+  let questionIndex = 0;
+
+  // photo state
+  let photoCaptures = [];
+  let currentPhotoIndex = 0;
+  let photoCountdownTimer = null;
+
+  function goTo(screenId) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('screen-' + screenId).classList.add('active');
+  }
+
+  function startMode(mode) {
+    currentMode = mode;
+    if (mode === 'video') {
+      goTo('instructions-video');
+    } else if (mode === 'photo') {
+      goTo('instructions-photo');
+    } else {
+      goTo('instructions-boomerang');
+    }
+  }
+
+  // ─── VIDEO FLOW ────────────────────────────────
+
+  function pickQuestion() {
+    const q = QUESTIONS[questionIndex % QUESTIONS.length];
+    questionIndex++;
+    return q;
+  }
+
+  async function startCameraAndCountdown() {
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: true
+      });
+    } catch(e) {
+      alert('Câmara falhou: ' + (e.name || 'erro') + ' — ' + (e.message || ''));
+      return;
+    }
+    currentQuestion = pickQuestion();
+    document.getElementById('countdown-question').textContent = currentQuestion;
+    document.getElementById('rec-question').textContent = currentQuestion;
+    document.getElementById('cam-preview').srcObject = mediaStream;
+    goTo('countdown');
+    runCountdown();
+  }
+
+  function runCountdown() {
+    let count = 5;
+    const numEl = document.getElementById('countdown-num');
+    numEl.textContent = count;
+    countdownTimer = setInterval(() => {
+      count--;
+      numEl.classList.remove('pulse');
+      void numEl.offsetWidth;
+      numEl.classList.add('pulse');
+      if (count <= 0) { clearInterval(countdownTimer); startRecording(); }
+      else { numEl.textContent = count; }
+    }, 1000);
+  }
+
+  function startRecording() {
+    document.getElementById('rec-preview').srcObject = mediaStream;
+    goTo('recording');
+    recordedChunks = [];
+    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
+      : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
+    mediaRecorder = new MediaRecorder(mediaStream, { mimeType });
+    mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
+    mediaRecorder.onstop = saveVideo;
+    mediaRecorder.start();
+    runRecordingTimer();
+  }
+
+  function runRecordingTimer() {
+    const TOTAL = 60;
+    let elapsed = 0;
+    const numEl = document.getElementById('timer-num');
+    const ring = document.getElementById('timer-ring-fg');
+    const circumference = 276.5;
+    numEl.textContent = TOTAL;
+    ring.style.strokeDashoffset = '0';
+    recordingTimer = setInterval(() => {
+      elapsed++;
+      const remaining = TOTAL - elapsed;
+      numEl.textContent = remaining;
+      ring.style.strokeDashoffset = (circumference * elapsed / TOTAL).toFixed(1);
+      if (elapsed >= TOTAL) { clearInterval(recordingTimer); stopRecording(); }
+    }, 1000);
+  }
+
+  function stopRecording() {
+    if (recordingTimer) { clearInterval(recordingTimer); recordingTimer = null; }
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  }
+
+  // Bound to MediaRecorder.onstop — builds the blob and routes to the review screen
+  let videoBlob = null;
+  let videoReviewTimer = null;
+
+  function saveVideo() {
+    if (!recordedChunks.length) {
+      alert('Houve um problema com a gravação. Tenta outra vez.');
+      stopCamera();
+      goTo('welcome');
+      return;
+    }
+    videoBlob = new Blob(recordedChunks, { type: recordedChunks[0]?.type || 'video/webm' });
+    stopCamera();
+    showVideoReview();
+  }
+
+  function showVideoReview() {
+    const player = document.getElementById('video-review-player');
+    const url = URL.createObjectURL(videoBlob);
+    player.src = url;
+    player.muted = true; // muted autoplay is allowed everywhere; user can unmute via controls
+    player.play().catch(() => {});
+    goTo('video-review');
+
+    // 10-second auto-save countdown
+    if (videoReviewTimer) clearInterval(videoReviewTimer);
+    let count = 10;
+    const countEl = document.getElementById('video-review-count');
+    countEl.textContent = count;
+    videoReviewTimer = setInterval(() => {
+      count--;
+      countEl.textContent = count;
+      if (count <= 0) {
+        clearInterval(videoReviewTimer);
+        videoReviewTimer = null;
+        saveAndFinishVideo();
+      }
+    }, 1000);
+  }
+
+  function teardownVideoReview() {
+    if (videoReviewTimer) { clearInterval(videoReviewTimer); videoReviewTimer = null; }
+    const player = document.getElementById('video-review-player');
+    player.pause();
+    const url = player.getAttribute('src');
+    player.removeAttribute('src');
+    player.load();
+    if (url) setTimeout(() => URL.revokeObjectURL(url), 200);
+  }
+
+  function saveAndFinishVideo() {
+    teardownVideoReview();
+    if (!videoBlob) { goTo('welcome'); return; }
+    const ext = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
+    const now = new Date();
+    const ts = `${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
+    const url = URL.createObjectURL(videoBlob);
+    const a = document.createElement('a');
+    a.href = url; a.download = `joao-constanca-video-${ts}.${ext}`;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    videoBlob = null;
+    document.getElementById('thanks-sub').textContent = 'A tua mensagem vai fazer parte de uma memória que o João e a Constança vão guardar para sempre.';
+    showThanks();
+  }
+
+  async function tryVideoAgain() {
+    teardownVideoReview();
+    videoBlob = null;
+    // Re-acquire camera and restart the countdown with the SAME question
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: true
+      });
+    } catch(e) {
+      alert('Câmara falhou: ' + (e.name || 'erro') + ' — ' + (e.message || ''));
+      goTo('welcome');
+      return;
+    }
+    document.getElementById('countdown-question').textContent = currentQuestion;
+    document.getElementById('rec-question').textContent = currentQuestion;
+    document.getElementById('cam-preview').srcObject = mediaStream;
+    goTo('countdown');
+    runCountdown();
+  }
+
+  // ─── PHOTO FLOW ────────────────────────────────
+
+  async function startPhotoSession() {
+    photoCaptures = [];
+    currentPhotoIndex = 0;
+    try {
+      mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false
+      });
+    } catch(e) {
+      alert('Câmara falhou: ' + (e.name || 'erro') + ' — ' + (e.message || ''));
+      return;
+    }
+    document.getElementById('photo-preview').srcObject = mediaStream;
+    goTo('photo-countdown');
+    updatePhotoDots();
+    startPhotoCountdown();
+  }
+
+  function updatePhotoDots() {
+    for (let i = 0; i < 3; i++) {
+      const dot = document.getElementById('dot-' + i);
+      dot.className = 'photo-dot';
+      if (i < currentPhotoIndex) dot.classList.add('taken');
+      else if (i === currentPhotoIndex) dot.classList.add('next');
+    }
+    document.getElementById('photo-counter-label').textContent = `Foto ${currentPhotoIndex + 1} de 3`;
+  }
+
+  function startPhotoCountdown() {
+    let count = 3;
+    const numEl = document.getElementById('photo-big-num');
+    numEl.style.animation = 'none';
+    void numEl.offsetWidth;
+    numEl.textContent = count;
+    numEl.style.animation = 'photopulse 0.4s ease';
+
+    photoCountdownTimer = setInterval(() => {
+      count--;
+      if (count <= 0) {
+        clearInterval(photoCountdownTimer);
+        capturePhoto();
+      } else {
+        numEl.style.animation = 'none';
+        void numEl.offsetWidth;
+        numEl.textContent = count;
+        numEl.style.animation = 'photopulse 0.4s ease';
+      }
+    }, 1000);
+  }
+
+  function capturePhoto() {
+    const video = document.getElementById('photo-preview');
+    const vw = video.videoWidth || 1280;
+    const vh = video.videoHeight || 720;
+
+    // Crop the largest 3:4 portrait region from the centre of the source.
+    // Source can be landscape (e.g. 1280×720 on iPad) OR portrait (e.g. 720×1280
+    // on some iPhones) — handle both so the output is always portrait.
+    const TARGET_AR = 0.75; // width / height for 3:4 portrait
+    let cropW, cropH, sx, sy;
+    if (vw / vh > TARGET_AR) {
+      // source is wider than target — limit by height, crop sides
+      cropH = vh;
+      cropW = Math.floor(cropH * TARGET_AR);
+      sx = Math.floor((vw - cropW) / 2);
+      sy = 0;
+    } else {
+      // source is taller/narrower than target — limit by width, crop top/bottom
+      cropW = vw;
+      cropH = Math.floor(cropW / TARGET_AR);
+      sx = 0;
+      sy = Math.floor((vh - cropH) / 2);
+    }
+
+    const canvas = document.createElement('canvas');
+    canvas.width = cropW;
+    canvas.height = cropH;
+    const ctx = canvas.getContext('2d');
+
+    // mirror to match what user sees
+    ctx.translate(cropW, 0);
+    ctx.scale(-1, 1);
+    ctx.drawImage(video, sx, sy, cropW, cropH, 0, 0, cropW, cropH);
+
+    // convert to black & white
+    const imageData = ctx.getImageData(0, 0, cropW, cropH);
+    const data = imageData.data;
+    for (let i = 0; i < data.length; i += 4) {
+      const gray = data[i] * 0.299 + data[i+1] * 0.587 + data[i+2] * 0.114;
+      data[i] = data[i+1] = data[i+2] = gray;
+    }
+    ctx.putImageData(imageData, 0, 0);
+
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+    photoCaptures.push(dataUrl);
+
+    // flash effect
+    const flash = document.getElementById('flash-overlay');
+    flash.classList.add('flash');
+    setTimeout(() => flash.classList.remove('flash'), 150);
+
+    if (photoCaptures.length < 3) {
+      currentPhotoIndex++;
+      updatePhotoDots();
+      // 800ms pause between shots so they can repose
+      setTimeout(() => startPhotoCountdown(), 800);
+    } else {
+      // all 3 done
+      setTimeout(() => {
+        stopCamera();
+        showStripPreview();
+      }, 400);
+    }
+  }
+
+  function showStripPreview() {
+    for (let i = 0; i < 3; i++) {
+      document.getElementById('strip-img-' + i).src = photoCaptures[i];
+      document.getElementById('strip-img-' + (i + 3)).src = photoCaptures[i];
+    }
+    goTo('strip');
+  }
+
+  function downloadStrip() {
+    // Portrait double-strip layout — canvas is tall, two strips side by side.
+    // Each strip occupies exactly half the canvas (no cut-zone gap), so the
+    // photo's outer margin equals its margin to the cut line.
+    const CANVAS_W = 1200;
+    const CANVAS_H = 2400;
+    const STRIP_W = CANVAS_W / 2; // 600
+    const PAD = 24;
+    const PHOTO_GAP = 10;
+    const MONOGRAM_DIAMETER = 180;
+    const MONOGRAM_GAP_TOP = 36;   // space between last photo and monogram
+    const PAD_BOTTOM = 30;
+    // 3 portrait 3:4 photos stacked vertically — fills remaining vertical space
+    const PHOTO_H = Math.floor(
+      (CANVAS_H - PAD - PHOTO_GAP * 2 - MONOGRAM_GAP_TOP - MONOGRAM_DIAMETER - PAD_BOTTOM) / 3
+    );
+    const PHOTO_W = Math.round(PHOTO_H * 0.75); // 3:4 portrait
+    const PHOTO_X_PAD = Math.floor((STRIP_W - PHOTO_W) / 2); // equal margin both sides of strip
+
+    const canvas = document.getElementById('strip-canvas');
+    canvas.width = CANVAS_W;
+    canvas.height = CANVAS_H;
+    const ctx = canvas.getContext('2d');
+
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
+
+    ctx.strokeStyle = '#e0ddd8';
+    ctx.lineWidth = 2;
+    ctx.strokeRect(1, 1, CANVAS_W - 2, CANVAS_H - 2);
+
+    // dashed cut line straight down the middle
+    const cutX = CANVAS_W / 2;
+    ctx.save();
+    ctx.setLineDash([10, 7]);
+    ctx.strokeStyle = '#bbbbbb';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cutX, PAD);
+    ctx.lineTo(cutX, CANVAS_H - PAD);
+    ctx.stroke();
+    ctx.restore();
+
+    ctx.font = '24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#888';
+    ctx.fillText('✂', cutX, PAD + 16);
+    ctx.save();
+    ctx.translate(cutX, CANVAS_H - PAD - 4);
+    ctx.rotate(Math.PI);
+    ctx.fillText('✂', 0, 0);
+    ctx.restore();
+
+    // preload images then draw both strips
+    const imgs = [];
+    let preloaded = 0;
+    for (let i = 0; i < 3; i++) {
+      const img = new Image();
+      img.onload = () => {
+        imgs[i] = img;
+        preloaded++;
+        if (preloaded < 3) return;
+
+        const drawCover = (img, dx, dy, dw, dh) => {
+          // force 3:4 portrait crop from center of source image
+          const targetAR = dw / dh; // e.g. ~0.75 for portrait slot
+          const srcW = img.naturalWidth;
+          const srcH = img.naturalHeight;
+          let sx, sy, sw, sh;
+          if (srcW / srcH > targetAR) {
+            // source is wider than target — crop sides
+            sh = srcH;
+            sw = Math.round(sh * targetAR);
+            sx = Math.round((srcW - sw) / 2);
+            sy = 0;
+          } else {
+            // source is taller than target — crop top/bottom
+            sw = srcW;
+            sh = Math.round(sw / targetAR);
+            sx = 0;
+            sy = Math.round((srcH - sh) / 2);
+          }
+          ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+        };
+
+        // Draws the welcome-page monogram: circular text ring + "J&C" centre letters
+        const drawMonogram = (cx, cy, radius) => {
+          // outer ring text
+          ctx.save();
+          ctx.fillStyle = '#7a8f67';
+          const ringFontSize = Math.max(10, Math.round(radius * 0.16));
+          ctx.font = `200 ${ringFontSize}px Jost, "Helvetica Neue", Arial, sans-serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          const ringText = 'CASAMENTO   ✦   JOÃO  &  CONSTANÇA   ✦   ';
+          const n = ringText.length;
+          for (let i = 0; i < n; i++) {
+            const theta = (i / n) * 2 * Math.PI - Math.PI / 2; // start at top
+            const x = cx + radius * Math.cos(theta);
+            const y = cy + radius * Math.sin(theta);
+            ctx.save();
+            ctx.translate(x, y);
+            ctx.rotate(theta + Math.PI / 2);
+            ctx.fillText(ringText[i], 0, 0);
+            ctx.restore();
+          }
+          ctx.restore();
+          // centre J&C letters
+          ctx.save();
+          ctx.fillStyle = '#5a6b4a';
+          ctx.font = `300 ${Math.round(radius * 0.85)}px "Cormorant Garamond", Georgia, serif`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('J&C', cx, cy);
+          ctx.restore();
+        };
+
+        const drawOneStrip = (xStart) => {
+          for (let j = 0; j < 3; j++) {
+            const x = xStart + PHOTO_X_PAD;
+            const y = PAD + j * (PHOTO_H + PHOTO_GAP);
+            drawCover(imgs[j], x, y, PHOTO_W, PHOTO_H);
+            // B&W conversion
+            const id = ctx.getImageData(x, y, PHOTO_W, PHOTO_H);
+            const d = id.data;
+            for (let p = 0; p < d.length; p += 4) {
+              const g = d[p] * 0.299 + d[p+1] * 0.587 + d[p+2] * 0.114;
+              d[p] = d[p+1] = d[p+2] = g;
+            }
+            ctx.putImageData(id, x, y);
+          }
+          // monogram centred in the bottom margin of the strip
+          const photosBottom = PAD + 3 * PHOTO_H + 2 * PHOTO_GAP;
+          const monogramCY = photosBottom + MONOGRAM_GAP_TOP + MONOGRAM_DIAMETER / 2;
+          drawMonogram(xStart + STRIP_W / 2, monogramCY, MONOGRAM_DIAMETER / 2);
+        };
+
+        drawOneStrip(0);
+        drawOneStrip(STRIP_W);
+
+        // download
+        const now = new Date();
+        const ts = `${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
+        canvas.toBlob(blob => {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `joao-constanca-strip-${ts}.jpg`;
+          document.body.appendChild(a); a.click(); document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(url), 5000);
+        }, 'image/jpeg', 0.96);
+
+        document.getElementById('thanks-sub').textContent = 'A vossa strip ficou lindíssima! O João e a Constança vão adorar.';
+        showThanks();
+      };
+      img.src = photoCaptures[i];
+    }
+  }
+
+  function retakePhotos() {
+    photoCaptures = [];
+    currentPhotoIndex = 0;
+    startPhotoSession();
+  }
+
+  // ─── SHARED ────────────────────────────────────
+
+  function stopCamera() {
+    if (mediaStream) { mediaStream.getTracks().forEach(t => t.stop()); mediaStream = null; }
+  }
+
+  function showThanks() {
+    goTo('thanks');
+    let count = 5;
+    const el = document.getElementById('thanks-count');
+    el.textContent = count;
+    thanksTimer = setInterval(() => {
+      count--;
+      el.textContent = count;
+      if (count <= 0) { clearInterval(thanksTimer); goTo('welcome'); }
+    }, 1000);
+  }
+</script>
+<!-- ══ SCREEN: BOOMERANG INSTRUCTIONS ══ -->
+<div id="screen-instructions-boomerang" class="screen instr-screen">
+  <div class="bg-texture"></div>
+  <button class="instr-back" onclick="goTo('welcome')"><span class="arrow">‹</span>Voltar</button>
+  <div class="instr-eyebrow">Boomerang</div>
+  <div class="instr-title">Como funciona</div>
+  <div class="instr-steps">
+    <div class="instr-step">
+      <div class="instr-step-num">1</div>
+      <div class="instr-step-text">Faz um movimento expressivo — um brinde, um salto, uma cara</div>
+    </div>
+    <div class="instr-step">
+      <div class="instr-step-num">2</div>
+      <div class="instr-step-text">Grava <strong style="font-weight:400;color:white;">1.5 segundos</strong> automaticamente</div>
+    </div>
+    <div class="instr-step">
+      <div class="instr-step-num">3</div>
+      <div class="instr-step-text">O vídeo vai e volta em loop — como no Instagram</div>
+    </div>
+  </div>
+  <button class="btn-light" onclick="startBoomerang()">Estou pronto</button>
+</div>
+
+<!-- ══ SCREEN: BOOMERANG RECORDING ══ -->
+<div id="screen-boom-record" class="screen">
+  <video id="boom-cam" class="cam-preview" autoplay muted playsinline></video>
+  <div class="photo-countdown-overlay">
+    <div class="photo-counter-label" id="boom-status-label">Prepara-te…</div>
+    <div class="photo-big-num" id="boom-count-num">3</div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: BOOMERANG PROCESSING ══ -->
+<div id="screen-boom-processing" class="screen">
+  <div class="boom-processing-inner">
+    <div class="boom-spinner"></div>
+    <div class="boom-processing-label">A criar o boomerang…</div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: BOOMERANG PREVIEW ══ -->
+<div id="screen-boom-preview" class="screen">
+  <div class="bg-pattern"></div>
+  <div class="boom-preview-inner">
+    <div class="boom-video-frame">
+      <video id="boom-preview-video" autoplay loop muted playsinline></video>
+    </div>
+    <div class="boom-actions">
+      <div class="boom-title">O teu boomerang!</div>
+      <div class="boom-sub">Toca em guardar para descarregar o vídeo.</div>
+      <button class="btn-main" onclick="downloadBoomerang()">Guardar</button>
+      <button style="margin-top:8px; background:transparent; border:none; font-family:var(--font-body);
+        font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--brown-light);
+        cursor:pointer; padding:8px 0;" onclick="retakeBoomerang()">Repetir video</button>
+    </div>
+  </div>
+</div>
+
+<!-- hidden canvas for boomerang frame processing -->
+<canvas id="boom-canvas"></canvas>
+
+<script>
+  // ─── BOOMERANG STATE ───────────────────────────
+  let boomStream = null;
+  let boomFrames = [];
+  let boomAllFrames = [];
+  let boomVideoBlob = null;
+  let boomChunks = [];
+  let boomPlayInterval = null;
+
+  function startBoomerang() {
+    goTo('boom-record');
+    boomFrames = [];
+    boomAllFrames = [];
+    boomChunks = [];
+    boomVideoBlob = null;
+    if (boomPlayInterval) { clearInterval(boomPlayInterval); boomPlayInterval = null; }
+
+    navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'user', width: { ideal: 1280 }, height: { ideal: 720 } },
+      audio: false
+    }).then(stream => {
+      boomStream = stream;
+      const vid = document.getElementById('boom-cam');
+      vid.srcObject = stream;
+      vid.onloadedmetadata = () => runBoomCountdown();
+    }).catch(e => {
+      alert('Câmara falhou: ' + (e.name || 'erro') + ' — ' + (e.message || ''));
+      goTo('welcome');
+    });
+  }
+
+  function runBoomCountdown() {
+    let count = 3;
+    const numEl = document.getElementById('boom-count-num');
+    const labelEl = document.getElementById('boom-status-label');
+    numEl.textContent = count;
+    numEl.style.animation = 'none'; void numEl.offsetWidth;
+    numEl.style.animation = 'photopulse 0.4s ease';
+
+    const timer = setInterval(() => {
+      count--;
+      if (count <= 0) {
+        clearInterval(timer);
+        labelEl.textContent = '● A gravar';
+        numEl.style.fontSize = '80px';
+        numEl.style.color = '#e05555';
+        recordBoomFrames();
+      } else {
+        numEl.style.animation = 'none'; void numEl.offsetWidth;
+        numEl.style.animation = 'photopulse 0.4s ease';
+        numEl.textContent = count;
+      }
+    }, 1000);
+  }
+
+  function recordBoomFrames() {
+    const vid = document.getElementById('boom-cam');
+    const canvas = document.getElementById('boom-canvas');
+    const ctx = canvas.getContext('2d');
+    const vw = vid.videoWidth || 1280;
+    const vh = vid.videoHeight || 720;
+    const size = Math.min(vw, vh);
+    canvas.width = size;
+    canvas.height = size;
+
+    const DURATION = 1500;
+    const FRAME_INTERVAL = 50; // 20fps
+    const numEl = document.getElementById('boom-count-num');
+    let elapsed = 0;
+    const pendingBitmaps = []; // Promises that resolve to ImageBitmaps
+
+    const captureInterval = setInterval(() => {
+      ctx.save();
+      ctx.translate(size, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(vid, (vw - size) / 2, (vh - size) / 2, size, size, 0, 0, size, size);
+      ctx.restore();
+      // createImageBitmap snapshots the canvas synchronously — no JPEG encode round-trip
+      pendingBitmaps.push(createImageBitmap(canvas));
+
+      const remaining = ((DURATION - elapsed) / 1000).toFixed(1);
+      numEl.textContent = remaining > 0 ? remaining : '✓';
+      elapsed += FRAME_INTERVAL;
+
+      if (elapsed >= DURATION) {
+        clearInterval(captureInterval);
+        stopBoomCamera();
+        goTo('boom-processing');
+        Promise.all(pendingBitmaps).then(bitmaps => {
+          boomFrames = bitmaps;
+          processBoomFrames();
+        });
+      }
+    }, FRAME_INTERVAL);
+  }
+
+  function stopBoomCamera() {
+    if (boomStream) { boomStream.getTracks().forEach(t => t.stop()); boomStream = null; }
+  }
+
+  function processBoomFrames() {
+    // Forward + reverse = one cycle; repeat until the saved video is at least 10s.
+    // boomFrames is already an array of ImageBitmaps — no async loading required.
+    const cycle = [...boomFrames, ...[...boomFrames].reverse()];
+    const FPS = 20;
+    const minFrames = 10 * FPS; // 200 frames = 10s @ 20fps
+    boomAllFrames = [];
+    while (boomAllFrames.length < minFrames) {
+      boomAllFrames.push(...cycle);
+    }
+    showBoomPreview();
+  }
+
+  function showBoomPreview() {
+    const canvas = document.getElementById('boom-canvas');
+    const ctx = canvas.getContext('2d');
+    const size = canvas.width;
+
+    // show preview screen with canvas playing back
+    const previewVid = document.getElementById('boom-preview-video');
+    previewVid.style.display = 'none';
+    canvas.style.display = 'block';
+    canvas.style.width = '280px';
+    canvas.style.height = '280px';
+
+    // move canvas into the video frame div
+    const frame = document.querySelector('.boom-video-frame');
+    frame.innerHTML = '';
+    frame.appendChild(canvas);
+
+    let frameIdx = 0;
+    boomPlayInterval = setInterval(() => {
+      ctx.drawImage(boomAllFrames[frameIdx], 0, 0, canvas.width, canvas.height);
+      frameIdx = (frameIdx + 1) % boomAllFrames.length;
+    }, 1000 / 20);
+
+    goTo('boom-preview');
+  }
+
+  function downloadBoomerang() {
+    // stop preview playback first to avoid canvas conflicts
+    if (boomPlayInterval) { clearInterval(boomPlayInterval); boomPlayInterval = null; }
+
+    const canvas = document.getElementById('boom-canvas');
+    const ctx = canvas.getContext('2d');
+    const btn = document.querySelector('#screen-boom-preview .btn-main');
+
+    const resumePreview = () => {
+      let fi = 0;
+      boomPlayInterval = setInterval(() => {
+        ctx.drawImage(boomAllFrames[fi], 0, 0, canvas.width, canvas.height);
+        fi = (fi + 1) % boomAllFrames.length;
+      }, 1000 / 20);
+    };
+
+    if (typeof canvas.captureStream !== 'function' || typeof MediaRecorder === 'undefined') {
+      alert('O teu browser não suporta exportação de vídeo. Tenta noutro browser.');
+      resumePreview();
+      return;
+    }
+
+    // Pick the best supported mime type — prefer MP4 (iOS Safari, saves to Photos,
+    // uploads to IG Story); fall back to WebM (Chrome / desktop browsers).
+    const mimeCandidates = [
+      'video/mp4;codecs=avc1.42E01E',
+      'video/mp4;codecs=h264',
+      'video/mp4',
+      'video/webm;codecs=vp9',
+      'video/webm;codecs=vp8',
+      'video/webm',
+    ];
+    const mimeType = mimeCandidates.find(m => MediaRecorder.isTypeSupported(m));
+    if (!mimeType) {
+      alert('O teu browser não consegue exportar este formato.');
+      resumePreview();
+      return;
+    }
+    const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+
+    if (btn) { btn.textContent = 'A processar…'; btn.style.opacity = '0.6'; btn.disabled = true; }
+
+    const stream = canvas.captureStream(20);
+    const chunks = [];
+    const recorder = new MediaRecorder(stream, { mimeType });
+    recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onstop = () => {
+      if (btn) { btn.textContent = 'Guardar'; btn.style.opacity = '1'; btn.disabled = false; }
+      const blob = new Blob(chunks, { type: mimeType });
+      const now = new Date();
+      const ts = `${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `joao-constanca-boomerang-${ts}.${ext}`;
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      setTimeout(() => URL.revokeObjectURL(url), 5000);
+      document.getElementById('thanks-sub').textContent = 'O teu boomerang ficou incrível! O João e a Constança vão adorar.';
+      showThanks();
+    };
+
+    // render each frame at exact interval — use precise timing to avoid drift
+    recorder.start();
+    let frameIdx = 0;
+    let lastTime = performance.now();
+    const FRAME_MS = 1000 / 20;
+
+    const renderForExport = (now) => {
+      if (frameIdx >= boomAllFrames.length) {
+        recorder.stop();
+        return;
+      }
+      const elapsed = now - lastTime;
+      if (elapsed >= FRAME_MS) {
+        ctx.drawImage(boomAllFrames[frameIdx], 0, 0, canvas.width, canvas.height);
+        frameIdx++;
+        lastTime = now - (elapsed % FRAME_MS);
+      }
+      requestAnimationFrame(renderForExport);
+    };
+    requestAnimationFrame(renderForExport);
+  }
+
+  function retakeBoomerang() {
+    if (boomPlayInterval) { clearInterval(boomPlayInterval); boomPlayInterval = null; }
+    boomFrames = [];
+    boomAllFrames = [];
+    boomVideoBlob = null;
+    // restore video element in frame
+    const frame = document.querySelector('.boom-video-frame');
+    frame.innerHTML = '<video id="boom-preview-video" autoplay loop muted playsinline></video>';
+    startBoomerang();
+  }
+</script>
+</body>
+</html>

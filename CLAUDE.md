@@ -1,0 +1,134 @@
+# grao — Wedding & Events Video Guestbook Booth
+
+## Project Overview
+
+grao is a self-service video guestbook booth for weddings and events in Portugal. Guests record short video messages, take B&W photo strips, or shoot boomerangs at a kiosk; an operator is always present to help guests; the couple/client receives all captured content after the event.
+
+The first live test is João & Constança's wedding — the app currently ships as a bespoke single-page booth for that event (`joao-constanca-booth.html`), but the codebase is meant to grow into a reusable, per-client configurable product (see Business Context and Development Priorities below).
+
+**Goal for Claude:** favor small, safe, dependency-free changes that keep the booth reliable in front of real guests with an operator standing next to a tablet — not clever abstractions. This runs unattended-ish at someone's wedding; a crash mid-recording is a real loss (a guest's only take).
+
+## Agent Team
+
+grao is run by a solo founder using Claude as infrastructure, per Anthropic's Founder's Playbook model: the founder orchestrates specialized agents rather than doing every function personally. Four project subagents live in `.claude/agents/`:
+
+- **`developer`** — all hands-on-code work on `index.html`/`joao-constanca-booth.html`: bug fixes, features, eventual hardware-integration code.
+- **`marketer`** — positioning, pricing-page copy, content, and competitor research for the Portuguese wedding/events vendor market.
+- **`procurement`** — sourcing and pricing the physical hardware kit (Pi 5, camera, printer, frame, power, connectivity), budget tracking, vendor comms.
+- **`architect-strategy`** — technical architecture decisions and business/product strategy; a devil's-advocate thinking partner that pressure-tests plans before `developer` builds them or the founder commits money.
+
+Each agent's own file has its full scope and guardrails. The playbook's core discipline applies across all of them: define architecture/scope *before* building, keep a written record of decisions (this file), and use the strategy agent as an adversarial check rather than a rubber stamp — grao is still MVP/early-Launch stage (one validated wedding so far), so don't let any agent scale execution ahead of actual booking evidence.
+
+## Current Architecture
+
+- **Single HTML file app.** No build step, no bundler, no package.json, no frameworks (no React/Vue/jQuery). Everything — HTML, CSS, JS — lives in one `.html` file per client/event (e.g. `joao-constanca-booth.html`).
+- **Runtime target:** Safari on iPad (the actual kiosk browser today) and/or hosted as a static page on GitHub Pages. Safari/iOS quirks are first-class constraints, not edge cases — see Known Issues.
+- **No backend.** All capture, processing, and file generation happens client-side in the browser via `getUserMedia`, `MediaRecorder`, and `<canvas>`. There is currently no server component, no database, and no upload — output files are downloaded locally (to the iPad, or to whatever device is capturing) for the operator to collect after the event.
+- **Screen flow (5 screens), all within one page, shown/hidden via JS state:**
+  1. **Welcome** — mode selection (Video / Photo strip / Boomerang)
+  2. **Instructions** — brief explanation of the chosen mode
+  3. **Countdown** — pre-capture countdown
+  4. **Recording/Capture** — the actual video recording, photo sequence, or boomerang capture
+  5. **Thank you** — confirmation screen, auto-returns to Welcome after 5s so the booth is ready for the next guest without operator intervention
+
+### Modes
+
+| Mode | Button size | Behavior |
+|---|---|---|
+| **Video** | Large (primary) | 5s pre-roll countdown showing the question, 15s recording, 3 rotating questions (cycles per guest/session), auto-downloads as `.webm` |
+| **Photo strip** | Small (secondary) | 3 photos, 3→2→1 countdown per shot, 800ms pause between shots, converted to B&W, portrait 3:4 crop per photo, laid out as a double strip (2 identical strips side by side with a dashed cut line) at 1800×1200px — sized for Canon Selphy CP1500 printing — downloads as `.jpg` |
+| **Boomerang** | Small (secondary) | Records 1.5s at 20fps, builds a forward+reverse ping-pong cycle repeated to fill 10s, plays back via a canvas render loop for on-screen preview, exports via `captureStream()` + `MediaRecorder` (**Chrome only** — Safari shows an alert instead of exporting, since Safari doesn't support `canvas.captureStream()` reliably) |
+
+### Design System
+
+- **Colors:**
+  - Black: `#0a0a0a`
+  - White: `#ffffff` (base white; confirm exact token in file if a warmer white is used)
+  - Gold accent: `#c8a96e`
+  - Grays: supporting neutral palette for secondary text/borders
+- **Typography:**
+  - Display font: **Cormorant Garamond** (headings, monogram, romantic/editorial feel)
+  - Body font: **Jost** (UI copy, instructions, buttons)
+- **Motifs:**
+  - Botanical corner ornaments on screens (decorative SVG/illustration elements in the corners)
+  - Couple monogram (e.g. "J&C") with rotating circular text around it — this is per-event/per-client branding and will need to be parameterized (see Feature Flags / Premium)
+
+When touching CSS or markup, preserve this visual language — it's a wedding product, not a generic web app. Elegant, minimal, high-contrast black/white/gold. Avoid introducing generic UI-kit look and feel.
+
+## Known Issues (fix in context, don't silently paper over)
+
+1. **Photo strip downloads landscape instead of portrait.**
+   The per-photo capture crop logic (in `capturePhoto`) targets a 3:4 portrait crop correctly, but the final compiled strip (in the strip-building/download function, e.g. `downloadStrip`) appears to stretch or place images into slots that don't preserve that portrait aspect ratio. When debugging: verify the *canvas slot dimensions* the strip compositor draws into match 3:4, and check `drawImage` source/destination rects aren't swapping width/height or sourcing from the wrong (pre-crop) image data.
+
+2. **Boomerang export is broken on Safari iOS.**
+   `HTMLCanvasElement.captureStream()` is unsupported/unreliable in Safari, so the current `captureStream()` + `MediaRecorder` export path only works in Chrome; Safari currently just shows an alert. Since the kiosk's actual target browser is Safari on iPad, this is effectively broken for production use today, not just a nice-to-have. Alternatives worth investigating: recording the original forward/reverse frames directly with `MediaRecorder` on the source stream and reversing at the frame/blob level, exporting as an animated format that doesn't need `captureStream` (e.g. GIF/APNG assembled from captured still frames via canvas + a JS encoder), or shipping a WebM recorded straight from `getUserMedia` for the forward pass and reconstructing the ping-pong client-side after the event instead of live in-browser.
+
+3. **Video recording duration is hardcoded to 15s.**
+   Should become a configurable value (per client/event, ideally per-plan) rather than a magic number baked into the capture logic.
+
+4. **No admin/config panel.**
+   Questions (currently 3, rotating), which features are enabled (photo strip, boomerang, branding), and other per-client settings are all hardcoded per HTML file today. There's no UI or config layer to manage this without editing the HTML directly.
+
+Do not "fix" these by hiding the feature or adding a try/catch that swallows the failure silently — guests and the operator need to know if a capture didn't work, ideally before the guest walks away.
+
+## Feature Flags per Plan
+
+The product is sold as two plans; the app should eventually gate features by an event's plan/config rather than the current one-off-per-wedding approach:
+
+| Feature | Basic (349€ + VAT) | Premium (599€ + VAT) |
+|---|---|---|
+| Video (3 fixed questions) | ✓ | ✓ |
+| Operator included | ✓ | ✓ |
+| Unlimited/custom questions | — | ✓ |
+| Photo strip | — | ✓ |
+| Boomerang | — | ✓ |
+| Edited compilation (post-event) | — | ✓ |
+| Custom branding (monogram, colors, event names) | — | ✓ |
+| QR code + remote recordings | — | ✓ |
+| Private digital gallery | ✓ | ✓ |
+
+Add-ons (both plans): print on site (+100€), soundproof cabin (+200€). Travel included up to 50km, +0.40€/km beyond.
+
+When building the eventual config/admin layer, model this as an explicit config object (e.g. `{ plan: 'basic' | 'premium', features: { photoStrip: bool, boomerang: bool, unlimitedQuestions: bool, customBranding: bool, qrRemote: bool }, questions: [...], videoDurationSec: number }`) rather than scattering plan checks through the capture code. Until that config layer exists, keep per-client customization to duplicating/editing the single HTML file — don't build a premature abstraction for a config system that has no consumer yet.
+
+## Hardware Roadmap
+
+Currently the booth runs on an iPad in Safari (or wherever the HTML is opened). The planned physical kiosk build:
+
+- **Compute:** Raspberry Pi 5 (4GB), running Chromium in kiosk mode (note: this shifts the primary target browser from Safari/iOS to Chromium/Linux for the physical kiosk — but Safari/iOS support should be kept working as long as iPad remains a fallback/secondary deployment target)
+- **Display:** 15.6" touchscreen monitor (InnoView or ELECROW)
+- **Camera:** Canon EOS M50 Mark II mirrorless via `gphoto2`, OR Obsbot Tiny 2 webcam as a simpler `getUserMedia`-compatible alternative
+- **Mic:** Maono AU-GM10 USB gooseneck mic
+- **Printer:** Canon Selphy CP1500 via CUPS on Linux (this is why the photo strip is sized 1800×1200px)
+- **Enclosure:** Modular aluminium frame (40×40mm profiles, Motedis system) with 5mm black matte Forex panels
+- **Power:** Jackery 240Wh power bank, for fully portable/off-grid setups
+- **Connectivity:** 4G/5G hotspot (TP-Link M7350)
+
+Implication for the app: once camera capture moves from `getUserMedia` (webcam/Obsbot) to `gphoto2` (Canon EOS M50), and printing moves from "download a JPG" to "send to CUPS," the app will need a local backend (Python/Node) to bridge the browser UI to hardware it can't reach directly. Don't build that bridge speculatively — the current getUserMedia + download flow should keep working standalone until that hardware integration is actually being wired up.
+
+## Development Priorities (in order)
+
+1. **Fix the photo strip portrait/landscape bug.** This directly breaks a paid (Premium) feature and produces bad prints.
+2. **Fix or replace boomerang export on Safari iOS**, since Safari/iPad is the current real-world deployment target — a Chrome-only export path means boomerang doesn't actually work in the field today.
+3. **Make video recording duration configurable** (not hardcoded 15s), as groundwork for the plan/config system.
+4. **Design and build a minimal admin/config layer** — at minimum, ability to set questions, video duration, and which features (photo strip / boomerang / branding) are enabled per client, without hand-editing the HTML each time.
+5. **Hardware integration** (gphoto2 camera, CUPS printing, Raspberry Pi kiosk mode) — later-stage, only once the browser-side app is stable and the first real event(s) have validated the software.
+
+Don't jump ahead to later priorities (e.g. building hardware integration code) while known bugs from earlier priorities are open, unless the user explicitly asks to.
+
+## Coding Conventions
+
+- **No frameworks, no build tools, no npm dependencies.** Plain HTML/CSS/JS in a single file. Do not introduce React, Vue, bundlers (Webpack/Vite), or npm packages unless the user explicitly decides to change this architecture.
+- **Single-file per client/event.** The pattern today is one `.html` file per wedding/event (e.g. `joao-constanca-booth.html`). Until a config-driven multi-client system exists, treat each event's HTML file as its own artifact — don't silently merge or refactor them into a shared module structure without being asked.
+- **Safari/iOS first.** The kiosk runs in Safari on iPad today. Any new use of browser APIs (`MediaRecorder`, `captureStream`, canvas, `getUserMedia`) must be checked against Safari/iOS support, not just Chrome. If a feature only works in Chrome, that's a bug (see Known Issues #2), not an acceptable trade-off, unless explicitly scoped to the future Chromium-on-Pi kiosk.
+- **No silent fallbacks that hide failure from the guest/operator.** If a capture, export, or download can fail (e.g. unsupported API), surface that clearly (visible message/alert) rather than failing silently — a guest who thinks they recorded a message but didn't is the worst-case outcome for this product.
+- **Keep the visual design system intact** (colors, fonts, ornaments, monogram) when editing UI — see Design System above.
+- **Avoid premature abstraction.** Don't build the admin/config system, multi-tenant architecture, or backend before it's actually needed — the priorities list above says when. Three near-duplicate HTML files is currently fine; a config-driven templating system is not yet.
+
+## Business Context (why decisions look the way they do)
+
+- This is a **service business**, not a SaaS product yet — grao is sold per-event (Basic 349€+VAT / Premium 599€+VAT) with an operator physically present, not a self-serve kiosk left unattended. Design decisions should assume a human operator is nearby to help a confused guest or restart a stuck capture — the UI doesn't need to defend against every possible user error as if unsupervised.
+- **Photo strip, boomerang, unlimited questions, branding, and QR/remote recording are Premium-only** — when adding features, keep in mind whether they should be gated, even before the gating mechanism itself exists.
+- **Print-on-site and soundproof cabin are paid add-ons** (+100€ / +200€) on top of either plan — they are not plan-differentiators, they're independent upsells.
+- **The couple/client gets all content after the event** via a private digital gallery (both plans) — there is currently no in-app upload/delivery mechanism described; assume delivery happens out-of-band (manual transfer) until told otherwise.
+- **João & Constança's wedding is the first real test event** — the current HTML file and its hardcoded monogram/questions/branding reflect that specific event, not a generic template yet. Treat it as the reference implementation to generalize from, not as throwaway code.
