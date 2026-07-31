@@ -19,17 +19,20 @@ grao is run by a solo founder using Claude as infrastructure, per Anthropic's Fo
 
 Each agent's own file has its full scope and guardrails. The playbook's core discipline applies across all of them: define architecture/scope *before* building, keep a written record of decisions (this file), and use the strategy agent as an adversarial check rather than a rubber stamp — grao is still MVP/early-Launch stage (one validated wedding so far), so don't let any agent scale execution ahead of actual booking evidence.
 
+**Read [STATUS.md](STATUS.md) at the start of any session.** It's the live dashboard of known-issue and proposed-feature state — CLAUDE.md is the stable architecture/context doc and doesn't get rewritten every session, so STATUS.md (plus the per-feature files under `features/`) is the fast, current answer to "what's actually going on" instead of re-deriving it from conversation history.
+
 ## Current Architecture
 
 - **Single HTML file app.** No build step, no bundler, no package.json, no frameworks (no React/Vue/jQuery). Everything — HTML, CSS, JS — lives in one `.html` file per client/event (e.g. `joao-constanca-booth.html`).
 - **Runtime target:** Safari on iPad (the actual kiosk browser today) and/or hosted as a static page on GitHub Pages. Safari/iOS quirks are first-class constraints, not edge cases — see Known Issues.
 - **No backend.** All capture, processing, and file generation happens client-side in the browser via `getUserMedia`, `MediaRecorder`, and `<canvas>`. There is currently no server component, no database, and no upload — output files are downloaded locally (to the iPad, or to whatever device is capturing) for the operator to collect after the event.
-- **Screen flow (5 screens), all within one page, shown/hidden via JS state:**
+- **Screen flow (5 screens, 6 for the Video path), all within one page, shown/hidden via JS state:**
   1. **Welcome** — mode selection (Video / Photo strip / Boomerang)
   2. **Instructions** — brief explanation of the chosen mode
   3. **Countdown** — pre-capture countdown
   4. **Recording/Capture** — the actual video recording, photo sequence, or boomerang capture
-  5. **Thank you** — confirmation screen, auto-returns to Welcome after 5s so the booth is ready for the next guest without operator intervention
+  5. **Video Review** (Video mode only) — guest watches their take back, can Retry or Save; auto-saves after a 10s countdown if untouched. Photo strip and boomerang modes skip straight to Thank you.
+  6. **Thank you** — confirmation screen, auto-returns to Welcome after 5s so the booth is ready for the next guest without operator intervention
 
 ### Modes
 
@@ -57,17 +60,19 @@ When touching CSS or markup, preserve this visual language — it's a wedding pr
 
 ## Known Issues (fix in context, don't silently paper over)
 
-1. **Photo strip downloads landscape instead of portrait.**
-   The per-photo capture crop logic (in `capturePhoto`) targets a 3:4 portrait crop correctly, but the final compiled strip (in the strip-building/download function, e.g. `downloadStrip`) appears to stretch or place images into slots that don't preserve that portrait aspect ratio. When debugging: verify the *canvas slot dimensions* the strip compositor draws into match 3:4, and check `drawImage` source/destination rects aren't swapping width/height or sourcing from the wrong (pre-crop) image data.
+Live status for these also lives in [STATUS.md](STATUS.md) — check there first for the current state before assuming this list is current; it drifted out of sync with the code once already (corrected 2026-07-31).
 
-2. **Boomerang export is broken on Safari iOS.**
-   `HTMLCanvasElement.captureStream()` is unsupported/unreliable in Safari, so the current `captureStream()` + `MediaRecorder` export path only works in Chrome; Safari currently just shows an alert. Since the kiosk's actual target browser is Safari on iPad, this is effectively broken for production use today, not just a nice-to-have. Alternatives worth investigating: recording the original forward/reverse frames directly with `MediaRecorder` on the source stream and reversing at the frame/blob level, exporting as an animated format that doesn't need `captureStream` (e.g. GIF/APNG assembled from captured still frames via canvas + a JS encoder), or shipping a WebM recorded straight from `getUserMedia` for the forward pass and reconstructing the ping-pong client-side after the event instead of live in-browser.
+1. ~~Photo strip downloads landscape instead of portrait.~~ **FIXED — verified in code, 2026-07-31.**
+   `downloadStrip` now composites onto a `1200×2400` portrait canvas (was `1800×1200` landscape), with `PHOTO_W = PHOTO_H * 0.75` slots and a proper cover-crop in `drawCover` matching `capturePhoto`'s 3:4 crop. Not yet confirmed on an actual Canon Selphy CP1500 print — do a real print test before treating this as fully closed.
 
-3. **Video recording duration is hardcoded to 15s.**
-   Should become a configurable value (per client/event, ideally per-plan) rather than a magic number baked into the capture logic.
+2. **Boomerang export on Safari iOS is MITIGATED, not confirmed fixed.**
+   `downloadBoomerang` now tries MP4/H.264 mime types before WebM and shows a visible alert if no `captureStream`/`MediaRecorder` support exists — real progress, no longer hard-coded Chrome-only. It still fundamentally depends on `canvas.captureStream()`, the exact API this issue originally flagged as unreliable on Safari; none of the alternate architectures (frame-level `MediaRecorder` off the raw stream, GIF/APNG, post-event reconstruction) were adopted. Additionally, `new MediaRecorder(...)` and `.start()` are **not wrapped in try/catch** — if Safari's `isTypeSupported()` reports a mime type it can't actually record (a known WebKit quirk), the failure is silent (stuck "A processar…" button, no alert), which violates the no-silent-failure rule below. Needs: (a) try/catch + timeout around the recorder lifecycle with a visible failure alert, (b) an actual on-device test on the kiosk iPad's Safari version confirming exported files play back correctly, before this is closed.
+
+3. **Video recording duration is hardcoded (now 60s, was 15s) — still not configurable.**
+   Groundwork for the plan/config system (priority #3 below) is still open. Also newly documented: there is now a video review/retry screen between Recording and Thank you (guest watches their take, can Retry or Save, auto-saves after a 10s countdown if untouched) — the 5-screen model further down is stale for the video path specifically; it's effectively 6 screens there.
 
 4. **No admin/config panel.**
-   Questions (currently 3, rotating), which features are enabled (photo strip, boomerang, branding), and other per-client settings are all hardcoded per HTML file today. There's no UI or config layer to manage this without editing the HTML directly.
+   Confirmed still absent — `QUESTIONS` is a hardcoded array, no config object exists anywhere in the file.
 
 Do not "fix" these by hiding the feature or adding a try/catch that swallows the failure silently — guests and the operator need to know if a capture didn't work, ideally before the guest walks away.
 
@@ -89,7 +94,7 @@ The product is sold as two plans; the app should eventually gate features by an 
 
 Add-ons (both plans): print on site (+100€), soundproof cabin (+200€). Travel included up to 50km, +0.40€/km beyond.
 
-When building the eventual config/admin layer, model this as an explicit config object (e.g. `{ plan: 'basic' | 'premium', features: { photoStrip: bool, boomerang: bool, unlimitedQuestions: bool, customBranding: bool, qrRemote: bool }, questions: [...], videoDurationSec: number }`) rather than scattering plan checks through the capture code. Until that config layer exists, keep per-client customization to duplicating/editing the single HTML file — don't build a premature abstraction for a config system that has no consumer yet.
+When building the eventual config/admin layer, model this as an explicit config object (e.g. `{ plan: 'basic' | 'premium', features: { photoStrip: bool, boomerang: bool, unlimitedQuestions: bool, customBranding: bool, qrRemote: bool }, questions: [...], videoDurationSec: number, language: 'pt' | 'en', copy: {...} }`) rather than scattering plan checks through the capture code. The `language`/`copy` keys are a placeholder reserved for [features/multilingual-ui.md](features/multilingual-ui.md) — don't build the actual toggle or extract strings yet, just don't design the object in a way that would preclude it later. Until that config layer exists, keep per-client customization to duplicating/editing the single HTML file — don't build a premature abstraction for a config system that has no consumer yet.
 
 ## Hardware Roadmap
 
