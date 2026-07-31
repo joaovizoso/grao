@@ -1269,9 +1269,48 @@
 
     const stream = canvas.captureStream(20);
     const chunks = [];
-    const recorder = new MediaRecorder(stream, { mimeType });
+    const FRAME_MS = 1000 / 20;
+
+    // Guards against WebKit's known quirk where isTypeSupported() can report `true`
+    // for a mimeType that then throws on construction, or records silently with no
+    // data. Any failure path below must surface a visible alert and reset the UI —
+    // never leave the guest staring at a stuck "A processar…" button.
+    let finished = false;
+    let watchdogTimer = null;
+    let recorder = null;
+
+    const failExport = (message) => {
+      if (finished) return;
+      finished = true;
+      if (watchdogTimer) { clearTimeout(watchdogTimer); watchdogTimer = null; }
+      try { if (recorder && recorder.state !== 'inactive') recorder.stop(); } catch (e) {}
+      if (btn) { btn.textContent = 'Guardar'; btn.style.opacity = '1'; btn.disabled = false; }
+      alert(message);
+      resumePreview();
+    };
+
+    try {
+      recorder = new MediaRecorder(stream, { mimeType });
+    } catch (err) {
+      failExport('Não foi possível exportar o boomerang neste browser. Tenta novamente ou usa outro browser.');
+      return;
+    }
+
     recorder.ondataavailable = e => { if (e.data.size > 0) chunks.push(e.data); };
+    recorder.onerror = () => {
+      failExport('Ocorreu um erro ao exportar o boomerang. Tenta novamente.');
+    };
     recorder.onstop = () => {
+      if (finished) return;
+      finished = true;
+      if (watchdogTimer) { clearTimeout(watchdogTimer); watchdogTimer = null; }
+      if (chunks.length === 0) {
+        // Recorder ran but produced nothing — the silent-failure case this fix targets.
+        if (btn) { btn.textContent = 'Guardar'; btn.style.opacity = '1'; btn.disabled = false; }
+        alert('Não foi possível exportar o boomerang. Tenta novamente.');
+        resumePreview();
+        return;
+      }
       if (btn) { btn.textContent = 'Guardar'; btn.style.opacity = '1'; btn.disabled = false; }
       const blob = new Blob(chunks, { type: mimeType });
       const now = new Date();
@@ -1286,13 +1325,29 @@
       showThanks();
     };
 
+    try {
+      recorder.start();
+    } catch (err) {
+      failExport('Não foi possível iniciar a gravação do boomerang neste browser. Tenta novamente ou usa outro browser.');
+      return;
+    }
+
+    // Watchdog: the render loop below paces boomAllFrames.length frames at FRAME_MS
+    // each, so a healthy export's onstop fires within roughly that time plus encoder
+    // flush overhead. If it hasn't fired well past that, the recorder is stuck/silent
+    // (start() succeeded but produced nothing) — treat it as a failure rather than
+    // leaving the guest on a dead "A processar…" button.
+    const expectedRenderMs = boomAllFrames.length * FRAME_MS;
+    watchdogTimer = setTimeout(() => {
+      failExport('A exportação do boomerang demorou demasiado tempo e falhou. Tenta novamente.');
+    }, expectedRenderMs + 8000);
+
     // render each frame at exact interval — use precise timing to avoid drift
-    recorder.start();
     let frameIdx = 0;
     let lastTime = performance.now();
-    const FRAME_MS = 1000 / 20;
 
     const renderForExport = (now) => {
+      if (finished) return; // watchdog/error already handled failure — stop driving frames
       if (frameIdx >= boomAllFrames.length) {
         recorder.stop();
         return;

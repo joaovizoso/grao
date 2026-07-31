@@ -9,7 +9,7 @@ Live tracking of in-flight work: known-issue state and proposed-feature state. T
 | # | Issue | Status | Notes |
 |---|---|---|---|
 | 1 | Photo strip portrait/landscape bug | ✅ Fixed (code-verified) | Strip canvas now 1200×2400 portrait, proper crop-to-fill. Not yet confirmed on a real Selphy CP1500 print. |
-| 2 | Boomerang export broken on Safari iOS | 🟡 Mitigated, not confirmed | Now tries MP4 before WebM; still depends on `captureStream()`. Gap found: `MediaRecorder` start not wrapped in try/catch — can fail silently. Needs on-device Safari/iPad test + try/catch fix. |
+| 2 | Boomerang export broken on Safari iOS | 🟡 Mitigated, not confirmed | Now tries MP4 before WebM; still depends on `captureStream()`. `MediaRecorder` construction/`.start()` now wrapped in try/catch + a render-duration-based watchdog timeout, with a visible alert and UI reset on any failure (2026-07-31) — silent-failure gap closed in code. Still needs an actual on-device Safari/iPad test confirming exported files play back correctly; the underlying `captureStream()` dependency is unchanged. |
 | 3 | Video duration hardcoded | 🟡 Partially addressed | Now 60s (was 15s), still not configurable. Undocumented review/retry screen added (6th screen, between Recording and Thank you). |
 | 4 | No admin/config panel | 🔴 Open | Confirmed absent in code — `QUESTIONS` is a hardcoded array, no config object exists. |
 
