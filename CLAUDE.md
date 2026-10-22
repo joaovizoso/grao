@@ -46,19 +46,30 @@ Each agent's own file has its full scope and guardrails. The playbook's core dis
 
 ### Design System
 
-- **Colors:**
-  - Black: `#0a0a0a`
-  - White: `#ffffff` (base white; confirm exact token in file if a warmer white is used)
-  - Gold accent: `#c8a96e`
-  - Grays: supporting neutral palette for secondary text/borders
+- **Colors** — these are the actual `:root` tokens in `index.html`. *(Corrected 2026-10-22: this section previously documented a black/white/gold palette that does not exist anywhere in the code — the app has never had a black or a gold token. Don't reintroduce it.)*
+  - Sage green (primary accent, buttons, headings): `--green: #5a6b4a`
+  - Sage light (active/pressed state): `--green-light: #7a8f67`
+  - Sage pale (eyebrows, numerals, hairlines on green): `--green-pale: #c8d4be`
+  - Sage faint (pressed state on light surfaces): `--green-faint: #edf0e9`
+  - Cream (primary background): `--cream: #f7f4ef`
+  - Warm brown (body text): `--brown: #3a3028`
+  - Brown mid (secondary text — the lightest tone safe on cream): `--brown-mid: #6b5d50`
+  - Brown light (`--brown-light: #a89880`) — **decorative only**. It fails contrast on cream (~2.3:1); never use it for text or controls.
+  - White: `--white: #ffffff`
+  - Dark ground for camera screens: `#1c2218` (hardcoded, not yet a token)
 - **Typography:**
-  - Display font: **Cormorant Garamond** (headings, monogram, romantic/editorial feel)
+  - Display font: **Cormorant Garamond** (headings, monogram, questions, numerals — romantic/editorial feel)
   - Body font: **Jost** (UI copy, instructions, buttons)
+  - Fluid scale: sizes use `clamp()` tuned for the 13" iPad Air M3 (~1366px landscape) with floors for smaller screens. Shared tokens: `--label-sm`, `--label-md`, `--body-md`, `--btn-main-w`, `--btn-small-w`.
+  - Avoid tracked-out ALL-CAPS for anything emotional or anything long. It's reserved for short functional micro-labels, at `--label-sm`/`--label-md` and ≤3px tracking — guests read this at arm's length, in dim venues, often elderly.
+- **Icons:** inline stroked SVG (`stroke-width:1.25`, `currentColor`), matching the botanical line weight. **Never emoji** — they render in fixed per-OS colours (the boomerang glyph comes out bright orange against the sage palette) and change shape across devices.
 - **Motifs:**
   - Botanical corner ornaments on screens (decorative SVG/illustration elements in the corners)
   - Couple monogram (e.g. "J&C") with rotating circular text around it — this is per-event/per-client branding and will need to be parameterized (see Feature Flags / Premium)
 
-When touching CSS or markup, preserve this visual language — it's a wedding product, not a generic web app. Elegant, minimal, high-contrast black/white/gold. Avoid introducing generic UI-kit look and feel.
+When touching CSS or markup, preserve this visual language — it's a wedding product, not a generic web app. Elegant, minimal, warm: cream ground, sage green accent, warm brown text — the palette of a Portuguese quinta (olive, stone, linen), not a generic UI kit.
+
+**The hero is the question.** The product's emotional core is the rotating question set in Cormorant italic over the live camera feed — that's the frame that makes a guest say something real. Spend boldness there and keep everything around it quiet; don't add competing focal points.
 
 ## Known Issues (fix in context, don't silently paper over)
 
