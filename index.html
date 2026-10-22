@@ -12,6 +12,13 @@
     --green-faint: #edf0e9; --cream: #f7f4ef; --brown: #3a3028;
     --brown-mid: #6b5d50; --brown-light: #a89880; --white: #ffffff;
     --font-display: 'Cormorant Garamond', serif; --font-body: 'Jost', sans-serif;
+    /* Fluid scale — tuned for the 13" iPad Air M3 (~1366px landscape), with
+       floors that keep smaller screens and portrait orientation usable. */
+    --btn-main-w: clamp(300px, 30vw, 440px);
+    --btn-small-w: calc((var(--btn-main-w) - 14px) / 2);
+    --label-sm: clamp(12px, 1.05vw, 15px);
+    --label-md: clamp(13px, 1.15vw, 16px);
+    --body-md: clamp(15px, 1.3vw, 19px);
   }
   html, body { width:100%; height:100%; overflow:hidden; background:var(--cream);
     font-family:var(--font-body); color:var(--brown);
@@ -27,38 +34,53 @@
   #screen-welcome .bg-pattern { position:absolute; inset:0;
     background-image: radial-gradient(circle at 20% 20%, rgba(90,107,74,0.06) 0%, transparent 50%),
       radial-gradient(circle at 80% 80%, rgba(90,107,74,0.08) 0%, transparent 50%); }
-  .monogram-ring { position:relative; width:200px; height:200px; margin-bottom:32px; }
+  .monogram-ring { position:relative; width:clamp(200px, 17vw, 260px);
+    height:clamp(200px, 17vw, 260px); margin-bottom:clamp(32px, 2.8vw, 44px); }
   .monogram-ring svg { position:absolute; inset:0; width:100%; height:100%; animation:spin 30s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
   .monogram-inner { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; }
-  .monogram-letters { font-family:var(--font-display); font-size:68px; font-weight:300;
+  .monogram-letters { font-family:var(--font-display); font-size:clamp(68px, 5.8vw, 88px); font-weight:300;
     color:var(--green); line-height:1; letter-spacing:-2px; }
-  .welcome-names { font-family:var(--font-display); font-size:38px; font-weight:300;
-    color:var(--brown); letter-spacing:3px; margin-bottom:6px; text-align:center; }
-  .welcome-subtitle { font-size:12px; font-weight:200; letter-spacing:4px; text-transform:uppercase;
-    color:var(--brown-mid); margin-bottom:48px; }
+  .welcome-names { font-family:var(--font-display); font-size:clamp(38px, 3.4vw, 52px); font-weight:300;
+    color:var(--brown); letter-spacing:3px; margin-bottom:8px; text-align:center; }
+  /* Was 12px uppercase with 4px tracking — the most emotional line on the screen,
+     set in the least legible way possible. Now display italic, matching the question
+     treatment that carries the product's voice. */
+  .welcome-subtitle { font-family:var(--font-display); font-size:clamp(20px, 1.9vw, 28px);
+    font-weight:300; font-style:italic; letter-spacing:0.5px;
+    color:var(--brown-mid); margin-bottom:clamp(48px, 4.2vw, 68px); }
 
   /* mode picker */
   .mode-picker { display:flex; flex-direction:column; gap:14px; position:relative; z-index:1; align-items:center; }
   .mode-btn-main { display:flex; align-items:center; justify-content:center; gap:14px;
-    width:320px; padding:26px 20px; background:var(--green); border:none;
+    width:var(--btn-main-w); padding:clamp(26px, 2.3vw, 34px) 20px; background:var(--green); border:none;
     cursor:pointer; transition:background 0.2s, transform 0.15s; position:relative; }
   .mode-btn-main::before { content:''; position:absolute; inset:-4px; border:1px solid var(--green-pale); }
   .mode-btn-main:active { transform:scale(0.97); background:var(--green-light); }
-  .mode-btn-main .mode-icon { font-size:28px; line-height:1; }
-  .mode-btn-main .mode-label { font-size:12px; font-weight:300; letter-spacing:4px;
+  /* Line icons, not emoji: system emoji render in their own fixed colours (the
+     boomerang glyph comes out bright orange against the sage palette) and change
+     shape per OS. These inherit currentColor and the thin-stroke botanical line
+     weight used elsewhere. */
+  .mode-icon { display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+  .mode-icon svg { width:100%; height:100%; display:block; }
+  .mode-btn-main .mode-icon { width:clamp(28px, 2.4vw, 36px); height:clamp(28px, 2.4vw, 36px);
+    color:var(--white); }
+  .mode-btn-main .mode-label { font-size:var(--label-md); font-weight:300; letter-spacing:3px;
     text-transform:uppercase; color:var(--white); }
   .mode-btn-secondary-row { display:flex; gap:14px; }
   .mode-btn-small { display:flex; align-items:center; justify-content:center; gap:10px;
-    width:153px; padding:20px 16px; background:transparent; border:1px solid var(--green-pale);
+    width:var(--btn-small-w); padding:clamp(20px, 1.8vw, 28px) 16px; background:transparent;
+    border:1px solid var(--green-pale);
     cursor:pointer; transition:background 0.2s, transform 0.15s; }
   .mode-btn-small:active { transform:scale(0.97); background:var(--green-faint); }
-  .mode-btn-small .mode-icon { font-size:22px; line-height:1; }
-  .mode-btn-small .mode-label { font-size:11px; font-weight:300; letter-spacing:4px;
+  .mode-btn-small .mode-icon { width:clamp(22px, 1.9vw, 29px); height:clamp(22px, 1.9vw, 29px);
+    color:var(--green); }
+  .mode-btn-small .mode-label { font-size:var(--label-sm); font-weight:300; letter-spacing:3px;
     text-transform:uppercase; color:var(--green); }
 
   /* corner svgs */
-  .corner-svg { position:absolute; width:180px; height:180px; pointer-events:none; }
+  .corner-svg { position:absolute; width:clamp(180px, 15vw, 240px);
+    height:clamp(180px, 15vw, 240px); pointer-events:none; }
   .corner-tl { top:0; left:0; }
   .corner-br { bottom:0; right:0; transform:rotate(180deg); }
 
@@ -66,35 +88,37 @@
   .instr-screen { background:var(--green); }
   .instr-screen .bg-texture { position:absolute; inset:0;
     background-image:radial-gradient(circle at 50% 0%, rgba(255,255,255,0.08) 0%, transparent 60%); }
-  .instr-back { position:absolute; top:24px; left:24px; background:transparent;
-    border:none; color:rgba(255,255,255,0.75); font-family:var(--font-body);
-    font-size:11px; font-weight:300; letter-spacing:3px; text-transform:uppercase;
-    cursor:pointer; padding:8px 14px 8px 0; z-index:3;
+  .instr-back { position:absolute; top:28px; left:28px; background:transparent;
+    border:none; color:rgba(255,255,255,0.8); font-family:var(--font-body);
+    font-size:var(--label-sm); font-weight:300; letter-spacing:2px; text-transform:uppercase;
+    cursor:pointer; padding:10px 16px 10px 0; z-index:3;
     transition:color 0.2s, transform 0.15s; }
   .instr-back:active { transform:translateX(-2px); color:#fff; }
-  .instr-back .arrow { display:inline-block; margin-right:8px; font-size:14px; line-height:1; vertical-align:-1px; }
-  .instr-eyebrow { font-size:11px; font-weight:300; letter-spacing:5px; text-transform:uppercase;
-    color:var(--green-pale); margin-bottom:32px; position:relative; z-index:1; }
-  .instr-title { font-family:var(--font-display); font-size:48px; font-weight:300; color:var(--white);
-    text-align:center; line-height:1.15; margin-bottom:44px; position:relative; z-index:1; }
-  .instr-steps { display:flex; flex-direction:column; gap:0; margin-bottom:52px;
-    position:relative; z-index:1; width:360px; }
-  .instr-step { display:flex; align-items:center; gap:20px; padding:14px 0;
+  .instr-back .arrow { display:inline-block; margin-right:8px; font-size:16px; line-height:1; vertical-align:-1px; }
+  .instr-eyebrow { font-size:var(--label-sm); font-weight:300; letter-spacing:3px; text-transform:uppercase;
+    color:var(--green-pale); margin-bottom:clamp(32px, 2.8vw, 44px); position:relative; z-index:1; }
+  .instr-title { font-family:var(--font-display); font-size:clamp(48px, 4.4vw, 68px); font-weight:300; color:var(--white);
+    text-align:center; line-height:1.15; margin-bottom:clamp(44px, 3.8vw, 60px); position:relative; z-index:1; }
+  .instr-steps { display:flex; flex-direction:column; gap:0; margin-bottom:clamp(52px, 4.4vw, 70px);
+    position:relative; z-index:1; width:clamp(360px, 36vw, 540px); }
+  .instr-step { display:flex; align-items:center; gap:clamp(20px, 1.8vw, 28px); padding:clamp(14px, 1.3vw, 20px) 0;
     border-bottom:1px solid rgba(255,255,255,0.12); }
   .instr-step:first-child { border-top:1px solid rgba(255,255,255,0.12); }
-  .instr-step-num { font-family:var(--font-display); font-size:26px; font-weight:300;
-    color:var(--green-pale); min-width:26px; text-align:center; }
-  .instr-step-text { font-size:14px; font-weight:300; color:rgba(255,255,255,0.85); line-height:1.4; }
+  .instr-step-num { font-family:var(--font-display); font-size:clamp(26px, 2.3vw, 34px); font-weight:300;
+    color:var(--green-pale); min-width:34px; text-align:center; }
+  .instr-step-text { font-size:var(--body-md); font-weight:300; color:rgba(255,255,255,0.88); line-height:1.45; }
 
-  .btn-main { font-family:var(--font-body); font-size:12px; font-weight:300; letter-spacing:4px;
+  .btn-main { font-family:var(--font-body); font-size:var(--label-md); font-weight:300; letter-spacing:3px;
     text-transform:uppercase; color:var(--white); background:var(--green); border:none;
-    padding:18px 52px; cursor:pointer; transition:background 0.3s, transform 0.15s;
+    padding:clamp(18px, 1.6vw, 24px) clamp(52px, 4.6vw, 72px); cursor:pointer;
+    transition:background 0.3s, transform 0.15s;
     position:relative; z-index:1; }
   .btn-main:active { transform:scale(0.97); background:var(--green-light); }
   .btn-main::before { content:''; position:absolute; inset:-4px; border:1px solid var(--green-pale); }
-  .btn-light { font-family:var(--font-body); font-size:12px; font-weight:300; letter-spacing:4px;
+  .btn-light { font-family:var(--font-body); font-size:var(--label-md); font-weight:300; letter-spacing:3px;
     text-transform:uppercase; color:var(--green); background:var(--white); border:none;
-    padding:18px 52px; cursor:pointer; transition:background 0.3s, transform 0.15s;
+    padding:clamp(18px, 1.6vw, 24px) clamp(52px, 4.6vw, 72px); cursor:pointer;
+    transition:background 0.3s, transform 0.15s;
     position:relative; z-index:1; }
   .btn-light:active { transform:scale(0.97); background:var(--green-faint); }
   .btn-light::before { content:''; position:absolute; inset:-4px; border:1px solid rgba(255,255,255,0.4); }
@@ -105,13 +129,16 @@
     object-fit:cover; opacity:0.35; transform:scaleX(-1); }
   .countdown-overlay { position:relative; z-index:2; display:flex; flex-direction:column;
     align-items:center; text-align:center; padding:60px 80px; max-width:720px; }
-  .countdown-label { font-size:11px; font-weight:300; letter-spacing:5px; text-transform:uppercase;
-    color:var(--green-pale); margin-bottom:24px; }
-  .question-text { font-family:var(--font-display); font-size:42px; font-weight:300; font-style:italic;
-    color:var(--white); line-height:1.3; margin-bottom:14px; }
-  .question-hint { font-size:13px; font-weight:200; color:rgba(200,212,190,0.7); letter-spacing:1px; margin-bottom:52px; }
-  .countdown-number { font-family:var(--font-display); font-size:110px; font-weight:300;
-    color:var(--green-pale); line-height:1; min-width:130px; text-align:center; }
+  .countdown-label { font-size:var(--label-sm); font-weight:300; letter-spacing:3px; text-transform:uppercase;
+    color:var(--green-pale); margin-bottom:clamp(24px, 2.1vw, 32px); }
+  /* The hero of the whole product: the question, in display italic, over the live
+     camera. Everything around it is deliberately kept quiet. */
+  .question-text { font-family:var(--font-display); font-size:clamp(42px, 4vw, 62px); font-weight:300; font-style:italic;
+    color:var(--white); line-height:1.3; margin-bottom:16px; }
+  .question-hint { font-size:var(--label-md); font-weight:200; color:rgba(200,212,190,0.75);
+    letter-spacing:0.5px; margin-bottom:clamp(52px, 4.4vw, 70px); }
+  .countdown-number { font-family:var(--font-display); font-size:clamp(110px, 9.5vw, 150px); font-weight:300;
+    color:var(--green-pale); line-height:1; min-width:1.3em; text-align:center; }
   .countdown-number.pulse { animation:countpulse 0.5s ease; }
   @keyframes countpulse { 0%{transform:scale(1.3);opacity:0.5} 100%{transform:scale(1);opacity:1} }
 
@@ -127,20 +154,20 @@
   .rec-dot-live { width:10px; height:10px; border-radius:50%; background:#e05555;
     animation:recpulse 1s ease-in-out infinite; }
   @keyframes recpulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .rec-label { font-size:12px; font-weight:300; letter-spacing:3px; text-transform:uppercase; color:rgba(255,255,255,0.9); }
+  .rec-label { font-size:var(--label-md); font-weight:300; letter-spacing:2px; text-transform:uppercase; color:rgba(255,255,255,0.92); }
   .rec-stop { display:flex; align-items:center; gap:10px; background:rgba(0,0,0,0.45);
-    border:1px solid rgba(255,255,255,0.18); padding:8px 18px; border-radius:40px;
-    color:rgba(255,255,255,0.9); font-family:var(--font-body); font-size:12px;
-    font-weight:300; letter-spacing:3px; text-transform:uppercase; cursor:pointer;
+    border:1px solid rgba(255,255,255,0.18); padding:clamp(10px, 0.9vw, 14px) clamp(20px, 1.8vw, 28px); border-radius:40px;
+    color:rgba(255,255,255,0.92); font-family:var(--font-body); font-size:var(--label-md);
+    font-weight:300; letter-spacing:2px; text-transform:uppercase; cursor:pointer;
     transition:background 0.2s, transform 0.15s; }
   .rec-stop:active { background:rgba(0,0,0,0.65); transform:scale(0.96); }
   .rec-stop .stop-icon { width:9px; height:9px; background:#e05555; display:inline-block; }
-  .rec-question-area { text-align:center; max-width:620px; }
-  .rec-question-text { font-family:var(--font-display); font-size:34px; font-style:italic;
-    font-weight:300; color:var(--white); line-height:1.4; margin-bottom:10px; text-shadow:0 2px 20px rgba(0,0,0,0.5); }
-  .rec-question-hint { font-size:13px; font-weight:200; color:rgba(200,212,190,0.65); letter-spacing:1px; }
+  .rec-question-area { text-align:center; max-width:min(70vw, 820px); }
+  .rec-question-text { font-family:var(--font-display); font-size:clamp(34px, 3.2vw, 50px); font-style:italic;
+    font-weight:300; color:var(--white); line-height:1.4; margin-bottom:12px; text-shadow:0 2px 20px rgba(0,0,0,0.5); }
+  .rec-question-hint { font-size:var(--label-md); font-weight:200; color:rgba(200,212,190,0.72); letter-spacing:0.5px; }
   .rec-timer-area { display:flex; flex-direction:column; align-items:center; gap:12px; }
-  .timer-ring { position:relative; width:100px; height:100px; }
+  .timer-ring { position:relative; width:clamp(100px, 8.6vw, 136px); height:clamp(100px, 8.6vw, 136px); }
   .timer-ring svg { position:absolute; inset:0; width:100%; height:100%; }
   .timer-ring-bg { stroke:rgba(255,255,255,0.15); fill:none; stroke-width:3; }
   .timer-ring-fg { stroke:var(--green-pale); fill:none; stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
@@ -150,9 +177,9 @@
   #screen-photo-countdown { background:#1c2218; }
   .photo-countdown-overlay { position:relative; z-index:2; display:flex; flex-direction:column;
     align-items:center; justify-content:center; width:100%; height:100%; }
-  .photo-counter-label { font-size:11px; font-weight:300; letter-spacing:5px; text-transform:uppercase;
-    color:var(--green-pale); margin-bottom:20px; }
-  .photo-big-num { font-family:var(--font-display); font-size:160px; font-weight:300;
+  .photo-counter-label { font-size:var(--label-md); font-weight:300; letter-spacing:3px; text-transform:uppercase;
+    color:var(--green-pale); margin-bottom:24px; }
+  .photo-big-num { font-family:var(--font-display); font-size:clamp(160px, 14vw, 220px); font-weight:300;
     color:var(--white); line-height:1; animation:photopulse 0.4s ease; }
   @keyframes photopulse { 0%{transform:scale(1.4);opacity:0.3} 100%{transform:scale(1);opacity:1} }
   .photo-dots { display:flex; gap:12px; margin-top:40px; }
@@ -177,10 +204,11 @@
   .single-strip + .single-strip { border-left: 2px dashed #bbb; }
   .cut-icon { position:absolute; top:50%; left:-13px; transform:translateY(-50%);
     font-size:16px; background:var(--white); padding:2px 0; line-height:1; }
-  .strip-photo { display:block; width:130px; height:174px; object-fit:cover;
-    margin-bottom:6px; filter:grayscale(100%); }
+  .strip-photo { display:block; width:clamp(130px, 11vw, 172px); height:clamp(174px, 14.7vw, 230px);
+    object-fit:cover; margin-bottom:6px; filter:grayscale(100%); }
   .strip-photo:last-of-type { margin-bottom:0; }
-  .strip-monogram { position:relative; width:84px; height:84px; margin:14px auto 0; }
+  .strip-monogram { position:relative; width:clamp(84px, 7vw, 108px);
+    height:clamp(84px, 7vw, 108px); margin:14px auto 0; }
   .strip-monogram svg { position:absolute; inset:0; width:100%; height:100%;
     animation:spin 30s linear infinite; }
   .strip-monogram .mini-letters { position:absolute; inset:0; display:flex;
@@ -188,8 +216,8 @@
     font-family:var(--font-display); font-size:30px; font-weight:300;
     color:var(--green); letter-spacing:-1px; line-height:1; }
   .strip-actions { display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
-  .strip-title { font-family:var(--font-display); font-size:34px; font-weight:300; color:var(--green); margin-bottom:4px; }
-  .strip-sub { font-size:13px; font-weight:200; color:var(--brown-mid); line-height:1.6; max-width:220px; margin-bottom:24px; }
+  .strip-title { font-family:var(--font-display); font-size:clamp(34px, 3.1vw, 48px); font-weight:300; color:var(--green); margin-bottom:6px; }
+  .strip-sub { font-size:var(--body-md); font-weight:300; color:var(--brown-mid); line-height:1.6; max-width:30ch; margin-bottom:28px; }
 
   /* ── THANKS ── */
   #screen-thanks { background:var(--cream); }
@@ -200,12 +228,13 @@
     align-items:center; text-align:center; }
   .thanks-icon { font-size:52px; margin-bottom:24px; animation:heartbeat 2s ease-in-out infinite; }
   @keyframes heartbeat { 0%,100%{transform:scale(1)} 30%{transform:scale(1.12)} 60%{transform:scale(1.05)} }
-  .thanks-title { font-family:var(--font-display); font-size:56px; font-weight:300;
-    color:var(--green); line-height:1; margin-bottom:14px; }
-  .thanks-sub { font-size:14px; font-weight:300; color:var(--brown-mid); letter-spacing:1px;
-    line-height:1.6; max-width:340px; margin-bottom:44px; }
-  .thanks-countdown { font-size:12px; font-weight:200; letter-spacing:3px; text-transform:uppercase; color:var(--brown-light); }
-  .thanks-countdown span { font-family:var(--font-display); font-size:18px; color:var(--green); }
+  .thanks-title { font-family:var(--font-display); font-size:clamp(56px, 5.2vw, 80px); font-weight:300;
+    color:var(--green); line-height:1; margin-bottom:16px; }
+  .thanks-sub { font-size:var(--body-md); font-weight:300; color:var(--brown-mid); letter-spacing:0.5px;
+    line-height:1.6; max-width:34ch; margin-bottom:clamp(44px, 3.8vw, 60px); }
+  /* was --brown-light on cream (~2.3:1, fails WCAG) */
+  .thanks-countdown { font-size:var(--label-md); font-weight:300; letter-spacing:2px; text-transform:uppercase; color:var(--brown-mid); }
+  .thanks-countdown span { font-family:var(--font-display); font-size:clamp(20px, 1.7vw, 26px); color:var(--green); }
 
   canvas#strip-canvas { display:none; }
   canvas#boom-canvas  { display:none; }
@@ -217,7 +246,7 @@
   .boom-spinner { width:56px; height:56px; border:3px solid rgba(200,212,190,0.2);
     border-top-color:var(--green-pale); border-radius:50%;
     animation:spin 0.8s linear infinite; }
-  .boom-processing-label { font-size:13px; font-weight:200; letter-spacing:4px;
+  .boom-processing-label { font-size:var(--label-md); font-weight:300; letter-spacing:2px;
     text-transform:uppercase; color:var(--green-pale); }
 
   /* ── VIDEO REVIEW ── */
@@ -229,19 +258,24 @@
     align-items:center; gap:48px; padding:0 32px; max-width:100%; }
   .video-review-frame { background:var(--white); padding:12px;
     box-shadow:0 4px 40px rgba(58,48,40,0.12); flex-shrink:0; }
-  #video-review-player { display:block; width:420px; max-width:50vw; height:auto;
+  #video-review-player { display:block; width:clamp(420px, 36vw, 560px); max-width:50vw; height:auto;
     background:#1c2218; }
   .video-review-actions { display:flex; flex-direction:column; align-items:flex-start; }
-  .video-review-title { font-family:var(--font-display); font-size:34px; font-weight:300;
-    color:var(--green); margin-bottom:4px; }
-  .video-review-sub { font-size:13px; font-weight:200; color:var(--brown-mid); line-height:1.6;
-    max-width:240px; margin-bottom:24px; }
-  .btn-retry { margin-top:8px; background:transparent; border:none;
-    font-family:var(--font-body); font-size:11px; letter-spacing:3px; text-transform:uppercase;
-    color:var(--brown-light); cursor:pointer; padding:8px 0; }
-  .video-review-hint { margin-top:28px; font-size:11px; font-weight:300; letter-spacing:3px;
-    text-transform:uppercase; color:var(--brown-light); }
-  .video-review-hint span { font-family:var(--font-display); font-size:16px; color:var(--green); }
+  .video-review-title { font-family:var(--font-display); font-size:clamp(34px, 3.1vw, 48px); font-weight:300;
+    color:var(--green); margin-bottom:6px; }
+  .video-review-sub { font-size:var(--body-md); font-weight:300; color:var(--brown-mid); line-height:1.6;
+    max-width:32ch; margin-bottom:28px; }
+  /* "Repetir" is a real action a guest needs to find after a bad take. It was
+     --brown-light on cream (~2.3:1) at 11px uppercase with no affordance — the
+     least legible element in the app. Now readable, and visibly a control. */
+  .btn-retry { margin-top:10px; background:transparent; border:none;
+    font-family:var(--font-body); font-size:var(--label-md); letter-spacing:2px; text-transform:uppercase;
+    color:var(--brown-mid); cursor:pointer; padding:10px 0;
+    border-bottom:1px solid var(--brown-light); }
+  .btn-retry:active { color:var(--green); border-bottom-color:var(--green); }
+  .video-review-hint { margin-top:32px; font-size:var(--label-md); font-weight:300; letter-spacing:2px;
+    text-transform:uppercase; color:var(--brown-mid); }
+  .video-review-hint span { font-family:var(--font-display); font-size:clamp(18px, 1.6vw, 24px); color:var(--green); }
 
   /* ── BOOMERANG PREVIEW ── */
   #screen-boom-preview { background:var(--cream); }
@@ -252,12 +286,30 @@
     align-items:center; gap:48px; }
   .boom-video-frame { background:var(--white); padding:12px;
     box-shadow:0 4px 40px rgba(58,48,40,0.12); }
-  #boom-preview-video { display:block; width:280px; height:280px; object-fit:cover; }
+  #boom-preview-video { display:block; width:clamp(280px, 24vw, 380px);
+    height:clamp(280px, 24vw, 380px); object-fit:cover; }
   .boom-actions { display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
-  .boom-title { font-family:var(--font-display); font-size:34px; font-weight:300;
-    color:var(--green); margin-bottom:4px; }
-  .boom-sub { font-size:13px; font-weight:200; color:var(--brown-mid); line-height:1.6;
-    max-width:220px; margin-bottom:24px; }
+  .boom-title { font-family:var(--font-display); font-size:clamp(34px, 3.1vw, 48px); font-weight:300;
+    color:var(--green); margin-bottom:6px; }
+  .boom-sub { font-size:var(--body-md); font-weight:300; color:var(--brown-mid); line-height:1.6;
+    max-width:30ch; margin-bottom:28px; }
+
+  /* ── QUALITY FLOOR ── */
+  /* Visible keyboard focus. The kiosk is touch-first, but an operator may pair a
+     keyboard, and a focus ring costs nothing when unused. */
+  button:focus-visible { outline:2px solid var(--green); outline-offset:4px; }
+  .instr-screen button:focus-visible, #screen-recording button:focus-visible { outline-color:var(--white); }
+
+  /* Respect reduced motion. The decorative perpetual animations (the rotating
+     monogram, the pulsing heart) are stopped; the recording indicator keeps
+     pulsing because it carries real state — it tells a guest they are live. */
+  @media (prefers-reduced-motion: reduce) {
+    .monogram-ring svg, .strip-monogram svg { animation:none; }
+    .thanks-icon { animation:none; }
+    .countdown-number.pulse, .photo-big-num { animation:none; }
+    .screen { transition:none; }
+    .boom-spinner { animation-duration:1.6s; }
+  }
 </style>
 </head>
 <body>
@@ -304,16 +356,36 @@
 
   <div class="mode-picker">
     <button class="mode-btn-main" onclick="startMode('video')">
-      <div class="mode-icon">🎬</div>
+      <div class="mode-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <rect x="2.5" y="6.5" width="13" height="11" rx="2"/>
+          <path d="M15.5 10.5l5-3v9l-5-3z"/>
+        </svg>
+      </div>
       <div class="mode-label">Vídeo</div>
     </button>
     <div class="mode-btn-secondary-row">
       <button class="mode-btn-small" onclick="startMode('photo')">
-        <div class="mode-icon">📸</div>
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M3 8.5a2 2 0 0 1 2-2h2.2l1.3-2h7l1.3 2H19a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+            <circle cx="12" cy="12.5" r="3.4"/>
+          </svg>
+        </div>
         <div class="mode-label">Fotografia</div>
       </button>
       <button class="mode-btn-small" onclick="startMode('boomerang')">
-        <div class="mode-icon">🔁</div>
+        <div class="mode-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M4 9h16"/>
+            <path d="M16.5 5.5 20 9l-3.5 3.5"/>
+            <path d="M20 15H4"/>
+            <path d="M7.5 11.5 4 15l3.5 3.5"/>
+          </svg>
+        </div>
         <div class="mode-label">Boomerang</div>
       </button>
     </div>
@@ -347,7 +419,7 @@
 <div id="screen-instructions-photo" class="screen instr-screen">
   <div class="bg-texture"></div>
   <button class="instr-back" onclick="goTo('welcome')"><span class="arrow">‹</span>Voltar</button>
-  <div class="instr-eyebrow">Photo strip</div>
+  <div class="instr-eyebrow">Tira de fotos</div>
   <div class="instr-title">Como funciona</div>
   <div class="instr-steps">
     <div class="instr-step">
@@ -360,7 +432,7 @@
     </div>
     <div class="instr-step">
       <div class="instr-step-num">3</div>
-      <div class="instr-step-text">As fotos ficam numa strip para descarregar</div>
+      <div class="instr-step-text">As três fotos ficam juntas numa tira</div>
     </div>
   </div>
   <button class="btn-light" onclick="startPhotoSession()">Estou pronto</button>
@@ -1074,7 +1146,7 @@
     </div>
     <div class="boom-actions">
       <div class="boom-title">O teu boomerang!</div>
-      <div class="boom-sub">Toca em guardar para descarregar o vídeo.</div>
+      <div class="boom-sub">Toca em guardar para ficar com o teu boomerang.</div>
       <button class="btn-main" onclick="downloadBoomerang()">Guardar</button>
       <button style="margin-top:8px; background:transparent; border:none; font-family:var(--font-body);
         font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--brown-light);
