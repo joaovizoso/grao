@@ -75,6 +75,44 @@ the app's `flex-row` layouts were already landscape-first, so that aligns.
    `"descarregar o vídeo"` → `"ficar com o teu boomerang"`. Deliberately avoids
    promising the guest a physical print, since print-on-site is a paid add-on.
 
+### Fixed in a follow-up pass (2026-10-22, founder-reported)
+
+10. **The recording timer's number wasn't centred in its ring.** Two causes, both
+    fixed. (a) It was an SVG `<text>` relying on `dy=".35em"`, the baseline trick
+    calibrated for sans-serif metrics; it's now an HTML overlay centred with
+    flex, the pattern already used for the monogram. (b) The real culprit:
+    **Cormorant Garamond ships oldstyle figures with very uneven metrics.**
+    Measured ink at 200px:
+
+    | digit | ascent | descent |
+    |---|---|---|
+    | 0 / 1 / 2 | 78–83 | 0–3 |
+    | **3 / 5 / 9** | ~82 | **56** |
+    | **8** | **115** | 3 |
+    | **6** | **133** | 3 |
+
+    So no fixed offset can centre it — a 60→59→58 countdown visibly dances
+    inside a fixed circle. `font-variant-numeric: lining-nums` has no effect;
+    the Google Fonts build of Cormorant doesn't carry the feature. The timer now
+    uses **Jost** (uniform 142/2 for every digit), which is also the system's UI
+    face — and a timer readout is UI, not display type. Verified: box offset is
+    now exactly 0 and ink metrics identical across "60", "38", "9", "16", "3".
+
+11. **Framing guide on the photo screen.** The preview is full-bleed
+    `object-fit:cover`, but `capturePhoto()` crops the centre 3:4 of the
+    *source* — so guests were framing against an area larger than what reaches
+    the strip. Added `#photo-frame`: a centred box dimming everything outside
+    it, with corner brackets. Sized in JS (`updatePhotoFrame`) from the live
+    `videoWidth/videoHeight` and the cover scale factor, since both the crop and
+    `object-fit:cover` are centre-anchored. Waits for `loadedmetadata` (otherwise
+    `videoWidth` is 0 on a cold camera start) and re-measures on resize.
+    Verified at 1366×1024 with a 1280×720 source: frame 768×1024, ratio exactly
+    0.7500, centre offset 0.0/0.0 — an exact match for the crop.
+    The photo screen's preview opacity was also raised 0.35 → 0.72 (its job is
+    for the guest to frame themselves, unlike the video screens where the
+    preview is only a backdrop), with text-shadows added to the numerals that
+    sit over it.
+
 ### Open
 
 8. **Vertical composition doesn't use the 13" canvas.** Confirmed by rendering:
@@ -86,6 +124,15 @@ the app's `flex-row` layouts were already landscape-first, so that aligns.
 9. **The `"Video guestbook"` eyebrow** is still tracked-out caps and still
    English. Left alone deliberately — "video guestbook" is grao's category
    positioning, so changing it is a brand call for the founder, not a design fix.
+
+10. **The big countdown numerals have the same oldstyle-figure problem as the
+    timer did** — `.photo-big-num` (160–220px) and `.countdown-number`
+    (110–150px) are still Cormorant. Counting 3→2→1, the "3" sits ~28% of the
+    font size lower than the "2" and "1". **Deliberately not changed**: unlike
+    the timer, these are large expressive numerals centred in open space, where
+    a settle reads as organic rather than broken, and switching them to Jost
+    would change the character of those screens. Founder's call — the data is
+    in finding 10 above if it's ever worth revisiting.
 
 ## Standing guidance that came out of this
 

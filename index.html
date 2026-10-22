@@ -171,16 +171,33 @@
   .timer-ring svg { position:absolute; inset:0; width:100%; height:100%; }
   .timer-ring-bg { stroke:rgba(255,255,255,0.15); fill:none; stroke-width:3; }
   .timer-ring-fg { stroke:var(--green-pale); fill:none; stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset 1s linear; }
-  .timer-ring-num { font-family:var(--font-display); font-size:34px; font-weight:300; fill:var(--white); }
+  /* Two fixes here, both about the number sitting dead centre in the ring.
+     1. It's an HTML overlay centred with flex, not an SVG <text>: SVG's
+        dy=".35em" baseline trick is calibrated for sans-serif metrics.
+        Same pattern already used for the monogram.
+     2. It's set in Jost, not Cormorant. Cormorant Garamond ships OLDSTYLE
+        figures with wildly uneven metrics — measured at 200px: 3/5/9 descend
+        56px below the baseline while 6 ascends 133 and 0/1/2 only ~80. A
+        60→59→58 countdown visibly dances inside a fixed circle. Jost is
+        uniform (142/2 for every digit) and is already the system's UI face,
+        which is what a timer readout is. `lining-nums` does not help — the
+        Google Fonts build of Cormorant doesn't carry the feature. */
+  .timer-ring-num { position:absolute; inset:0; display:flex; align-items:center;
+    justify-content:center; font-family:var(--font-body);
+    font-size:clamp(28px, 2.4vw, 38px); font-weight:300; color:var(--white);
+    line-height:1; font-variant-numeric:tabular-nums; letter-spacing:0.5px; }
 
   /* ── PHOTO COUNTDOWN ── */
   #screen-photo-countdown { background:#1c2218; }
   .photo-countdown-overlay { position:relative; z-index:2; display:flex; flex-direction:column;
     align-items:center; justify-content:center; width:100%; height:100%; }
   .photo-counter-label { font-size:var(--label-md); font-weight:300; letter-spacing:3px; text-transform:uppercase;
-    color:var(--green-pale); margin-bottom:24px; }
+    color:var(--green-pale); margin-bottom:24px; text-shadow:0 2px 16px rgba(0,0,0,0.6); }
+  /* Shadowed because the preview now runs brighter behind it — a white numeral
+     over a brightly-lit face would otherwise disappear. */
   .photo-big-num { font-family:var(--font-display); font-size:clamp(160px, 14vw, 220px); font-weight:300;
-    color:var(--white); line-height:1; animation:photopulse 0.4s ease; }
+    color:var(--white); line-height:1; animation:photopulse 0.4s ease;
+    text-shadow:0 2px 30px rgba(0,0,0,0.55); }
   @keyframes photopulse { 0%{transform:scale(1.4);opacity:0.3} 100%{transform:scale(1);opacity:1} }
   .photo-dots { display:flex; gap:12px; margin-top:40px; }
   .photo-dot { width:12px; height:12px; border-radius:50%; background:rgba(255,255,255,0.2); transition:background 0.3s; }
@@ -189,6 +206,27 @@
   .flash-overlay { position:absolute; inset:0; background:white; opacity:0; pointer-events:none; z-index:10;
     transition:opacity 0.05s; }
   .flash-overlay.flash { opacity:1; }
+
+  /* Framing guide — shows the exact 3:4 region capturePhoto() crops, so a guest
+     can see what actually lands on the strip instead of guessing from a
+     full-bleed preview that shows more than gets captured. Sized in JS from the
+     real video dimensions (see updatePhotoFrame). Everything outside is dimmed
+     with one large box-shadow spread rather than four mask elements. */
+  .photo-frame { position:absolute; top:50%; left:50%; transform:translate(-50%,-50%);
+    border:1px solid rgba(255,255,255,0.5);
+    box-shadow:0 0 0 9999px rgba(18,22,15,0.58);
+    pointer-events:none; z-index:2; opacity:0; transition:opacity 0.5s ease; }
+  .photo-frame.visible { opacity:1; }
+  .photo-frame i, .photo-frame::before, .photo-frame::after { content:''; position:absolute;
+    width:clamp(22px, 2vw, 32px); height:clamp(22px, 2vw, 32px);
+    border:2px solid var(--green-pale); }
+  .photo-frame::before { top:-1px; left:-1px; border-right:none; border-bottom:none; }
+  .photo-frame::after { bottom:-1px; right:-1px; border-left:none; border-top:none; }
+  .photo-frame i:first-child { top:-1px; right:-1px; border-left:none; border-bottom:none; }
+  .photo-frame i:last-child { bottom:-1px; left:-1px; border-right:none; border-top:none; }
+  /* The photo screen's job is for the guest to frame themselves, so its preview
+     runs brighter than the video screens', where the preview is only a backdrop. */
+  #screen-photo-countdown .cam-preview { opacity:0.72; }
 
   /* ── PHOTO STRIP PREVIEW ── */
   #screen-strip { background:var(--cream); }
@@ -475,9 +513,8 @@
             <circle class="timer-ring-fg" id="timer-ring-fg" cx="50" cy="50" r="44"
               stroke-dasharray="276.5" stroke-dashoffset="0"/>
           </g>
-          <text id="timer-num" class="timer-ring-num" x="50" y="50"
-            text-anchor="middle" dy=".35em">60</text>
         </svg>
+        <div id="timer-num" class="timer-ring-num">60</div>
       </div>
     </div>
   </div>
@@ -503,6 +540,7 @@
 <!-- ══ SCREEN 5: PHOTO COUNTDOWN ══ -->
 <div id="screen-photo-countdown" class="screen">
   <video id="photo-preview" class="cam-preview" autoplay muted playsinline></video>
+  <div class="photo-frame" id="photo-frame" aria-hidden="true"><i></i><i></i></div>
   <div class="flash-overlay" id="flash-overlay"></div>
   <div class="photo-countdown-overlay">
     <div class="photo-counter-label" id="photo-counter-label">Foto 1 de 3</div>
@@ -803,11 +841,49 @@
       alert('Câmara falhou: ' + (e.name || 'erro') + ' — ' + (e.message || ''));
       return;
     }
-    document.getElementById('photo-preview').srcObject = mediaStream;
+    const preview = document.getElementById('photo-preview');
+    preview.srcObject = mediaStream;
     goTo('photo-countdown');
+    showPhotoFrame(preview);
     updatePhotoDots();
     startPhotoCountdown();
   }
+
+  // Size the framing guide to the exact region capturePhoto() will crop. Both
+  // the crop (centred in the source frame) and object-fit:cover (centred in the
+  // element) are anchored to the centre, so the guide is just a centred box of
+  // the crop size scaled by the cover factor. The preview's scaleX(-1) mirror
+  // doesn't shift a centred, symmetric box.
+  function updatePhotoFrame() {
+    const video = document.getElementById('photo-preview');
+    const frame = document.getElementById('photo-frame');
+    const vw = video.videoWidth, vh = video.videoHeight;
+    const elW = video.clientWidth, elH = video.clientHeight;
+    if (!vw || !vh || !elW || !elH) return false;
+    const TARGET_AR = 0.75; // must stay in sync with capturePhoto()
+    let cropW, cropH;
+    if (vw / vh > TARGET_AR) { cropH = vh; cropW = cropH * TARGET_AR; }
+    else { cropW = vw; cropH = cropW / TARGET_AR; }
+    const scale = Math.max(elW / vw, elH / vh); // object-fit: cover
+    frame.style.width  = Math.round(cropW * scale) + 'px';
+    frame.style.height = Math.round(cropH * scale) + 'px';
+    return true;
+  }
+
+  function showPhotoFrame(video) {
+    const frame = document.getElementById('photo-frame');
+    frame.classList.remove('visible');
+    const reveal = () => { if (updatePhotoFrame()) frame.classList.add('visible'); };
+    // videoWidth is 0 until metadata arrives, so the guide would be mis-sized
+    // if drawn immediately on a cold camera start.
+    if (video.readyState >= 1) reveal();
+    else video.addEventListener('loadedmetadata', reveal, { once: true });
+  }
+
+  window.addEventListener('resize', () => {
+    const scr = document.getElementById('screen-photo-countdown');
+    if (scr && scr.classList.contains('active')) updatePhotoFrame();
+  });
 
   function updatePhotoDots() {
     for (let i = 0; i < 3; i++) {
