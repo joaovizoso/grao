@@ -867,6 +867,34 @@
     showVideoReview();
   }
 
+  // Invisible safety net: if a guest walks away from the review screen, save
+  // their take after a long idle period instead of leaving it unsaved in memory
+  // (lost on a reload) and the next guest facing someone else's video. Any touch
+  // or any use of the player controls restarts the wait; nothing is shown.
+  const REVIEW_IDLE_MS = (() => {
+    const m = /[?&]reviewIdleMs=(\d+)/.exec(location.search); // test hook (like ?outboxFail=1)
+    return m ? Math.max(1000, +m[1]) : 3 * 60 * 1000;
+  })();
+  let reviewIdleTimer = null, reviewIdleWired = false;
+  function armReviewIdle() {
+    if (reviewIdleTimer) clearTimeout(reviewIdleTimer);
+    reviewIdleTimer = setTimeout(() => {
+      reviewIdleTimer = null;
+      if (activeScreenId() === 'video-review') saveAndFinishVideo();
+    }, REVIEW_IDLE_MS);
+  }
+  function wireReviewIdle() {
+    if (reviewIdleWired) return; reviewIdleWired = true;
+    const scr = document.getElementById('screen-video-review');
+    const poke = () => { if (reviewIdleTimer) armReviewIdle(); };
+    ['pointerdown', 'touchstart', 'click'].forEach(ev => scr.addEventListener(ev, poke, true));
+    // The native controls may not bubble pointer events, so watch the player too.
+    // NOT 'seeking'/'play': the preview loops, and every loop fires 'seeking',
+    // which would restart the wait forever and defeat the safety net.
+    ['pause', 'volumechange'].forEach(ev =>
+      document.getElementById('video-review-player').addEventListener(ev, poke));
+  }
+
   function showVideoReview() {
     const player = document.getElementById('video-review-player');
     const url = URL.createObjectURL(videoBlob);
@@ -874,8 +902,10 @@
     const soundBtn = document.getElementById('review-sound');
     soundBtn.hidden = true;
     goTo('video-review');
-    // No auto-save and no countdown: the guest takes as long as they like and
-    // chooses Guardar or Repetir. The take stays in memory until they do.
+    // No visible countdown: the guest takes as long as they like and chooses
+    // Guardar or Repetir. Only the invisible idle net above can save for them.
+    wireReviewIdle();
+    armReviewIdle();
     // Try WITH sound first. Safari may refuse an unmuted autoplay that isn't
     // tied to a tap (the recording often ends on a timer, not a tap); then fall
     // back to muted playback and offer a clear "Ouvir com som" button.
@@ -896,6 +926,7 @@
   }
 
   function teardownVideoReview() {
+    if (reviewIdleTimer) { clearTimeout(reviewIdleTimer); reviewIdleTimer = null; }
     const player = document.getElementById('video-review-player');
     document.getElementById('review-sound').hidden = true;
     player.pause();
