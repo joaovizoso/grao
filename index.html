@@ -1123,16 +1123,20 @@
       if (stripBtn) { stripBtn.textContent = stripBtnLabel; stripBtn.style.opacity = '1'; stripBtn.disabled = false; }
       stripOtherBtns.forEach(b => { b.disabled = false; });
     };
-    // Portrait double-strip layout — canvas is tall, two strips side by side.
-    // Each strip occupies exactly half the canvas (no cut-zone gap), so the
-    // photo's outer margin equals its margin to the cut line.
+    // Standard photobooth format (features/photo-strip-print-format.md):
+    // one 4×6" sheet at 300 DPI = 1200×1800, printed on the Selphy CP1500 and
+    // cut down the middle into two identical 2×6" strips (600×1800 each).
+    // Each strip occupies exactly half the canvas (no cut-zone gap).
+    // Photos stay 3:4 portrait to match capturePhoto() and the on-screen framing
+    // guide. With three of them stacked in 6", the height is the binding
+    // constraint (~380px wide each), so the side margins are wider than the top.
     const CANVAS_W = 1200;
-    const CANVAS_H = 2400;
-    const STRIP_W = CANVAS_W / 2; // 600
-    const PAD = 24;
-    const PHOTO_GAP = 10;
-    const MONOGRAM_DIAMETER = 180;
-    const MONOGRAM_GAP_TOP = 36;   // space between last photo and monogram
+    const CANVAS_H = 1800;
+    const STRIP_W = CANVAS_W / 2; // 600 = 2" at 300 DPI
+    const PAD = 36;                // top margin (also insets the cut line)
+    const PHOTO_GAP = 14;
+    const MONOGRAM_DIAMETER = 160;
+    const MONOGRAM_GAP_TOP = 24;   // space between last photo and monogram
     const PAD_BOTTOM = 30;
     // 3 portrait 3:4 photos stacked vertically — fills remaining vertical space
     const PHOTO_H = Math.floor(
