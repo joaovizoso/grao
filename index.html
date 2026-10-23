@@ -99,7 +99,7 @@
     color:var(--green-pale); margin-bottom:clamp(32px, 2.8vw, 44px); position:relative; z-index:1; }
   .instr-title { font-family:var(--font-display); font-size:clamp(48px, 4.4vw, 68px); font-weight:300; color:var(--white);
     text-align:center; line-height:1.15; margin-bottom:clamp(44px, 3.8vw, 60px); position:relative; z-index:1; }
-  .instr-steps { display:flex; flex-direction:column; gap:0; margin-bottom:clamp(52px, 4.4vw, 70px);
+  .instr-steps { display:flex; flex-direction:column; gap:0; margin-bottom:clamp(34px, 2.9vw, 46px);
     position:relative; z-index:1; width:clamp(360px, 36vw, 540px); }
   .instr-step { display:flex; align-items:center; gap:clamp(20px, 1.8vw, 28px); padding:clamp(14px, 1.3vw, 20px) 0;
     border-bottom:1px solid rgba(255,255,255,0.12); }
@@ -348,6 +348,65 @@
   .boom-sub { font-size:var(--body-md); font-weight:300; color:var(--brown-mid); line-height:1.6;
     max-width:30ch; margin-bottom:28px; }
 
+  /* ── CONSENT LINE (Instructions screens) ── */
+  /* GDPR notice-and-tap: tapping "Estou pronto" is the affirmative act. Plain
+     sentence case at body size — guests must be able to actually read it. White
+     at .88 on --green holds ~5:1; --green-pale would fall under 4.5:1 here. */
+  .instr-consent { position:relative; z-index:1; max-width:44ch; text-align:center;
+    font-size:var(--label-md); font-weight:300; line-height:1.55; letter-spacing:0.2px;
+    color:rgba(255,255,255,0.88); margin-bottom:clamp(28px, 2.4vw, 38px); padding:0 24px; }
+
+  /* ── OUTBOX INDICATOR (Welcome only) ── */
+  /* Operator-facing and deliberately quiet: nothing at 0 pending, a small count
+     otherwise. The alert state changes the icon AND the text, never colour alone. */
+  .outbox-indicator { position:absolute; top:clamp(18px, 1.6vw, 26px); right:clamp(20px, 1.8vw, 30px);
+    z-index:2; display:flex; align-items:center; gap:8px;
+    font-family:var(--font-body); font-size:var(--label-sm); font-weight:300; letter-spacing:0.5px;
+    color:var(--brown-mid); pointer-events:none; }
+  .outbox-indicator[hidden] { display:none; }
+  .outbox-indicator svg { width:clamp(16px, 1.3vw, 20px); height:clamp(16px, 1.3vw, 20px); display:block; }
+  .outbox-indicator.alert { color:var(--brown); font-weight:400; }
+
+  /* The monogram doubles as the hidden operator gesture (3s long-press). Stop
+     iOS from turning a long touch into a text-selection or callout. */
+  #screen-welcome .monogram-ring { -webkit-touch-callout:none; -webkit-user-select:none; touch-action:none; }
+
+  /* ── OPERATOR SCREEN ── */
+  #screen-operator { background:var(--cream); justify-content:flex-start; overflow-y:auto;
+    padding:clamp(36px, 3.4vw, 56px) 32px; }
+  .op-wrap { position:relative; z-index:1; width:min(760px, 100%); display:flex; flex-direction:column; align-items:center; }
+  .op-eyebrow { font-size:var(--label-sm); font-weight:300; letter-spacing:3px; text-transform:uppercase;
+    color:var(--brown-mid); margin-bottom:10px; }
+  .op-title { font-family:var(--font-display); font-size:clamp(34px, 3.1vw, 48px); font-weight:300;
+    color:var(--green); margin-bottom:clamp(22px, 2vw, 32px); text-align:center; }
+  .op-pin-dots { display:flex; gap:16px; margin-bottom:22px; }
+  .op-pin-dot { width:14px; height:14px; border-radius:50%; border:1px solid var(--green); }
+  .op-pin-dot.filled { background:var(--green); }
+  .op-pin-msg { min-height:1.6em; font-size:var(--body-md); font-weight:300; color:var(--brown); margin-bottom:14px; text-align:center; }
+  .op-keypad { display:grid; grid-template-columns:repeat(3, clamp(76px, 6.4vw, 96px)); gap:12px; margin-bottom:26px; }
+  .op-key { height:clamp(64px, 5.4vw, 80px); background:transparent; border:1px solid var(--green-pale);
+    font-family:var(--font-body); font-size:clamp(22px, 1.9vw, 28px); font-weight:300; color:var(--green);
+    cursor:pointer; transition:background 0.15s, transform 0.1s; }
+  .op-key:active { background:var(--green-faint); transform:scale(0.97); }
+  .op-key.op-key-fn { font-size:var(--label-sm); letter-spacing:1px; text-transform:uppercase; color:var(--brown-mid); }
+  .op-stats { display:grid; grid-template-columns:1fr 1fr; gap:0 32px; width:100%; margin-bottom:26px; }
+  .op-stat { padding:12px 0; border-bottom:1px solid var(--green-pale); }
+  .op-stat.op-wide { grid-column:1 / -1; }
+  .op-stat dt { font-size:var(--label-sm); font-weight:300; letter-spacing:2px; text-transform:uppercase;
+    color:var(--brown-mid); margin-bottom:4px; }
+  .op-stat dd { font-size:var(--body-md); font-weight:300; color:var(--brown); line-height:1.45; word-break:break-word; }
+  .op-stat dd.op-warn { font-weight:400; }
+  .op-actions { display:flex; flex-wrap:wrap; gap:18px 22px; justify-content:center; align-items:center; margin-bottom:18px; }
+  .btn-outline { font-family:var(--font-body); font-size:var(--label-md); font-weight:300; letter-spacing:2px;
+    text-transform:uppercase; color:var(--green); background:transparent; border:1px solid var(--green);
+    padding:clamp(16px, 1.4vw, 22px) clamp(24px, 2.2vw, 36px); cursor:pointer; transition:background 0.2s, transform 0.15s; }
+  .btn-outline:active { background:var(--green-faint); transform:scale(0.97); }
+  .btn-outline:disabled, .btn-main:disabled { opacity:0.5; cursor:default; }
+  .op-msg { min-height:1.6em; font-size:var(--body-md); font-weight:300; color:var(--brown); text-align:center;
+    max-width:60ch; margin-bottom:18px; }
+  .op-danger { margin-top:6px; }
+  .op-close { margin-top:8px; }
+
   /* ── QUALITY FLOOR ── */
   /* Visible keyboard focus. The kiosk is touch-first, but an operator may pair a
      keyboard, and a focus ring costs nothing when unused. */
@@ -392,6 +451,12 @@
     <path d="M40,15 Q45,8 52,12 Q55,18 48,22 Q41,20 40,15Z" fill="#7a8f67"/>
     <path d="M15,42 Q10,35 16,30 Q23,28 26,35 Q24,42 15,42Z" fill="#7a8f67"/>
   </svg>
+
+  <!-- Outbox pending indicator (operator-facing, Welcome screen only). Filled by
+       refreshOutboxIndicator(); hidden when nothing is pending. -->
+  <div class="outbox-indicator" id="outbox-indicator" hidden>
+    <span id="outbox-indicator-icon"></span><span id="outbox-indicator-text"></span>
+  </div>
 
   <div class="monogram-ring">
     <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
@@ -466,6 +531,7 @@
       <div class="instr-step-text">Fala alto, ri-te, é para recordar para sempre</div>
     </div>
   </div>
+  <p class="instr-consent">Ao gravar, a tua mensagem fica guardada e é entregue ao João e à Constança. Mais informação no cartão ao lado.</p>
   <button class="btn-light" onclick="startCameraAndCountdown()">Estou pronto</button>
 </div>
 
@@ -489,6 +555,7 @@
       <div class="instr-step-text">As três fotos ficam juntas numa tira</div>
     </div>
   </div>
+  <p class="instr-consent">Ao gravar, a tua mensagem fica guardada e é entregue ao João e à Constança. Mais informação no cartão ao lado.</p>
   <button class="btn-light" onclick="startPhotoSession()">Estou pronto</button>
 </div>
 
@@ -644,6 +711,27 @@
 </div>
 
 <script>
+  // ─── EVENT ─────────────────────────────────────
+  // Per-event settings for the local outbox + upload + operator panel. Read ONLY
+  // by the outbox/operator module at the bottom of this file — capture code never
+  // touches it. Key names match the future config object (CLAUDE.md priority #4,
+  // features/config-menu.md) so nothing has to be renamed later.
+  const EVENT = {
+    // eventCode = couple names + wedding date, accent-stripped lowercase slug,
+    // e.g. 'joao-constanca-20261114'. FOUNDER: append the wedding date before the
+    // event — it must match an entry in the Worker's ALLOWED_EVENTS variable.
+    code: 'joao-constanca',
+    // Off until the Worker is deployed AND the GDPR prerequisites are done
+    // (features/backend-infrastructure.md). With false, captures stay in the
+    // on-device outbox and are exported from the operator panel.
+    uploadEnabled: false,
+    uploadEndpoint: '',  // e.g. 'https://grao-upload.<account>.workers.dev' (no trailing slash)
+    uploadToken: '',     // the Worker's UPLOAD_TOKEN secret — rotate per event
+    // 4-digit PIN for the operator panel (3s long-press on the welcome monogram).
+    // CHANGE THIS before every event — the panel can export and delete captures.
+    operatorPin: '0000',
+  };
+
   const QUESTIONS = [
     "Que conselho darias ao casal para daqui a 20 anos?",
     "Faz um brinde — improvisa o discurso que nunca darias ao microfone.",
@@ -668,6 +756,9 @@
   function goTo(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-' + screenId).classList.add('active');
+    // Outbox hook: pauses/resumes background upload around capture screens and
+    // refreshes the welcome-screen pending indicator. Defined further down.
+    if (typeof outboxOnScreen === 'function') outboxOnScreen(screenId);
   }
 
   function startMode(mode) {
@@ -806,23 +897,33 @@
     if (url) setTimeout(() => URL.revokeObjectURL(url), 200);
   }
 
-  function saveAndFinishVideo() {
+  let videoSaving = false;
+
+  async function saveAndFinishVideo() {
+    // Guard: the 10s auto-save and a "Guardar" tap can race.
+    if (videoSaving) return;
+    videoSaving = true;
     teardownVideoReview();
-    if (!videoBlob) { goTo('welcome'); return; }
-    const ext = videoBlob.type.includes('mp4') ? 'mp4' : 'webm';
-    const now = new Date();
-    const ts = `${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}${now.getSeconds().toString().padStart(2,'0')}`;
-    const url = URL.createObjectURL(videoBlob);
-    const a = document.createElement('a');
-    a.href = url; a.download = `joao-constanca-video-${ts}.${ext}`;
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 5000);
+    if (!videoBlob) { videoSaving = false; goTo('welcome'); return; }
+    const blob = videoBlob;
+    const ext = blob.type.includes('mp4') ? 'mp4' : 'webm';
+    const reviewBtns = document.querySelectorAll('#screen-video-review button');
+    const saveBtn = document.querySelector('#screen-video-review .btn-main');
+    reviewBtns.forEach(b => { b.disabled = true; });
+    if (saveBtn) { saveBtn.textContent = 'A guardar…'; saveBtn.style.opacity = '0.6'; }
+    // Thank you is shown only after the outbox write has committed (or, if it
+    // failed, after the visible alert + legacy download fallback).
+    await saveCapture(blob, 'video', ext);
+    reviewBtns.forEach(b => { b.disabled = false; });
+    if (saveBtn) { saveBtn.textContent = 'Guardar'; saveBtn.style.opacity = '1'; }
     videoBlob = null;
+    videoSaving = false;
     document.getElementById('thanks-sub').textContent = 'A tua mensagem vai fazer parte de uma memória que o João e a Constança vão guardar para sempre.';
     showThanks();
   }
 
   async function tryVideoAgain() {
+    if (videoSaving) return;
     teardownVideoReview();
     videoBlob = null;
     // Re-acquire camera and restart the countdown with the SAME question
@@ -1006,7 +1107,22 @@
     goTo('strip');
   }
 
+  let stripSaving = false;
+
   function downloadStrip() {
+    if (stripSaving) return; // double-tap guard
+    stripSaving = true;
+    const stripBtn = document.querySelector('#screen-strip .btn-main');
+    const stripBtnLabel = stripBtn ? stripBtn.textContent : 'Imprimir';
+    if (stripBtn) { stripBtn.textContent = 'A guardar…'; stripBtn.style.opacity = '0.6'; stripBtn.disabled = true; }
+    // "Repetir fotos" too — a retake mid-save would be interrupted by Thank you.
+    const stripOtherBtns = [...document.querySelectorAll('#screen-strip .strip-actions button')].filter(b => b !== stripBtn);
+    stripOtherBtns.forEach(b => { b.disabled = true; });
+    const stripDone = () => {
+      stripSaving = false;
+      if (stripBtn) { stripBtn.textContent = stripBtnLabel; stripBtn.style.opacity = '1'; stripBtn.disabled = false; }
+      stripOtherBtns.forEach(b => { b.disabled = false; });
+    };
     // Portrait double-strip layout — canvas is tall, two strips side by side.
     // Each strip occupies exactly half the canvas (no cut-zone gap), so the
     // photo's outer margin equals its margin to the cut line.
@@ -1062,6 +1178,7 @@
     // preload images then draw both strips
     const imgs = [];
     let preloaded = 0;
+    let imgFailed = false;
     for (let i = 0; i < 3; i++) {
       const img = new Image();
       img.onload = () => {
@@ -1146,20 +1263,25 @@
         drawOneStrip(0);
         drawOneStrip(STRIP_W);
 
-        // download
-        const now = new Date();
-        const ts = `${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
-        canvas.toBlob(blob => {
-          const url = URL.createObjectURL(blob);
-          const a = document.createElement('a');
-          a.href = url;
-          a.download = `joao-constanca-strip-${ts}.jpg`;
-          document.body.appendChild(a); a.click(); document.body.removeChild(a);
-          setTimeout(() => URL.revokeObjectURL(url), 5000);
+        // Save to the outbox. Thank you only after the write has committed —
+        // previously it was shown before toBlob had even produced the file.
+        canvas.toBlob(async blob => {
+          if (!blob || !blob.size) {
+            stripDone();
+            alert('Não foi possível criar a tira de fotos. Toca outra vez em ' + stripBtnLabel + '.');
+            return;
+          }
+          await saveCapture(blob, 'photo', 'jpg');
+          stripDone();
+          document.getElementById('thanks-sub').textContent = 'A vossa strip ficou lindíssima! O João e a Constança vão adorar.';
+          showThanks();
         }, 'image/jpeg', 0.96);
-
-        document.getElementById('thanks-sub').textContent = 'A vossa strip ficou lindíssima! O João e a Constança vão adorar.';
-        showThanks();
+      };
+      img.onerror = () => {
+        if (imgFailed) return; // one alert, not three
+        imgFailed = true;
+        stripDone();
+        alert('Não foi possível montar a tira de fotos. Repete as fotos, por favor.');
       };
       img.src = photoCaptures[i];
     }
@@ -1209,6 +1331,7 @@
       <div class="instr-step-text">O vídeo vai e volta em loop — como no Instagram</div>
     </div>
   </div>
+  <p class="instr-consent">Ao gravar, a tua mensagem fica guardada e é entregue ao João e à Constança. Mais informação no cartão ao lado.</p>
   <button class="btn-light" onclick="startBoomerang()">Estou pronto</button>
 </div>
 
@@ -1475,18 +1598,19 @@
         resumePreview();
         return;
       }
-      if (btn) { btn.textContent = 'Guardar'; btn.style.opacity = '1'; btn.disabled = false; }
       const blob = new Blob(chunks, { type: mimeType });
-      const now = new Date();
-      const ts = `${now.getHours().toString().padStart(2,'0')}${now.getMinutes().toString().padStart(2,'0')}`;
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `joao-constanca-boomerang-${ts}.${ext}`;
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      setTimeout(() => URL.revokeObjectURL(url), 5000);
-      document.getElementById('thanks-sub').textContent = 'O teu boomerang ficou incrível! O João e a Constança vão adorar.';
-      showThanks();
+      if (btn) btn.textContent = 'A guardar…';
+      // "Repetir video" too — a retake mid-save would be interrupted by Thank you.
+      const otherBtns = [...document.querySelectorAll('#screen-boom-preview .boom-actions button')].filter(b => b !== btn);
+      otherBtns.forEach(b => { b.disabled = true; });
+      // Thank you only after the outbox write has committed (or the visible
+      // fallback download has run).
+      saveCapture(blob, 'boomerang', ext).then(() => {
+        if (btn) { btn.textContent = 'Guardar'; btn.style.opacity = '1'; btn.disabled = false; }
+        otherBtns.forEach(b => { b.disabled = false; });
+        document.getElementById('thanks-sub').textContent = 'O teu boomerang ficou incrível! O João e a Constança vão adorar.';
+        showThanks();
+      });
     };
 
     try {
@@ -1537,6 +1661,755 @@
     frame.innerHTML = '<video id="boom-preview-video" autoplay loop muted playsinline></video>';
     startBoomerang();
   }
+</script>
+<!-- ══ SCREEN: OPERATOR (hidden — 3s long-press on the welcome monogram + PIN) ══
+     Not reachable from any visible control. Future operator settings
+     (features/config-menu.md) mount as extra sections inside #op-sections. -->
+<div id="screen-operator" class="screen">
+  <div class="op-wrap">
+    <div class="op-eyebrow">Operador</div>
+    <div class="op-title" id="op-title">Introduz o PIN</div>
+
+    <div id="op-lock">
+      <div style="display:flex; flex-direction:column; align-items:center;">
+        <div class="op-pin-dots" aria-hidden="true">
+          <span class="op-pin-dot"></span><span class="op-pin-dot"></span>
+          <span class="op-pin-dot"></span><span class="op-pin-dot"></span>
+        </div>
+        <div class="op-pin-msg" id="op-pin-msg" role="status" aria-live="polite"></div>
+        <div class="op-keypad" id="op-keypad">
+          <button class="op-key" data-k="1">1</button><button class="op-key" data-k="2">2</button><button class="op-key" data-k="3">3</button>
+          <button class="op-key" data-k="4">4</button><button class="op-key" data-k="5">5</button><button class="op-key" data-k="6">6</button>
+          <button class="op-key" data-k="7">7</button><button class="op-key" data-k="8">8</button><button class="op-key" data-k="9">9</button>
+          <button class="op-key op-key-fn" data-k="cancel">Sair</button><button class="op-key" data-k="0">0</button><button class="op-key op-key-fn" data-k="back">Apagar</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="op-panel" hidden>
+      <dl class="op-stats">
+        <div class="op-stat"><dt>Por enviar</dt><dd id="op-pending">—</dd></div>
+        <div class="op-stat"><dt>Tamanho</dt><dd id="op-bytes">—</dd></div>
+        <div class="op-stat"><dt>Mais antigo</dt><dd id="op-oldest">—</dd></div>
+        <div class="op-stat"><dt>Envio</dt><dd id="op-upload">—</dd></div>
+        <div class="op-stat"><dt>Armazenamento persistente</dt><dd id="op-persisted">—</dd></div>
+        <div class="op-stat"><dt>Espaço livre</dt><dd id="op-free">—</dd></div>
+        <div class="op-stat"><dt>Evento</dt><dd id="op-event">—</dd></div>
+        <div class="op-stat"><dt>Nesta sessão</dt><dd id="op-session">—</dd></div>
+        <div class="op-stat op-wide"><dt>Último erro</dt><dd id="op-error">—</dd></div>
+      </dl>
+      <div class="op-actions">
+        <button class="btn-main" id="op-retry" onclick="operatorRetryNow()">Tentar enviar agora</button>
+        <button class="btn-outline" id="op-export" onclick="operatorExportBatch()">Exportar pendentes</button>
+      </div>
+      <div class="op-msg" id="op-msg" role="status" aria-live="polite"></div>
+      <!-- Extension point for features/config-menu.md (not built). -->
+      <div id="op-sections"></div>
+      <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
+        <button class="btn-retry op-danger" id="op-delete" onclick="operatorDeleteLast()">Apagar último pendente</button>
+        <button class="btn-outline op-close" onclick="closeOperator()">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ─── OUTBOX · UPLOAD · OPERATOR ────────────────
+  // The only module that reads EVENT. Capture code calls exactly one function
+  // here — saveCapture(blob, mode, ext) — plus the goTo() screen hook.
+  //
+  // Lifecycle of a capture:
+  //   capture → saveCapture(): SHA-256 + durable IndexedDB write (resolves on
+  //   transaction oncomplete; only then does the caller show Thank you)
+  //   → drain loop uploads it to the Worker → the Worker confirms key + size +
+  //   R2-validated SHA-256 → only then is the local copy deleted.
+  // If the IndexedDB write fails, the guest sees an alert and the legacy
+  // <a download> runs instead, so the take is never lost silently.
+  //
+  // Safari notes: Blob values in IndexedDB (WebKit, long-supported; must pass
+  // on-device test T3), crypto.subtle (secure context — https or the
+  // home-screen app, not file://), navigator.storage.persist/estimate (Safari
+  // 15.2+/17), navigator.share({files}) (iOS 15+). No Background Sync on
+  // Safari: the drain only runs while this page is open and in the foreground.
+
+  const OUTBOX = {
+    DB_NAME: 'grao-outbox',
+    DB_VERSION: 1,
+    WARN_FREE_BYTES: 2 * 1024 * 1024 * 1024,   // operator warning below 2 GB free quota
+    FLOOR_FREE_BYTES: 500 * 1024 * 1024,       // operator alert below 500 MB
+    STALE_MS: 10 * 60 * 1000,                  // oldest pending > 10 min → alert state
+    BACKOFF_MIN_MS: 5000,
+    BACKOFF_MAX_MS: 5 * 60 * 1000,
+    EXPORT_BATCH: 5,
+    IDB_TIMEOUT_MS: 20000,
+    // Fallback for on-device test T3: if Blobs read back from IndexedDB turn out
+    // unreadable after an app kill / reboot, flip this to store ArrayBuffers.
+    STORE_AS_ARRAYBUFFER: false,
+    // Test T6: open the booth with ?outboxFail=1 to force the IndexedDB write to
+    // fail and exercise the alert + legacy-download fallback.
+    FORCE_FAIL: /[?&]outboxFail=1(&|$)/.test(location.search),
+  };
+  const MIME_BY_EXT = { mp4: 'video/mp4', webm: 'video/webm', jpg: 'image/jpeg' };
+  const MODE_LABEL = { video: 'Vídeo', photo: 'Tira de fotos', boomerang: 'Boomerang' };
+  // New uploads may only START on these screens. Countdown, recording, review,
+  // photo shooting and boomerang capture/export are protected; an upload already
+  // in flight is allowed to finish.
+  const UPLOAD_OK_SCREENS = /^(welcome|thanks|operator|instructions-[a-z]+)$/;
+
+  const outboxState = {
+    timer: null, running: false, inFlight: null, backoffMs: 0,
+    status: 'idle',           // idle | offline | waiting-screen | uploading | backoff | disabled | misconfigured
+    lastError: null,          // { message, at } — most recent failure of any kind
+    lastAttemptFailed: false,
+    lastSuccessAt: 0,
+    uploaded: 0, saved: 0, fallbacks: 0,
+    persisted: null,          // true | false | null (unknown/unsupported)
+    storage: null,            // { free, quota, usage, level } | { unsupported:true }
+    lastFloorAlertAt: 0,
+    holdIds: new Set(),       // captureIds the drain must not touch (pending delete)
+    exportedIds: new Set(),   // exported during this panel session (export never deletes)
+    exportBatch: null,        // { files, ids } prepared ahead so share() keeps the tap's user activation
+  };
+
+  // ── small utilities ──
+  function outboxUuid() {
+    if (window.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    const b = crypto.getRandomValues(new Uint8Array(16));
+    b[6] = (b[6] & 0x0f) | 0x40; b[8] = (b[8] & 0x3f) | 0x80;
+    const h = [...b].map(x => x.toString(16).padStart(2, '0')).join('');
+    return `${h.slice(0,8)}-${h.slice(8,12)}-${h.slice(12,16)}-${h.slice(16,20)}-${h.slice(20)}`;
+  }
+  async function sha256Hex(buf) {
+    if (!window.crypto || !crypto.subtle) throw new Error('crypto.subtle indisponível (é preciso https)');
+    const d = await crypto.subtle.digest('SHA-256', buf);
+    return [...new Uint8Array(d)].map(x => x.toString(16).padStart(2, '0')).join('');
+  }
+  function stampOf(ms) { // local time, YYYYMMDD-HHMMSS
+    const d = new Date(ms), p = n => String(n).padStart(2, '0');
+    return `${d.getFullYear()}${p(d.getMonth()+1)}${p(d.getDate())}-${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`;
+  }
+  function fmtBytes(n) {
+    if (n == null || isNaN(n)) return '—';
+    if (n >= 1024 ** 3) return (n / 1024 ** 3).toFixed(1).replace('.', ',') + ' GB';
+    if (n >= 1024 ** 2) return (n / 1024 ** 2).toFixed(1).replace('.', ',') + ' MB';
+    return Math.max(1, Math.round(n / 1024)) + ' KB';
+  }
+  function fmtAge(ms) {
+    const s = Math.max(0, Math.round(ms / 1000));
+    if (s < 60) return s + ' s';
+    const m = Math.floor(s / 60);
+    if (m < 60) return m + ' min';
+    return Math.floor(m / 60) + ' h ' + (m % 60) + ' min';
+  }
+  function fmtTime(ms) { const d = new Date(ms); return d.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit', second: '2-digit' }); }
+  function withTimeout(p, ms, msg) {
+    let t; return Promise.race([p, new Promise((_, rej) => { t = setTimeout(() => rej(new Error(msg)), ms); })]).finally(() => clearTimeout(t));
+  }
+  function noteError(message) {
+    outboxState.lastError = { message: String(message), at: Date.now() };
+  }
+  function activeScreenId() {
+    const a = document.querySelector('.screen.active');
+    return a ? a.id.replace(/^screen-/, '') : '';
+  }
+
+  // ── IndexedDB: two stores written in one transaction ──
+  // 'meta' holds the small record (listed often, for stats); 'blobs' holds the
+  // bytes (read only to upload/export). Same keyPath, always written/deleted together.
+  let outboxDbPromise = null;
+  function openOutboxDb() {
+    if (outboxDbPromise) return outboxDbPromise;
+    outboxDbPromise = new Promise((resolve, reject) => {
+      if (!window.indexedDB) { reject(new Error('IndexedDB indisponível neste browser')); return; }
+      let req;
+      try { req = indexedDB.open(OUTBOX.DB_NAME, OUTBOX.DB_VERSION); } catch (e) { reject(e); return; }
+      req.onupgradeneeded = () => {
+        const db = req.result;
+        if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta', { keyPath: 'captureId' });
+        if (!db.objectStoreNames.contains('blobs')) db.createObjectStore('blobs', { keyPath: 'captureId' });
+      };
+      req.onsuccess = () => {
+        const db = req.result;
+        // WebKit can drop the connection (e.g. after long backgrounding); reopen next time.
+        db.onclose = () => { outboxDbPromise = null; };
+        db.onversionchange = () => { db.close(); outboxDbPromise = null; };
+        resolve(db);
+      };
+      req.onerror = () => reject(req.error || new Error('não foi possível abrir a IndexedDB'));
+      req.onblocked = () => reject(new Error('IndexedDB bloqueada por outro separador'));
+    });
+    outboxDbPromise.catch(() => { outboxDbPromise = null; });
+    return outboxDbPromise;
+  }
+  // Runs body(tx, setResult) in one transaction; resolves with the result only
+  // on 'complete' (i.e. after the write is durable, for readwrite).
+  function idbTx(stores, mode, body) {
+    return openOutboxDb().then(db => new Promise((resolve, reject) => {
+      let tx, result;
+      try { tx = db.transaction(stores, mode, { durability: 'strict' }); }
+      catch (e) { outboxDbPromise = null; reject(e); return; }
+      tx.oncomplete = () => resolve(result);
+      tx.onerror = () => reject(tx.error || new Error('transação IndexedDB falhou'));
+      tx.onabort = () => reject(tx.error || new Error('transação IndexedDB abortada'));
+      try { body(tx, v => { result = v; }); }
+      catch (e) { try { tx.abort(); } catch (_) {} reject(e); }
+    }));
+  }
+  // One retry on a fresh connection — covers WebKit's "connection lost" case.
+  async function idbTxRetry(stores, mode, body) {
+    try { return await idbTx(stores, mode, body); }
+    catch (e) { outboxDbPromise = null; return await idbTx(stores, mode, body); }
+  }
+  function outboxPut(meta, data) {
+    return idbTxRetry(['meta', 'blobs'], 'readwrite', tx => {
+      tx.objectStore('meta').put(meta);
+      tx.objectStore('blobs').put({ captureId: meta.captureId, data });
+    });
+  }
+  function outboxListMeta() {
+    return idbTxRetry(['meta'], 'readonly', (tx, set) => {
+      const r = tx.objectStore('meta').getAll();
+      r.onsuccess = () => set((r.result || []).sort((a, b) => a.createdAt - b.createdAt));
+    });
+  }
+  function outboxGetData(id) {
+    return idbTxRetry(['blobs'], 'readonly', (tx, set) => {
+      const r = tx.objectStore('blobs').get(id);
+      r.onsuccess = () => set(r.result ? r.result.data : null);
+    });
+  }
+  function outboxUpdateMeta(id, patch) {
+    return idbTxRetry(['meta'], 'readwrite', tx => {
+      const st = tx.objectStore('meta');
+      const r = st.get(id);
+      r.onsuccess = () => { if (r.result) st.put(Object.assign(r.result, patch)); };
+    });
+  }
+  function outboxDelete(id) {
+    return idbTxRetry(['meta', 'blobs'], 'readwrite', tx => {
+      tx.objectStore('meta').delete(id);
+      tx.objectStore('blobs').delete(id);
+    });
+  }
+  function dataToBlob(data, mime) {
+    if (data instanceof Blob) return data;
+    return new Blob([data], { type: mime });
+  }
+
+  // ── Legacy download — kept as the visible fallback, not deleted ──
+  function legacyDownload(blob, filename) {
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+  }
+  function legacyFilename(mode, ext, ms) {
+    const label = mode === 'photo' ? 'strip' : mode;
+    return `${EVENT.code}-${label}-${stampOf(ms)}.${ext}`;
+  }
+
+  // ── THE capture funnel ──
+  // Never rejects. Resolves { stored:true } after the IndexedDB transaction has
+  // committed, or { stored:false } after the guest/operator has seen an alert
+  // and the legacy download has been triggered.
+  async function saveCapture(blob, mode, ext) {
+    const createdAt = Date.now();
+    try {
+      if (!blob || !blob.size) throw new Error('a captura está vazia');
+      if (OUTBOX.FORCE_FAIL) throw new Error('falha forçada para teste (?outboxFail=1)');
+      const captureId = outboxUuid();
+      // Hash the in-memory capture now, so the upload later proves the bytes
+      // that reach R2 are the bytes that were captured (not just what IDB returned).
+      let sha256 = null, buf = null;
+      try { buf = await blob.arrayBuffer(); sha256 = await sha256Hex(buf); }
+      catch (e) { sha256 = null; noteError('SHA-256 na captura falhou: ' + (e.message || e.name)); }
+      const data = OUTBOX.STORE_AS_ARRAYBUFFER ? (buf || await blob.arrayBuffer()) : blob;
+      buf = null;
+      const meta = {
+        captureId, eventCode: EVENT.code, mode, ext,
+        mime: MIME_BY_EXT[ext] || (blob.type || '').split(';')[0] || 'application/octet-stream',
+        size: blob.size, createdAt, attempts: 0, lastError: null, lastAttemptAt: 0, sha256,
+        key: `${EVENT.code}/${stampOf(createdAt)}-${mode}-${captureId}.${ext}`,
+      };
+      await withTimeout(outboxPut(meta, data), OUTBOX.IDB_TIMEOUT_MS, 'a IndexedDB não respondeu a tempo');
+      outboxState.saved++;
+      refreshOutboxUi();
+      checkStorage(false);
+      scheduleDrain(0);
+      return { stored: true, captureId };
+    } catch (err) {
+      outboxState.fallbacks++;
+      noteError('Gravação local falhou: ' + ((err && (err.message || err.name)) || 'erro'));
+      try {
+        if (blob && blob.size) {
+          alert('Não foi possível guardar esta gravação no booth.\n\n' +
+                'Vamos descarregar o ficheiro — confirma a transferência para não a perder.\n\n' +
+                '(Operador: ' + ((err && (err.message || err.name)) || 'erro') + ')');
+          legacyDownload(blob, legacyFilename(mode, ext, createdAt));
+        } else {
+          alert('A gravação ficou vazia e não pôde ser guardada. Tenta outra vez, por favor.');
+        }
+      } catch (e2) { /* alert/download unavailable — nothing further we can do */ }
+      refreshOutboxUi();
+      return { stored: false };
+    }
+  }
+
+  // ── Drain loop: one upload in flight, never started on a capture screen ──
+  function scheduleDrain(ms) {
+    if (outboxState.timer) clearTimeout(outboxState.timer);
+    outboxState.timer = setTimeout(drainOutbox, Math.max(0, ms || 0));
+  }
+
+  async function drainOutbox() {
+    outboxState.timer = null;
+    if (outboxState.running) return;
+    if (!EVENT.uploadEnabled) { outboxState.status = 'disabled'; return; }
+    if (!EVENT.uploadEndpoint || !EVENT.uploadToken) {
+      outboxState.status = 'misconfigured';
+      noteError('Envio ativo, mas EVENT.uploadEndpoint / uploadToken estão vazios');
+      outboxState.lastAttemptFailed = true;
+      refreshOutboxUi();
+      return;
+    }
+    if (navigator.onLine === false) { outboxState.status = 'offline'; refreshOutboxUi(); return; } // 'online' event resumes
+    if (!UPLOAD_OK_SCREENS.test(activeScreenId())) { outboxState.status = 'waiting-screen'; scheduleDrain(3000); return; }
+
+    outboxState.running = true;
+    let next = null;
+    try {
+      const list = (await outboxListMeta()).filter(r => !outboxState.holdIds.has(r.captureId));
+      if (!list.length) { outboxState.status = 'idle'; outboxState.backoffMs = 0; return; }
+      // Least-recently-attempted first, so one permanently failing capture
+      // can't block the rest of the queue.
+      list.sort((a, b) => (a.lastAttemptAt - b.lastAttemptAt) || (a.createdAt - b.createdAt));
+      outboxState.status = 'uploading';
+      refreshOutboxUi();
+      const r = await uploadOne(list[0]);
+      if (r.deferred) { outboxState.status = 'waiting-screen'; next = 3000; }
+      else if (r.ok) {
+        outboxState.backoffMs = 0;
+        outboxState.lastAttemptFailed = false;
+        outboxState.lastSuccessAt = Date.now();
+        outboxState.uploaded++;
+        next = 0;
+      } else {
+        outboxState.lastAttemptFailed = true;
+        outboxState.backoffMs = outboxState.backoffMs
+          ? Math.min(outboxState.backoffMs * 2, OUTBOX.BACKOFF_MAX_MS) : OUTBOX.BACKOFF_MIN_MS;
+        outboxState.status = 'backoff';
+        next = outboxState.backoffMs;
+      }
+    } catch (e) {
+      noteError('Fila local: ' + (e.message || e.name));
+      outboxState.lastAttemptFailed = true;
+      outboxState.backoffMs = outboxState.backoffMs
+        ? Math.min(outboxState.backoffMs * 2, OUTBOX.BACKOFF_MAX_MS) : OUTBOX.BACKOFF_MIN_MS;
+      outboxState.status = 'backoff';
+      next = outboxState.backoffMs;
+    } finally {
+      outboxState.running = false;
+      outboxState.inFlight = null;
+      refreshOutboxUi();
+      if (next !== null) scheduleDrain(next);
+    }
+  }
+
+  async function uploadOne(rec) {
+    const attemptAt = Date.now();
+    outboxState.inFlight = { captureId: rec.captureId, startedAt: attemptAt, size: rec.size };
+    let errMsg;
+    try {
+      const data = await outboxGetData(rec.captureId);
+      if (!data) throw new Error('dados locais em falta para esta captura');
+      // Read the whole capture into memory (≤100 MB, one at a time): this both
+      // re-verifies the local bytes and avoids uploading an IDB-backed Blob directly.
+      const buf = data instanceof Blob ? await data.arrayBuffer() : data;
+      if (buf.byteLength !== rec.size) throw new Error(`tamanho local ${buf.byteLength} ≠ ${rec.size} — cópia local danificada`);
+      const sha = await sha256Hex(buf);
+      if (rec.sha256 && sha !== rec.sha256) throw new Error('checksum local diferente do da captura — cópia local danificada; exporta-a');
+      if (!rec.sha256) { rec.sha256 = sha; await outboxUpdateMeta(rec.captureId, { sha256: sha }); }
+      // A guest may have started a capture while we were hashing — don't start now.
+      if (!UPLOAD_OK_SCREENS.test(activeScreenId())) return { ok: false, deferred: true };
+
+      const url = EVENT.uploadEndpoint.replace(/\/+$/, '') + '/u/' + rec.key.split('/').map(encodeURIComponent).join('/');
+      const timeoutMs = 30000 + Math.ceil(rec.size / 125000) * 1000; // 30s + ~1 Mbit/s floor
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), timeoutMs);
+      let res, body = null;
+      try {
+        res = await fetch(url, {
+          method: 'PUT', body: buf, signal: ctrl.signal, cache: 'no-store', credentials: 'omit',
+          headers: { 'Content-Type': rec.mime, 'X-Upload-Token': EVENT.uploadToken, 'X-Content-SHA256': sha },
+        });
+        try { body = await res.json(); } catch (_) { body = null; }
+      } catch (e) {
+        throw new Error(e && e.name === 'AbortError' ? `tempo esgotado (${Math.round(timeoutMs / 1000)} s)` : 'rede: ' + ((e && e.message) || 'falhou'));
+      } finally { clearTimeout(t); }
+
+      if (!res.ok) throw new Error(`servidor HTTP ${res.status}${body && body.error ? ' — ' + body.error : ''}`);
+      // "Confirmed" = the server states the object exists at OUR key, with OUR
+      // byte size and the SHA-256 that R2 validated. Anything less: keep local.
+      if (!body || (body.status !== 'stored' && body.status !== 'exists')) throw new Error('resposta inesperada do servidor');
+      if (body.key !== rec.key) throw new Error('servidor confirmou outra chave');
+      if (body.size !== rec.size) throw new Error(`servidor confirmou ${body.size} bytes, esperado ${rec.size}`);
+      if (body.sha256 !== sha) throw new Error('servidor confirmou outro checksum');
+
+      await outboxDelete(rec.captureId);
+      return { ok: true, status: body.status };
+    } catch (e) {
+      errMsg = (e && (e.message || e.name)) || 'erro';
+    }
+    noteError(`Envio (${MODE_LABEL[rec.mode] || rec.mode}, ${fmtTime(rec.createdAt)}): ${errMsg}`);
+    try { await outboxUpdateMeta(rec.captureId, { attempts: (rec.attempts || 0) + 1, lastAttemptAt: attemptAt, lastError: errMsg }); } catch (_) {}
+    return { ok: false, error: errMsg };
+  }
+
+  // ── Storage persistence + quota ──
+  async function checkStorage(alertOnFloor) {
+    try {
+      if (!navigator.storage || typeof navigator.storage.estimate !== 'function') {
+        outboxState.storage = { unsupported: true };
+      } else {
+        const e = await navigator.storage.estimate();
+        const free = (e.quota || 0) - (e.usage || 0);
+        const level = free < OUTBOX.FLOOR_FREE_BYTES ? 'floor' : free < OUTBOX.WARN_FREE_BYTES ? 'warn' : 'ok';
+        outboxState.storage = { free, quota: e.quota, usage: e.usage, level };
+        if (level === 'floor' && alertOnFloor && Date.now() - outboxState.lastFloorAlertAt > 15 * 60 * 1000) {
+          outboxState.lastFloorAlertAt = Date.now();
+          alert('Operador: o espaço de armazenamento do booth está quase esgotado (' + fmtBytes(free) +
+                ' livres).\n\nEnvia ou exporta as capturas pendentes antes de continuar.');
+        }
+      }
+    } catch (e) {
+      outboxState.storage = { unsupported: true, error: e.message || e.name };
+    }
+    refreshOutboxUi();
+  }
+  async function requestPersistence() {
+    try {
+      if (!navigator.storage || typeof navigator.storage.persisted !== 'function') { outboxState.persisted = null; return; }
+      let p = await navigator.storage.persisted();
+      if (!p && typeof navigator.storage.persist === 'function') p = await navigator.storage.persist();
+      outboxState.persisted = !!p;
+    } catch (e) { outboxState.persisted = null; }
+    refreshOutboxUi();
+  }
+
+  // ── Screen hook (called from goTo) ──
+  function outboxOnScreen(screenId) {
+    if (/^instructions-/.test(screenId)) checkStorage(true); // "before each capture"
+    if (UPLOAD_OK_SCREENS.test(screenId) && outboxState.status === 'waiting-screen' && !outboxState.running) scheduleDrain(500);
+    if (screenId === 'welcome') refreshOutboxUi();
+  }
+
+  // ── UI: welcome indicator + operator panel ──
+  const ICON_PENDING = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 15V4"/><path d="M8 8l4-4 4 4"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4"/></svg>';
+  const ICON_ALERT = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></svg>';
+
+  let outboxStats = { count: 0, bytes: 0, oldestAt: 0, newest: null, recErrors: 0 };
+  let refreshQueued = false;
+  function refreshOutboxUi() {
+    if (refreshQueued) return;
+    refreshQueued = true;
+    setTimeout(async () => {
+      refreshQueued = false;
+      try {
+        const list = await outboxListMeta();
+        outboxStats = {
+          count: list.length,
+          bytes: list.reduce((s, r) => s + (r.size || 0), 0),
+          oldestAt: list.length ? list[0].createdAt : 0,
+          newest: list.length ? list[list.length - 1] : null,
+          recErrors: list.filter(r => r.lastError).length,
+        };
+        outboxState.idbError = null;
+        // Forget export marks for captures that have since been uploaded/deleted.
+        const ids = new Set(list.map(r => r.captureId));
+        outboxState.exportedIds.forEach(id => { if (!ids.has(id)) outboxState.exportedIds.delete(id); });
+      } catch (e) {
+        outboxState.idbError = e.message || e.name;
+      }
+      renderIndicator();
+      if (activeScreenId() === 'operator' && operatorUnlocked) renderOperatorPanel();
+    }, 50);
+  }
+
+  function outboxAlertReasons() {
+    const r = [];
+    const s = outboxStats;
+    if (outboxState.idbError) r.push('fila local ilegível');
+    if (EVENT.uploadEnabled && s.count && Date.now() - s.oldestAt > OUTBOX.STALE_MS) r.push('pendente há ' + fmtAge(Date.now() - s.oldestAt));
+    if (EVENT.uploadEnabled && s.count && outboxState.lastAttemptFailed) r.push('último envio falhou');
+    if (EVENT.uploadEnabled && outboxState.status === 'misconfigured') r.push('envio sem endpoint');
+    if (outboxState.storage && (outboxState.storage.level === 'floor' || outboxState.storage.level === 'warn')) r.push('pouco espaço');
+    if (outboxState.fallbacks) r.push('gravação local falhou');
+    return r;
+  }
+
+  function renderIndicator() {
+    const el = document.getElementById('outbox-indicator');
+    if (!el) return;
+    const reasons = outboxAlertReasons();
+    const n = outboxStats.count;
+    if (!n && !reasons.length) { el.hidden = true; return; }
+    el.hidden = false;
+    const alertOn = reasons.length > 0;
+    el.classList.toggle('alert', alertOn);
+    document.getElementById('outbox-indicator-icon').innerHTML = alertOn ? ICON_ALERT : ICON_PENDING;
+    document.getElementById('outbox-indicator-text').textContent =
+      alertOn ? (n ? n + ' · ' : '') + 'Atenção: ' + reasons[0] : String(n);
+  }
+
+  function setDd(id, text, warn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = warn ? 'Atenção — ' + text : text;
+    el.classList.toggle('op-warn', !!warn);
+  }
+
+  function renderOperatorPanel() {
+    const s = outboxStats, now = Date.now();
+    setDd('op-pending', outboxState.idbError ? 'fila ilegível: ' + outboxState.idbError : String(s.count), !!outboxState.idbError);
+    setDd('op-bytes', s.count ? fmtBytes(s.bytes) : '0');
+    const stale = EVENT.uploadEnabled && s.count && now - s.oldestAt > OUTBOX.STALE_MS;
+    setDd('op-oldest', s.count ? fmtAge(now - s.oldestAt) + ' (' + fmtTime(s.oldestAt) + ')' : '—', stale);
+    let up;
+    if (!EVENT.uploadEnabled) up = 'desativado (uploadEnabled = false) — exporta no fim';
+    else if (outboxState.status === 'misconfigured') up = 'sem endpoint/token configurado';
+    else if (outboxState.inFlight) up = 'a enviar (' + fmtBytes(outboxState.inFlight.size) + ', há ' + fmtAge(now - outboxState.inFlight.startedAt) + ')';
+    else if (navigator.onLine === false) up = 'sem rede — retoma quando voltar';
+    else if (outboxState.status === 'backoff') up = 'nova tentativa em breve (espera ' + fmtAge(outboxState.backoffMs) + ')';
+    else if (outboxState.status === 'waiting-screen') up = 'em pausa durante a captura';
+    else up = s.count ? 'ativo' : 'ativo — tudo enviado';
+    setDd('op-upload', up, EVENT.uploadEnabled && (outboxState.status === 'misconfigured' || navigator.onLine === false || outboxState.status === 'backoff'));
+    setDd('op-persisted', outboxState.persisted === true ? 'sim' : outboxState.persisted === false ? 'não concedido; abre a app pelo ícone do ecrã principal' : 'desconhecido', outboxState.persisted !== true);
+    const st = outboxState.storage;
+    setDd('op-free', !st || st.unsupported ? 'desconhecido' : fmtBytes(st.free), st && (st.level === 'warn' || st.level === 'floor'));
+    setDd('op-event', EVENT.code + (EVENT.operatorPin === '0000' ? ' · PIN por defeito, muda-o' : ''), EVENT.operatorPin === '0000');
+    setDd('op-session', `${outboxState.saved} guardadas · ${outboxState.uploaded} enviadas` + (outboxState.fallbacks ? ` · ${outboxState.fallbacks} em descarga de recurso` : ''), !!outboxState.fallbacks);
+    const le = outboxState.lastError;
+    setDd('op-error', le ? le.message + ' (' + fmtTime(le.at) + ')' : 'nenhum', !!le);
+    const retry = document.getElementById('op-retry');
+    if (retry) retry.disabled = !EVENT.uploadEnabled;
+    const exp = document.getElementById('op-export');
+    if (exp && !exp.dataset.busy) {
+      const remaining = s.count - outboxState.exportedIds.size;
+      exp.textContent = !s.count ? 'Exportar pendentes' : remaining > 0
+        ? `Exportar pendentes (${Math.min(OUTBOX.EXPORT_BATCH, remaining)} de ${remaining})`
+        : 'Exportar de novo (do início)';
+      exp.disabled = !s.count;
+    }
+    const del = document.getElementById('op-delete');
+    if (del) del.disabled = !s.count;
+  }
+
+  function operatorMsg(text) { const el = document.getElementById('op-msg'); if (el) el.textContent = text; }
+
+  // ── Operator access: 3s long-press on the welcome monogram, then PIN ──
+  let operatorUnlocked = false;
+  let operatorPinEntry = '';
+  let operatorPinFails = 0, operatorLockedUntil = 0;
+  let operatorRefreshTimer = null, operatorIdleTimer = null;
+  const OPERATOR_IDLE_MS = 120000; // auto-lock if left open
+
+  (function setupOperatorGesture() {
+    const ring = document.querySelector('#screen-welcome .monogram-ring');
+    if (!ring) return;
+    let t = null;
+    const clear = () => { if (t) { clearTimeout(t); t = null; } };
+    ring.addEventListener('pointerdown', () => {
+      clear();
+      t = setTimeout(() => { t = null; if (activeScreenId() === 'welcome') openOperator(); }, 3000);
+    });
+    ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => ring.addEventListener(ev, clear));
+    ring.addEventListener('contextmenu', e => e.preventDefault());
+  })();
+
+  function renderPinDots(msg) {
+    document.querySelectorAll('#op-lock .op-pin-dot').forEach((d, i) => d.classList.toggle('filled', i < operatorPinEntry.length));
+    if (msg !== undefined) document.getElementById('op-pin-msg').textContent = msg;
+  }
+
+  function openOperator() {
+    operatorUnlocked = false;
+    operatorPinEntry = '';
+    document.getElementById('op-title').textContent = 'Introduz o PIN';
+    document.getElementById('op-lock').hidden = false;
+    document.getElementById('op-panel').hidden = true;
+    renderPinDots('');
+    goTo('operator');
+    bumpOperatorIdle();
+  }
+
+  document.getElementById('op-keypad').addEventListener('click', e => {
+    const k = e.target.closest('[data-k]');
+    if (!k) return;
+    const key = k.dataset.k;
+    if (key === 'cancel') { closeOperator(); return; }
+    if (key === 'back') { operatorPinEntry = operatorPinEntry.slice(0, -1); renderPinDots(''); return; }
+    if (Date.now() < operatorLockedUntil) {
+      renderPinDots('Demasiadas tentativas. Espera ' + Math.ceil((operatorLockedUntil - Date.now()) / 1000) + ' s.');
+      return;
+    }
+    if (operatorPinEntry.length >= 4) return;
+    operatorPinEntry += key;
+    renderPinDots('');
+    if (operatorPinEntry.length === 4) {
+      if (operatorPinEntry === String(EVENT.operatorPin)) {
+        operatorPinFails = 0;
+        unlockOperator();
+      } else {
+        operatorPinFails++;
+        operatorPinEntry = '';
+        if (operatorPinFails >= 5) { operatorLockedUntil = Date.now() + 60000; operatorPinFails = 0; renderPinDots('PIN errado. Bloqueado durante 60 s.'); }
+        else renderPinDots('PIN errado.');
+      }
+    }
+  });
+
+  function unlockOperator() {
+    operatorUnlocked = true;
+    outboxState.exportedIds.clear();
+    outboxState.exportBatch = null;
+    document.getElementById('op-title').textContent = 'Estado do booth';
+    document.getElementById('op-lock').hidden = true;
+    document.getElementById('op-panel').hidden = false;
+    operatorMsg('');
+    checkStorage(false);
+    refreshOutboxUi();
+    prepareExportBatch();
+    if (operatorRefreshTimer) clearInterval(operatorRefreshTimer);
+    operatorRefreshTimer = setInterval(refreshOutboxUi, 2000);
+  }
+
+  function closeOperator() {
+    operatorUnlocked = false;
+    operatorPinEntry = '';
+    outboxState.exportBatch = null;
+    if (operatorRefreshTimer) { clearInterval(operatorRefreshTimer); operatorRefreshTimer = null; }
+    if (operatorIdleTimer) { clearTimeout(operatorIdleTimer); operatorIdleTimer = null; }
+    document.getElementById('op-panel').hidden = true;
+    document.getElementById('op-lock').hidden = false;
+    if (activeScreenId() === 'operator') goTo('welcome');
+  }
+
+  function bumpOperatorIdle() {
+    if (operatorIdleTimer) clearTimeout(operatorIdleTimer);
+    operatorIdleTimer = setTimeout(() => { if (activeScreenId() === 'operator') closeOperator(); }, OPERATOR_IDLE_MS);
+  }
+  document.getElementById('screen-operator').addEventListener('pointerdown', bumpOperatorIdle);
+
+  function operatorRetryNow() {
+    if (!operatorUnlocked) return;
+    if (!EVENT.uploadEnabled) { operatorMsg('O envio está desativado neste evento (uploadEnabled = false).'); return; }
+    outboxState.backoffMs = 0;
+    if (outboxState.running) { operatorMsg('Já está um envio em curso.'); return; }
+    operatorMsg('A tentar enviar…');
+    scheduleDrain(0);
+  }
+
+  // Export: prepared ahead of the tap, because navigator.share() needs the tap's
+  // user activation and awaiting IndexedDB reads first could lose it on WebKit.
+  async function prepareExportBatch() {
+    outboxState.exportBatch = null;
+    try {
+      const list = (await outboxListMeta()).filter(r => !outboxState.exportedIds.has(r.captureId));
+      const pick = list.slice(0, OUTBOX.EXPORT_BATCH);
+      const files = [], ids = [];
+      for (const r of pick) {
+        const data = await outboxGetData(r.captureId);
+        if (!data) continue;
+        const name = `${r.eventCode}-${stampOf(r.createdAt)}-${r.mode}-${r.captureId.slice(0, 8)}.${r.ext}`;
+        files.push(new File([dataToBlob(data, r.mime)], name, { type: r.mime }));
+        ids.push(r.captureId);
+      }
+      outboxState.exportBatch = { files, ids };
+    } catch (e) {
+      noteError('Preparar exportação: ' + (e.message || e.name));
+      operatorMsg('Não foi possível ler as capturas para exportar: ' + (e.message || e.name));
+    }
+  }
+
+  function operatorExportBatch() {
+    if (!operatorUnlocked) return;
+    const batch = outboxState.exportBatch;
+    if (outboxStats.count && outboxState.exportedIds.size >= outboxStats.count) {
+      outboxState.exportedIds.clear();
+      operatorMsg('A preparar de novo desde o início…');
+      prepareExportBatch().then(() => { operatorMsg('Pronto. Toca outra vez em Exportar.'); refreshOutboxUi(); });
+      return;
+    }
+    if (!batch) { operatorMsg('A preparar ficheiros… toca outra vez dentro de instantes.'); prepareExportBatch(); return; }
+    if (!batch.files.length) { operatorMsg('Nada para exportar.'); prepareExportBatch(); return; }
+    const done = () => {
+      batch.ids.forEach(id => outboxState.exportedIds.add(id));
+      operatorMsg(`Exportados ${batch.files.length}. Exportar não apaga — as capturas continuam pendentes até serem enviadas.`);
+      prepareExportBatch().then(refreshOutboxUi);
+    };
+    const canShareFiles = navigator.share && navigator.canShare && (() => { try { return navigator.canShare({ files: batch.files }); } catch (_) { return false; } })();
+    if (canShareFiles) {
+      navigator.share({ files: batch.files }).then(done).catch(e => {
+        if (e && e.name === 'AbortError') operatorMsg('Exportação cancelada. Nada foi apagado.');
+        else { noteError('Exportar: ' + ((e && (e.message || e.name)) || 'falhou')); operatorMsg('A exportação falhou: ' + ((e && (e.message || e.name)) || 'erro') + '. Tenta um lote mais pequeno ou outro destino.'); }
+        refreshOutboxUi();
+      });
+    } else {
+      // No file sharing (e.g. desktop browser): fall back to plain downloads.
+      batch.files.forEach(f => legacyDownload(f, f.name));
+      operatorMsg('Este browser não partilha ficheiros — foram descarregados.');
+      done();
+    }
+  }
+
+  async function operatorDeleteLast() {
+    if (!operatorUnlocked) return;
+    let list;
+    try { list = await outboxListMeta(); } catch (e) { operatorMsg('Não foi possível ler a fila: ' + (e.message || e.name)); return; }
+    if (!list.length) { operatorMsg('Não há capturas pendentes.'); return; }
+    const last = list[list.length - 1];
+    if (outboxState.inFlight && outboxState.inFlight.captureId === last.captureId) {
+      operatorMsg('Esta captura está a ser enviada agora. Tenta daqui a pouco.');
+      return;
+    }
+    outboxState.holdIds.add(last.captureId); // the drain must not pick it up while we ask
+    try {
+      const ok = confirm('Apagar a última captura pendente?\n\n' +
+        (MODE_LABEL[last.mode] || last.mode) + ' · ' + fmtTime(last.createdAt) + ' · ' + fmtBytes(last.size) +
+        '\n\nIsto não pode ser desfeito.');
+      if (!ok) { operatorMsg('Nada foi apagado.'); return; }
+      if (outboxState.inFlight && outboxState.inFlight.captureId === last.captureId) {
+        operatorMsg('Esta captura começou a ser enviada. Não foi apagada.');
+        return;
+      }
+      await outboxDelete(last.captureId);
+      outboxState.exportedIds.delete(last.captureId);
+      operatorMsg('Apagada: ' + (MODE_LABEL[last.mode] || last.mode) + ' das ' + fmtTime(last.createdAt) + '.');
+      prepareExportBatch();
+    } catch (e) {
+      operatorMsg('Não foi possível apagar: ' + (e.message || e.name));
+    } finally {
+      outboxState.holdIds.delete(last.captureId);
+      refreshOutboxUi();
+    }
+  }
+
+  // ── Launch + triggers ──
+  window.addEventListener('online', () => { outboxState.backoffMs = 0; scheduleDrain(0); });
+  window.addEventListener('offline', () => { outboxState.status = 'offline'; refreshOutboxUi(); });
+  document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { refreshOutboxUi(); if (!outboxState.running) scheduleDrain(1000); } });
+  setInterval(() => { if (activeScreenId() === 'welcome') refreshOutboxUi(); }, 30000); // keep "oldest age" honest
+
+  (function outboxLaunch() {
+    if (EVENT.uploadEnabled && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(EVENT.code)) {
+      noteError('EVENT.code inválido: usa só minúsculas, números e hífenes');
+    }
+    requestPersistence();
+    checkStorage(false);
+    refreshOutboxUi();
+    scheduleDrain(1500); // resume a queue left from a previous session
+  })();
 </script>
 </body>
 </html>
