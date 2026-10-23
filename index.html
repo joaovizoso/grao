@@ -327,9 +327,14 @@
     color:var(--brown-mid); cursor:pointer; padding:10px 0;
     border-bottom:1px solid var(--brown-light); }
   .btn-retry:active { color:var(--green); border-bottom-color:var(--green); }
-  .video-review-hint { margin-top:32px; font-size:var(--label-md); font-weight:300; letter-spacing:2px;
-    text-transform:uppercase; color:var(--brown-mid); }
-  .video-review-hint span { font-family:var(--font-display); font-size:clamp(18px, 1.6vw, 24px); color:var(--green); }
+  /* Shown only when Safari refused to autoplay the preview with sound. */
+  .video-review-frame { position:relative; }
+  .review-sound { position:absolute; left:50%; bottom:clamp(28px, 3vw, 44px); transform:translateX(-50%);
+    font-family:var(--font-body); font-size:var(--label-md); font-weight:300; letter-spacing:2px;
+    text-transform:uppercase; color:var(--white); background:rgba(28,34,24,0.82);
+    border:1px solid rgba(255,255,255,0.35); padding:clamp(12px, 1.1vw, 16px) clamp(22px, 2vw, 30px);
+    border-radius:40px; cursor:pointer; }
+  .review-sound:active { background:rgba(28,34,24,0.95); }
 
   /* ── BOOMERANG PREVIEW ── */
   #screen-boom-preview { background:var(--cream); }
@@ -608,14 +613,14 @@
   <div class="bg-pattern"></div>
   <div class="video-review-inner">
     <div class="video-review-frame">
-      <video id="video-review-player" autoplay loop muted playsinline controls></video>
+      <video id="video-review-player" loop playsinline controls></video>
+      <button class="review-sound" id="review-sound" type="button" hidden onclick="reviewEnableSound()">Ouvir com som</button>
     </div>
     <div class="video-review-actions">
       <div class="video-review-title">A tua mensagem</div>
       <div class="video-review-sub">Vê o teu vídeo. Queres guardar ou tentar outra vez?</div>
       <button class="btn-main" onclick="saveAndFinishVideo()">Guardar</button>
       <button class="btn-retry" onclick="tryVideoAgain()">Repetir</button>
-      <div class="video-review-hint">Guarda em <span id="video-review-count">10</span>s</div>
     </div>
   </div>
 </div>
@@ -849,7 +854,6 @@
 
   // Bound to MediaRecorder.onstop — builds the blob and routes to the review screen
   let videoBlob = null;
-  let videoReviewTimer = null;
 
   function saveVideo() {
     if (!recordedChunks.length) {
@@ -867,29 +871,33 @@
     const player = document.getElementById('video-review-player');
     const url = URL.createObjectURL(videoBlob);
     player.src = url;
-    player.muted = true; // muted autoplay is allowed everywhere; user can unmute via controls
-    player.play().catch(() => {});
+    const soundBtn = document.getElementById('review-sound');
+    soundBtn.hidden = true;
     goTo('video-review');
+    // No auto-save and no countdown: the guest takes as long as they like and
+    // chooses Guardar or Repetir. The take stays in memory until they do.
+    // Try WITH sound first. Safari may refuse an unmuted autoplay that isn't
+    // tied to a tap (the recording often ends on a timer, not a tap); then fall
+    // back to muted playback and offer a clear "Ouvir com som" button.
+    player.muted = false;
+    player.play().catch(() => {
+      player.muted = true;
+      player.play().catch(() => {});
+      soundBtn.hidden = false;
+    });
+  }
 
-    // 10-second auto-save countdown
-    if (videoReviewTimer) clearInterval(videoReviewTimer);
-    let count = 10;
-    const countEl = document.getElementById('video-review-count');
-    countEl.textContent = count;
-    videoReviewTimer = setInterval(() => {
-      count--;
-      countEl.textContent = count;
-      if (count <= 0) {
-        clearInterval(videoReviewTimer);
-        videoReviewTimer = null;
-        saveAndFinishVideo();
-      }
-    }, 1000);
+  function reviewEnableSound() {
+    const player = document.getElementById('video-review-player');
+    player.muted = false;
+    player.currentTime = 0;
+    player.play().catch(() => {});
+    document.getElementById('review-sound').hidden = true;
   }
 
   function teardownVideoReview() {
-    if (videoReviewTimer) { clearInterval(videoReviewTimer); videoReviewTimer = null; }
     const player = document.getElementById('video-review-player');
+    document.getElementById('review-sound').hidden = true;
     player.pause();
     const url = player.getAttribute('src');
     player.removeAttribute('src');
@@ -900,7 +908,7 @@
   let videoSaving = false;
 
   async function saveAndFinishVideo() {
-    // Guard: the 10s auto-save and a "Guardar" tap can race.
+    // Guard: a double-tap on "Guardar" must not save twice.
     if (videoSaving) return;
     videoSaving = true;
     teardownVideoReview();
