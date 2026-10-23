@@ -1,6 +1,6 @@
 # Auto-backup/Sync of Captures During the Event
 
-**Status:** deferred
+**Status:** superseded (2026-10-23) — see [backend-infrastructure.md](backend-infrastructure.md) Phase 1
 **Plan tier:** Not a plan differentiator — operational reliability, would sit under both plans.
 **Proposed:** 2026-07-31 (architect-strategy)
 
@@ -19,3 +19,4 @@ An actual data-loss incident happens, or an operator reports the manual-copy pro
 ## Decision log
 
 - 2026-07-31 — Proposed, deferred. Recommended mitigation in the meantime is a documented operator process, not new code.
+- 2026-10-23 — Superseded. The founder reported the local-download flow failing in practice (Safari save prompt on every capture, storage filling up). Phase 1 of backend-infrastructure.md — a local outbox in IndexedDB with verified upload to R2, deleting local copies only after confirmed upload — delivers what this file intended, without the "guest thinks it saved and it didn't" risk this file warned about.
