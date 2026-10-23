@@ -2,7 +2,7 @@
 
 Live tracking of in-flight work: known-issue state and proposed-feature state. This file is the fast-read status dashboard — `CLAUDE.md` stays the stable architecture/business-context doc, `features/*.md` hold full detail per idea. Update this file (and the linked file) whenever a status changes; don't let it drift the way `CLAUDE.md`'s Known Issues section did.
 
-**Last updated:** 2026-08-19
+**Last updated:** 2026-10-22
 
 ## Known issues (see `CLAUDE.md` § Known Issues for full technical detail)
 
