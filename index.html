@@ -812,6 +812,11 @@
     // Video message length in seconds (Known Issue #3). Clamped to 10–300.
     // Drives the timer, the ring, the auto-stop and the instructions copy.
     videoDurationSec: 60,
+    // Modo Meia-Noite (features/midnight-questions.md, both plans): between
+    // unlockAt and endAt (the iPad's local time, 'HH:MM'; the window may wrap
+    // past midnight) the video questions come from QUESTIONS_NIGHT instead of
+    // QUESTIONS. Active from unlockAt inclusive to endAt exclusive.
+    midnight: { enabled: true, unlockAt: '00:00', endAt: '06:00' },
   };
 
   // ─── Capture settings derived from EVENT ───────
@@ -854,11 +859,86 @@
   const VIDEO_BITS_PER_SECOND = VIDEO_DURATION_SEC > 120
     ? Math.floor((80 * 1000 * 1000 * 8) / VIDEO_DURATION_SEC) - 128000 : null;
 
+  // Question sets. Mirrored in questions/dia.json and questions/noite.json; more
+  // ideas (by theme, with tone notes) in questions/sugestoes.md. To change the
+  // questions today, edit these two arrays (a settings menu is planned).
   const QUESTIONS = [
     "Que conselho darias ao casal para daqui a 20 anos?",
     "Faz um brinde — improvisa o discurso que nunca darias ao microfone.",
     "Conta uma memória tua com um dos noivos que nunca vais esquecer."
   ];
+  // Modo Meia-Noite: romantic with a wink, never crude, nothing that
+  // humiliates or outs anyone; fine with grandparents and children around.
+  const QUESTIONS_NIGHT = [
+    "Que história dos noivos só se conta depois da meia-noite? (A versão para todas as idades.)",
+    "Faz o brinde da meia-noite: a que é que os noivos vão brindar daqui a 10 anos?",
+    "Declara-te: diz aos noivos, olhos nos olhos da câmara, porque é que gostas tanto deles.",
+    "Quem é o rei ou a rainha da pista esta noite? Prova-o com o teu melhor passo de dança.",
+    "Que música vai ficar para sempre colada a esta noite — e porquê?",
+    "Confessa: qual foi o momento mais bonito do dia que ninguém viu?",
+    "Que promessa farias aos noivos às três da manhã que manterias às três da tarde?",
+    "Dá aos noivos um conselho para as próximas mil noites — o mais elegante que conseguires."
+  ];
+
+  // ─── Modo Meia-Noite (derived from EVENT.midnight) ───
+  // Test hooks (like ?reviewIdleMs): ?nowTime=HH:MM or ?nowHour=H[.fraction]
+  // replace the clock for the night-window check only.
+  let midnightNote = null; // shown in the operator panel when the config is unusable
+  const MIDNIGHT = (() => {
+    const cfg = EVENT.midnight || {};
+    const parse = v => { const m = /^([01]?\d|2[0-3]):([0-5]\d)$/.exec(String(v || '').trim()); return m ? +m[1] * 60 + +m[2] : null; };
+    const start = parse(cfg.unlockAt), end = parse(cfg.endAt);
+    if (!cfg.enabled) return { enabled: false };
+    if (start === null || end === null || start === end) {
+      midnightNote = 'horas inválidas (' + cfg.unlockAt + '–' + cfg.endAt + '), modo desligado';
+      return { enabled: false };
+    }
+    if (!QUESTIONS_NIGHT.length) { midnightNote = 'QUESTIONS_NIGHT vazio, modo desligado'; return { enabled: false }; }
+    return { enabled: true, start, end, label: cfg.unlockAt + '–' + cfg.endAt };
+  })();
+  const CLOCK_OVERRIDE_MIN = (() => {
+    const t = /[?&]nowTime=(\d{1,2}):(\d{2})/.exec(location.search);
+    if (t) return (+t[1] % 24) * 60 + Math.min(59, +t[2]);
+    const h = /[?&]nowHour=(\d{1,2}(?:\.\d+)?)/.exec(location.search);
+    return h ? Math.floor((+h[1] % 24) * 60) : null;
+  })();
+  function nowMinuteOfDay() {
+    if (CLOCK_OVERRIDE_MIN !== null) return CLOCK_OVERRIDE_MIN;
+    const d = new Date();
+    return d.getHours() * 60 + d.getMinutes();
+  }
+  // [start, end) in minutes of the local day; wraps past midnight when start > end.
+  function inNightWindow(min) {
+    if (!MIDNIGHT.enabled) return false;
+    return MIDNIGHT.start < MIDNIGHT.end
+      ? min >= MIDNIGHT.start && min < MIDNIGHT.end
+      : min >= MIDNIGHT.start || min < MIDNIGHT.end;
+  }
+  function isNightNow() { return inNightWindow(nowMinuteOfDay()); }
+
+  // Day copy restored outside the window; read once from the markup.
+  let nightCopyDay = null;
+  function nightCopyInit() {
+    if (nightCopyDay) return;
+    nightCopyDay = {
+      sub: document.querySelector('#screen-welcome .welcome-subtitle').textContent,
+      lbl: document.querySelector('#screen-countdown .countdown-label').textContent,
+    };
+  }
+  // Welcome subtitle follows the clock (refreshed on every return to Welcome
+  // and every 30 s while it's showing).
+  function applyNightCopy() {
+    nightCopyInit();
+    document.querySelector('#screen-welcome .welcome-subtitle').textContent =
+      isNightNow() ? 'Há perguntas que só se fazem depois da meia-noite.' : nightCopyDay.sub;
+  }
+  // The countdown label follows the set the question actually came from, so a
+  // guest who started at 23:59:59 doesn't see "Modo Meia-Noite" over a day question.
+  function applyQuestionLabel() {
+    nightCopyInit();
+    document.querySelector('#screen-countdown .countdown-label').textContent =
+      currentQuestionNight ? 'Modo Meia-Noite' : nightCopyDay.lbl;
+  }
 
   let currentMode = 'video';
   let currentQuestion = '';
@@ -878,6 +958,7 @@
   function goTo(screenId) {
     document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
     document.getElementById('screen-' + screenId).classList.add('active');
+    if (screenId === 'welcome') applyNightCopy();
     // Outbox hook: pauses/resumes background upload around capture screens and
     // refreshes the welcome-screen pending indicator. Defined further down.
     if (typeof outboxOnScreen === 'function') outboxOnScreen(screenId);
@@ -896,7 +977,17 @@
 
   // ─── VIDEO FLOW ────────────────────────────────
 
+  // Each guest advances the rotation of the set that is active when they start;
+  // Repetir (tryVideoAgain) reuses currentQuestion, so a retake keeps the SAME
+  // question even if the night window opened in between.
+  let nightQuestionIndex = 0, currentQuestionNight = false;
   function pickQuestion() {
+    currentQuestionNight = isNightNow();
+    if (currentQuestionNight) {
+      const q = QUESTIONS_NIGHT[nightQuestionIndex % QUESTIONS_NIGHT.length];
+      nightQuestionIndex++;
+      return q;
+    }
     const q = QUESTIONS[questionIndex % QUESTIONS.length];
     questionIndex++;
     return q;
@@ -913,6 +1004,7 @@
       return;
     }
     currentQuestion = pickQuestion();
+    applyQuestionLabel();
     document.getElementById('countdown-question').textContent = currentQuestion;
     document.getElementById('rec-question').textContent = currentQuestion;
     document.getElementById('cam-preview').srcObject = mediaStream;
@@ -973,6 +1065,9 @@
     const r = ring && ring.r && ring.r.baseVal ? ring.r.baseVal.value : 44;
     return 2 * Math.PI * r;
   }
+
+  applyNightCopy();
+  setInterval(() => { if (document.getElementById('screen-welcome').classList.contains('active')) applyNightCopy(); }, 30000);
 
   // Copy that depends on the configured duration, filled once at load.
   (function applyVideoDuration() {
@@ -1926,7 +2021,8 @@
         <div class="op-stat"><dt>Evento</dt><dd id="op-event">—</dd></div>
         <div class="op-stat"><dt>Nesta sessão</dt><dd id="op-session">—</dd></div>
         <div class="op-stat"><dt>Duração do vídeo</dt><dd id="op-video">—</dd></div>
-        <div class="op-stat"><dt>Versão da app</dt><dd id="op-version">—</dd></div>
+        <div class="op-stat"><dt>Modo Meia-Noite</dt><dd id="op-night">—</dd></div>
+        <div class="op-stat op-wide"><dt>Versão da app</dt><dd id="op-version">—</dd></div>
         <div class="op-stat op-wide"><dt>Cópia offline pronta</dt><dd id="op-offline">—</dd></div>
         <div class="op-stat op-wide"><dt>Aberta como app do ecrã principal</dt><dd id="op-standalone">—</dd></div>
         <div class="op-stat op-wide"><dt>Último erro</dt><dd id="op-error">—</dd></div>
@@ -2474,6 +2570,11 @@
     setDd('op-event', EVENT.code + (EVENT.operatorPin === '0000' ? ' · PIN por defeito, muda-o' : ''), EVENT.operatorPin === '0000');
     setDd('op-session', `${outboxState.saved} guardadas · ${outboxState.uploaded} enviadas` + (outboxState.fallbacks ? ` · ${outboxState.fallbacks} em descarga de recurso` : ''), !!outboxState.fallbacks);
     setDd('op-video', ptDuration(VIDEO_DURATION_SEC) + (videoDurationNote ? ' — ' + videoDurationNote : ''), !!videoDurationNote);
+    setDd('op-night', midnightNote ? midnightNote
+      : !MIDNIGHT.enabled ? 'desligado'
+      : (isNightNow() ? 'ativo agora (' + MIDNIGHT.label + ') · perguntas da noite'
+        : 'inativo · começa às ' + EVENT.midnight.unlockAt + ' (' + MIDNIGHT.label + ')') +
+        (CLOCK_OVERRIDE_MIN !== null ? ' · relógio de teste' : ''), !!midnightNote);
     renderShellStatus();
     renderTermsStatus();
     const le = outboxState.lastError;

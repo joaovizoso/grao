@@ -1,0 +1,16 @@
+{
+  "set": "noite",
+  "nome": "Modo Meia-Noite (predefinidas)",
+  "espelho_de": "QUESTIONS_NIGHT em index.html",
+  "nota": "Cópia exata das perguntas embutidas na app. A app usa o array embutido, não este ficheiro. Ao mudar um, muda o outro.",
+  "questions": [
+    "Que história dos noivos só se conta depois da meia-noite? (A versão para todas as idades.)",
+    "Faz o brinde da meia-noite: a que é que os noivos vão brindar daqui a 10 anos?",
+    "Declara-te: diz aos noivos, olhos nos olhos da câmara, porque é que gostas tanto deles.",
+    "Quem é o rei ou a rainha da pista esta noite? Prova-o com o teu melhor passo de dança.",
+    "Que música vai ficar para sempre colada a esta noite — e porquê?",
+    "Confessa: qual foi o momento mais bonito do dia que ninguém viu?",
+    "Que promessa farias aos noivos às três da manhã que manterias às três da tarde?",
+    "Dá aos noivos um conselho para as próximas mil noites — o mais elegante que conseguires."
+  ]
+}
