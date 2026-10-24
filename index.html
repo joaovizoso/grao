@@ -407,6 +407,47 @@
      iOS from turning a long touch into a text-selection or callout. */
   #screen-welcome .monogram-ring { -webkit-touch-callout:none; -webkit-user-select:none; touch-action:none; }
 
+  /* ── COUPLE TERMS (operator panel → "Termos do evento") ── */
+  /* Read by the couple at arm's length: larger body text, sentence case, one
+     calm column. Placeholders still to be filled are marked with a dashed box
+     so an unfinished draft can't pass for a final text. */
+  #screen-terms { background:var(--ground); justify-content:flex-start; overflow-y:auto;
+    padding:clamp(36px, 3.4vw, 56px) 32px clamp(48px, 4vw, 72px); }
+  .terms-wrap { width:min(720px, 100%); display:flex; flex-direction:column; align-items:stretch; }
+  .terms-back { position:static; align-self:flex-start; color:var(--ink-soft); margin-bottom:12px; }
+  .terms-back:active { color:var(--accent); }
+  .terms-draft { display:flex; gap:12px; align-items:flex-start; border:1px solid var(--ink); padding:14px 18px;
+    margin-bottom:26px; font-size:var(--body-md); font-weight:400; color:var(--ink); line-height:1.5; }
+  .terms-draft svg { width:22px; height:22px; flex-shrink:0; margin-top:2px; }
+  .terms-draft[hidden] { display:none; }
+  .terms-meta { font-size:var(--label-md); font-weight:300; color:var(--ink-soft); text-align:center; margin-bottom:24px; }
+  .terms-text { font-size:clamp(17px, 1.45vw, 21px); font-weight:300; color:var(--ink); line-height:1.65;
+    border-top:1px solid var(--accent-pale); padding-top:8px; }
+  .terms-text h3 { font-family:var(--font-display); font-weight:400; font-size:clamp(24px, 2vw, 30px);
+    color:var(--accent); margin:26px 0 8px; line-height:1.2; }
+  .terms-text p { margin:0 0 12px; }
+  .terms-text ul { margin:0 0 12px 1.2em; }
+  .terms-text li { margin-bottom:6px; }
+  .terms-text strong { font-weight:400; }
+  .terms-ph { border:1px dashed var(--ink-soft); padding:0 4px; color:var(--ink-soft); white-space:normal; }
+  .terms-fill { font-weight:400; }
+  .terms-form { margin-top:30px; border-top:1px solid var(--accent-pale); padding-top:24px;
+    display:flex; flex-direction:column; gap:18px; }
+  .terms-field { display:flex; flex-direction:column; gap:6px; }
+  .terms-field label { font-size:var(--body-md); font-weight:400; color:var(--ink); }
+  .terms-field input { font-family:var(--font-body); font-size:clamp(18px, 1.5vw, 22px); font-weight:300; color:var(--ink);
+    background:var(--white); border:1px solid var(--accent-pale); padding:12px 14px; border-radius:0; -webkit-appearance:none; appearance:none; }
+  .terms-field input:focus-visible { outline:2px solid var(--accent); outline-offset:1px; }
+  .terms-check { display:flex; gap:14px; align-items:center; font-size:clamp(18px, 1.5vw, 22px); font-weight:400; color:var(--ink); cursor:pointer; }
+  .terms-check input { width:28px; height:28px; accent-color:var(--accent); flex-shrink:0; }
+  .terms-actions { display:flex; justify-content:center; margin-top:6px; }
+  .terms-msg { min-height:1.6em; font-size:var(--body-md); font-weight:300; color:var(--ink); text-align:center; }
+  /* panel section */
+  .op-section { width:100%; border-top:1px solid var(--accent-pale); padding-top:18px; margin-bottom:22px; }
+  .op-section-title { font-family:var(--font-display); font-size:clamp(24px, 2vw, 30px); font-weight:400; color:var(--accent); margin-bottom:6px; }
+  .op-section-text { font-size:var(--body-md); font-weight:300; color:var(--ink); line-height:1.55; margin-bottom:14px; }
+  .op-section-text.op-warn { font-weight:400; }
+
   /* ── OPERATOR SCREEN ── */
   #screen-operator { background:var(--ground); justify-content:flex-start; overflow-y:auto;
     padding:clamp(36px, 3.4vw, 56px) 32px; }
@@ -1896,12 +1937,52 @@
       </div>
       <div class="op-msg" id="op-msg" role="status" aria-live="polite"></div>
       <!-- Extension point for features/config-menu.md (not built). -->
-      <div id="op-sections"></div>
+      <div id="op-sections">
+        <section class="op-section" aria-labelledby="op-terms-title">
+          <div class="op-section-title" id="op-terms-title">Termos do evento</div>
+          <div class="op-section-text" id="op-terms-status">—</div>
+          <div class="op-actions">
+            <button class="btn-main" id="op-terms-open" onclick="openTerms()">Ver e aceitar termos</button>
+            <button class="btn-outline" id="op-terms-export" onclick="exportAcceptance()">Exportar aceitação</button>
+          </div>
+        </section>
+      </div>
       <div style="display:flex; flex-direction:column; align-items:center; gap:10px;">
         <button class="btn-retry op-danger" id="op-delete" onclick="operatorDeleteLast()">Apagar último pendente</button>
         <button class="btn-outline op-close" onclick="closeOperator()">Fechar</button>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ══ SCREEN: COUPLE TERMS (only from the unlocked operator panel) ══
+     The couple reads and accepts the event terms (legal/termos-evento-pt.md).
+     With upload on, nothing leaves the iPad until an acceptance for this event
+     code and this terms version is recorded here. -->
+<div id="screen-terms" class="screen">
+  <div class="terms-wrap">
+    <button class="instr-back terms-back" onclick="closeTerms()"><span class="arrow">‹</span>Voltar</button>
+    <div class="op-eyebrow" style="text-align:center;">Para os noivos</div>
+    <div class="op-title">Termos do evento</div>
+    <div class="terms-draft" id="terms-draft" role="note" hidden>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3.5 2.5 20h19z"/><path d="M12 10v4.5"/><path d="M12 17.2v.1"/></svg>
+      <span>Rascunho — não revisto por advogado. Não usar num evento real com envio ligado antes dessa revisão.</span>
+    </div>
+    <div class="terms-meta" id="terms-meta"></div>
+    <div class="terms-text" id="terms-text"></div>
+    <form class="terms-form" id="terms-form" onsubmit="event.preventDefault(); acceptTerms();">
+      <div class="terms-field">
+        <label for="terms-names">Os vossos nomes</label>
+        <input id="terms-names" type="text" autocomplete="off" autocapitalize="words" placeholder="ex.: João e Constança" oninput="renderTerms()">
+      </div>
+      <div class="terms-field">
+        <label for="terms-date">Data do casamento</label>
+        <input id="terms-date" type="date" oninput="renderTerms()" onchange="renderTerms()">
+      </div>
+      <label class="terms-check"><input type="checkbox" id="terms-ok" onchange="renderTerms()"> Lemos e aceitamos estes termos</label>
+      <div class="terms-msg" id="terms-msg" role="status" aria-live="polite"></div>
+      <div class="terms-actions"><button class="btn-main" id="terms-accept" type="submit" disabled>Aceitar</button></div>
+    </form>
   </div>
 </div>
 
@@ -1926,7 +2007,9 @@
 
   const OUTBOX = {
     DB_NAME: 'grao-outbox',
-    DB_VERSION: 1,
+    // v1: meta + blobs (pending captures). v2 (2026-10-24): + terms (couple
+    // acceptances). Upgrades only ADD stores; existing captures are never touched.
+    DB_VERSION: 2,
     WARN_FREE_BYTES: 2 * 1024 * 1024 * 1024,   // operator warning below 2 GB free quota
     FLOOR_FREE_BYTES: 500 * 1024 * 1024,       // operator alert below 500 MB
     STALE_MS: 10 * 60 * 1000,                  // oldest pending > 10 min → alert state
@@ -1950,7 +2033,7 @@
 
   const outboxState = {
     timer: null, running: false, inFlight: null, backoffMs: 0,
-    status: 'idle',           // idle | offline | waiting-screen | uploading | backoff | disabled | misconfigured
+    status: 'idle',           // idle | offline | waiting-screen | uploading | backoff | disabled | misconfigured | needs-terms
     lastError: null,          // { message, at } — most recent failure of any kind
     lastAttemptFailed: false,
     lastSuccessAt: 0,
@@ -2019,6 +2102,8 @@
         const db = req.result;
         if (!db.objectStoreNames.contains('meta')) db.createObjectStore('meta', { keyPath: 'captureId' });
         if (!db.objectStoreNames.contains('blobs')) db.createObjectStore('blobs', { keyPath: 'captureId' });
+        // id = eventCode + '|' + termsVersion, so an older acceptance stays as history.
+        if (!db.objectStoreNames.contains('terms')) db.createObjectStore('terms', { keyPath: 'id' });
       };
       req.onsuccess = () => {
         const db = req.result;
@@ -2171,6 +2256,11 @@
     outboxState.running = true;
     let next = null;
     try {
+      // Legal gate: no recorded couple acceptance of the CURRENT terms version
+      // for this event code → nothing leaves the iPad. Captures keep saving
+      // locally; the welcome indicator and the operator panel say why.
+      // acceptTerms() restarts the drain.
+      if (!(await currentAcceptance())) { outboxState.status = 'needs-terms'; return; }
       const list = (await outboxListMeta()).filter(r => !outboxState.holdIds.has(r.captureId));
       if (!list.length) { outboxState.status = 'idle'; outboxState.backoffMs = 0; return; }
       // Least-recently-attempted first, so one permanently failing capture
@@ -2332,6 +2422,7 @@
     const r = [];
     const s = outboxStats;
     if (outboxState.idbError) r.push('fila local ilegível');
+    if (termsMissing()) r.push(TERMS_REASON);
     if (EVENT.uploadEnabled && s.count && Date.now() - s.oldestAt > OUTBOX.STALE_MS) r.push('pendente há ' + fmtAge(Date.now() - s.oldestAt));
     if (EVENT.uploadEnabled && s.count && outboxState.lastAttemptFailed) r.push('último envio falhou');
     if (EVENT.uploadEnabled && outboxState.status === 'misconfigured') r.push('envio sem endpoint');
@@ -2351,7 +2442,7 @@
     el.classList.toggle('alert', alertOn);
     document.getElementById('outbox-indicator-icon').innerHTML = alertOn ? ICON_ALERT : ICON_PENDING;
     document.getElementById('outbox-indicator-text').textContent =
-      alertOn ? (n ? n + ' · ' : '') + 'Atenção: ' + reasons[0] : String(n);
+      alertOn ? (n ? n + ' · ' : '') + (reasons[0] === TERMS_REASON ? TERMS_REASON : 'Atenção: ' + reasons[0]) : String(n);
   }
 
   function setDd(id, text, warn) {
@@ -2369,13 +2460,14 @@
     setDd('op-oldest', s.count ? fmtAge(now - s.oldestAt) + ' (' + fmtTime(s.oldestAt) + ')' : '—', stale);
     let up;
     if (!EVENT.uploadEnabled) up = 'desativado (uploadEnabled = false) — exporta no fim';
+    else if (outboxState.status === 'needs-terms' || (termsState.loaded && !termsState.acceptance)) up = 'parado: os noivos ainda não aceitaram os termos (versão ' + TERMS_VERSION + '). Ver "Termos do evento" abaixo';
     else if (outboxState.status === 'misconfigured') up = 'sem endpoint/token configurado';
     else if (outboxState.inFlight) up = 'a enviar (' + fmtBytes(outboxState.inFlight.size) + ', há ' + fmtAge(now - outboxState.inFlight.startedAt) + ')';
     else if (navigator.onLine === false) up = 'sem rede — retoma quando voltar';
     else if (outboxState.status === 'backoff') up = 'nova tentativa em breve (espera ' + fmtAge(outboxState.backoffMs) + ')';
     else if (outboxState.status === 'waiting-screen') up = 'em pausa durante a captura';
     else up = s.count ? 'ativo' : 'ativo — tudo enviado';
-    setDd('op-upload', up, EVENT.uploadEnabled && (outboxState.status === 'misconfigured' || navigator.onLine === false || outboxState.status === 'backoff'));
+    setDd('op-upload', up, EVENT.uploadEnabled && (outboxState.status === 'needs-terms' || (termsState.loaded && !termsState.acceptance) || outboxState.status === 'misconfigured' || navigator.onLine === false || outboxState.status === 'backoff'));
     setDd('op-persisted', outboxState.persisted === true ? 'sim' : outboxState.persisted === false ? 'não concedido; abre a app pelo ícone do ecrã principal' : 'desconhecido', outboxState.persisted !== true);
     const st = outboxState.storage;
     setDd('op-free', !st || st.unsupported ? 'desconhecido' : fmtBytes(st.free), st && (st.level === 'warn' || st.level === 'floor'));
@@ -2383,6 +2475,7 @@
     setDd('op-session', `${outboxState.saved} guardadas · ${outboxState.uploaded} enviadas` + (outboxState.fallbacks ? ` · ${outboxState.fallbacks} em descarga de recurso` : ''), !!outboxState.fallbacks);
     setDd('op-video', ptDuration(VIDEO_DURATION_SEC) + (videoDurationNote ? ' — ' + videoDurationNote : ''), !!videoDurationNote);
     renderShellStatus();
+    renderTermsStatus();
     const le = outboxState.lastError;
     setDd('op-error', le ? le.message + ' (' + fmtTime(le.at) + ')' : 'nenhum', !!le);
     const retry = document.getElementById('op-retry');
@@ -2596,6 +2689,232 @@
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { refreshOutboxUi(); if (!outboxState.running) scheduleDrain(1000); } });
   setInterval(() => { if (activeScreenId() === 'welcome') refreshOutboxUi(); }, 30000); // keep "oldest age" honest
 
+  // ─── COUPLE TERMS · "no recorded acceptance, no upload" ───
+  // Source: legal/termos-evento-pt.md. Keep TERMS_BLOCKS identical to sections
+  // 1–10 there and bump TERMS_VERSION whenever the text changes: a new version
+  // blocks uploads again until the couple accepts it.
+  // [NOMES] and [DATA] are filled from the form; every other [placeholder]
+  // stays visibly unfilled (dashed box) until the founder/lawyer fills it.
+  const TERMS_VERSION = '0.1-rascunho';
+  const TERMS_IS_DRAFT = true; // FOUNDER: false only after the lawyer review
+  const TERMS_REASON = 'Falta aceitar os termos';
+  const TERMS_BLOCKS = [
+    { h: '1. Quem somos', p: ['**grao** — [NOME LEGAL, NIF, MORADA, EMAIL DE CONTACTO] ("grao"), que presta o serviço de video guestbook (booth) no evento dos noivos **[NOMES]**, a realizar em **[DATA]**, em **[LOCAL]** ("Noivos").'] },
+    { h: '2. O que é gravado', p: ['Vídeos, fotografias e boomerangs que os convidados escolhem gravar na booth. Incluem a imagem e a voz de quem grava e, por vezes, de quem aparece no fundo. A participação é voluntária.'] },
+    { h: '3. Para que serve', p: ['Apenas para entregar esse conteúdo aos Noivos. A grao não usa nem publica o conteúdo (nem em redes sociais, nem em portefólio, nem em publicidade) sem autorização separada, escrita e específica dos Noivos.'] },
+    { h: '4. Onde fica guardado', ul: [
+      'Durante o evento, no iPad da booth.',
+      'Enviado para armazenamento na nuvem (Cloudflare R2, **jurisdição da União Europeia**) por ligação cifrada. Só depois de a grao confirmar que o ficheiro chegou intacto é que a cópia no iPad é apagada.',
+      'Ninguém tem acesso público a esse armazenamento. O acesso é restrito à grao.'] },
+    { h: '5. Quanto tempo', p: ['A grao apaga os ficheiros **90 dias** depois de serem enviados. Os Noivos devem descarregar o conteúdo nos primeiros **60 dias**. A grao não guarda arquivo depois disso.'] },
+    { h: '6. Os convidados', p: [
+      'Os convidados são informados antes de cada gravação (aviso no ecrã de instruções e cartão impresso junto da booth) e há sempre um operador presente. Um convidado pode pedir a remoção de um conteúdo seu ao operador ou por email para [EMAIL]. A grao apaga-o em [PRAZO, ex.: 5 dias úteis].',
+      'Os Noivos reconhecem que, num casamento, a imagem e a voz dos convidados são registadas por vários prestadores (fotógrafo, videógrafo e a booth da grao), e **[a confirmar com o advogado:]** que informaram ou informarão os convidados desse facto, e que a grao trata o conteúdo da booth só no âmbito deste serviço.'] },
+    { h: '7. Menores', p: ['O operador orienta os convidados menores de idade. A gravação por menores faz-se acompanhada por um responsável presente. **[A confirmar com o advogado.]**'] },
+    { h: '8. Entrega', p: ['O conteúdo é entregue aos Noivos por [LIGAÇÃO / MÉTODO A DEFINIR]. Depois de descarregado, a cópia dos Noivos é da responsabilidade dos Noivos.'] },
+    { h: '9. Segurança e subcontratantes', p: ['Ligação cifrada (HTTPS). Acesso restrito. Subcontratante: Cloudflare, Inc., com os dados guardados na UE, ao abrigo do respetivo acordo de tratamento de dados.'] },
+    { h: '10. Aceitação', p: ['Os Noivos declaram que leram estes termos e aceitam-nos para o evento acima. A app regista: o nome dos Noivos, a data e hora, a versão destes termos e o código do evento.'] },
+  ];
+  const termsState = { loaded: false, acceptance: null, error: null, saving: false };
+
+  function termsFills() {
+    const names = (document.getElementById('terms-names').value || '').trim().replace(/\s+/g, ' ');
+    const iso = document.getElementById('terms-date').value || '';
+    let date = '';
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+      const [y, m, d] = iso.split('-').map(Number);
+      date = new Date(y, m - 1, d).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    return { names, date, iso };
+  }
+  // Splits a paragraph into text / **bold** / [placeholder] tokens.
+  function termsTokens(str) {
+    const out = [];
+    const re = /\*\*(.+?)\*\*|\[([^\]]+)\]/g;
+    let last = 0, m;
+    while ((m = re.exec(str))) {
+      if (m.index > last) out.push({ t: str.slice(last, m.index) });
+      if (m[1] !== undefined) out.push({ bold: termsTokens(m[1]) });
+      else out.push({ ph: m[2] });
+      last = re.lastIndex;
+    }
+    if (last < str.length) out.push({ t: str.slice(last) });
+    return out;
+  }
+  function phValue(ph, f) { return ph === 'NOMES' ? f.names : ph === 'DATA' ? f.date : ''; }
+  function termsToDom(tokens, f, parent) {
+    tokens.forEach(k => {
+      if (k.t !== undefined) parent.appendChild(document.createTextNode(k.t));
+      else if (k.bold) { const b = document.createElement('strong'); termsToDom(k.bold, f, b); parent.appendChild(b); }
+      else {
+        const v = phValue(k.ph, f);
+        const sp = document.createElement('span');
+        if (v) { sp.className = 'terms-fill'; sp.textContent = v; }
+        else { sp.className = 'terms-ph'; sp.textContent = '[' + k.ph + ']'; }
+        parent.appendChild(sp);
+      }
+    });
+  }
+  function termsToText(tokens, f) {
+    return tokens.map(k => k.t !== undefined ? k.t : k.bold ? termsToText(k.bold, f) : (phValue(k.ph, f) || '[' + k.ph + ']')).join('');
+  }
+  // The exact text that was accepted, built from the blocks (not from layout),
+  // so the SHA-256 is the same on every browser.
+  function termsPlainText(f) {
+    const parts = ['Termos do evento — grao', 'Versão: ' + TERMS_VERSION + (TERMS_IS_DRAFT ? ' (RASCUNHO, não revisto por advogado)' : ''), 'Código do evento: ' + EVENT.code];
+    TERMS_BLOCKS.forEach(b => {
+      parts.push(b.h);
+      (b.p || []).forEach(x => parts.push(termsToText(termsTokens(x), f)));
+      (b.ul || []).forEach(x => parts.push('- ' + termsToText(termsTokens(x), f)));
+    });
+    return parts.join('\n\n') + '\n';
+  }
+  function renderTerms() {
+    const f = termsFills();
+    const box = document.getElementById('terms-text');
+    box.textContent = '';
+    TERMS_BLOCKS.forEach(b => {
+      const h = document.createElement('h3'); h.textContent = b.h; box.appendChild(h);
+      (b.p || []).forEach(x => { const p = document.createElement('p'); termsToDom(termsTokens(x), f, p); box.appendChild(p); });
+      if (b.ul) {
+        const ul = document.createElement('ul');
+        b.ul.forEach(x => { const li = document.createElement('li'); termsToDom(termsTokens(x), f, li); ul.appendChild(li); });
+        box.appendChild(ul);
+      }
+    });
+    document.getElementById('terms-draft').hidden = !TERMS_IS_DRAFT;
+    document.getElementById('terms-meta').textContent = 'Versão ' + TERMS_VERSION + ' · código do evento ' + EVENT.code;
+    const ok = document.getElementById('terms-ok').checked;
+    document.getElementById('terms-accept').disabled = termsState.saving || !(f.names && f.date && ok);
+  }
+
+  function termsKey() { return EVENT.code + '|' + TERMS_VERSION; }
+  async function loadAcceptance() {
+    try {
+      const rec = await idbTxRetry(['terms'], 'readonly', (tx, set) => {
+        const r = tx.objectStore('terms').get(termsKey());
+        r.onsuccess = () => set(r.result || null);
+      });
+      termsState.acceptance = rec && rec.termsVersion === TERMS_VERSION && rec.eventCode === EVENT.code ? rec : null;
+      termsState.error = null;
+    } catch (e) {
+      // Unreadable → treated as NOT accepted (uploads stay blocked), and said so.
+      termsState.acceptance = null;
+      termsState.error = e.message || e.name;
+    }
+    termsState.loaded = true;
+    return termsState.acceptance;
+  }
+  async function currentAcceptance() {
+    if (!termsState.loaded || termsState.error) await loadAcceptance();
+    return termsState.acceptance;
+  }
+  function termsMissing() { return EVENT.uploadEnabled && termsState.loaded && !termsState.acceptance; }
+
+  async function saveTermsAcceptance(names, iso) {
+    const f = { names, iso, date: '' };
+    if (/^\d{4}-\d{2}-\d{2}$/.test(iso)) {
+      const [y, m, d] = iso.split('-').map(Number);
+      f.date = new Date(y, m - 1, d).toLocaleDateString('pt-PT', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+    const text = termsPlainText(f);
+    const rec = {
+      id: termsKey(), eventCode: EVENT.code, names, eventDate: iso,
+      acceptedAt: new Date().toISOString(), termsVersion: TERMS_VERSION, termsIsDraft: TERMS_IS_DRAFT,
+      termsSha256: await sha256Hex(new TextEncoder().encode(text)), acceptedText: text,
+    };
+    await idbTxRetry(['terms'], 'readwrite', tx => { tx.objectStore('terms').put(rec); });
+    termsState.acceptance = rec; termsState.loaded = true; termsState.error = null;
+    return rec;
+  }
+
+  let termsIdleTimer = null;
+  const TERMS_IDLE_MS = 10 * 60 * 1000; // the couple may read slowly; still lock eventually
+  function bumpTermsIdle() {
+    if (termsIdleTimer) clearTimeout(termsIdleTimer);
+    termsIdleTimer = setTimeout(() => { if (activeScreenId() === 'terms') { goTo('operator'); closeOperator(); } }, TERMS_IDLE_MS);
+  }
+  function openTerms() {
+    if (!operatorUnlocked) return;
+    const a = termsState.acceptance;
+    document.getElementById('terms-names').value = a ? a.names : '';
+    document.getElementById('terms-date').value = a ? a.eventDate || '' : '';
+    document.getElementById('terms-ok').checked = false;
+    document.getElementById('terms-msg').textContent = a
+      ? 'Já aceites por ' + a.names + ' em ' + new Date(a.acceptedAt).toLocaleString('pt-PT') + '. Podem aceitar de novo para corrigir os nomes ou a data.'
+      : '';
+    renderTerms();
+    if (operatorIdleTimer) { clearTimeout(operatorIdleTimer); operatorIdleTimer = null; }
+    goTo('terms');
+    document.getElementById('screen-terms').scrollTop = 0;
+    bumpTermsIdle();
+  }
+  function closeTerms() {
+    if (termsIdleTimer) { clearTimeout(termsIdleTimer); termsIdleTimer = null; }
+    if (!operatorUnlocked) { goTo('welcome'); return; }
+    goTo('operator');
+    bumpOperatorIdle();
+    refreshOutboxUi();
+  }
+  async function acceptTerms() {
+    const f = termsFills();
+    if (!operatorUnlocked || termsState.saving) return;
+    if (!f.names || !f.date || !document.getElementById('terms-ok').checked) { renderTerms(); return; }
+    termsState.saving = true; renderTerms();
+    const msg = document.getElementById('terms-msg');
+    msg.textContent = 'A registar…';
+    try {
+      await saveTermsAcceptance(f.names, f.iso);
+      termsState.saving = false;
+      closeTerms();
+      operatorMsg('Termos aceites e registados neste iPad.' + (EVENT.uploadEnabled ? ' O envio vai começar.' : ''));
+      scheduleDrain(500);
+    } catch (e) {
+      termsState.saving = false; renderTerms();
+      noteError('Termos: ' + (e.message || e.name));
+      msg.textContent = 'Não foi possível registar a aceitação: ' + (e.message || e.name) + '. Chamem o operador.';
+      alert('Não foi possível registar a aceitação dos termos neste iPad. O envio continua parado.');
+    }
+  }
+  ['pointerdown', 'keydown', 'scroll'].forEach(ev =>
+    document.getElementById('screen-terms').addEventListener(ev, () => { if (termsIdleTimer) bumpTermsIdle(); }, { capture: true, passive: true }));
+
+  function renderTermsStatus() {
+    const el = document.getElementById('op-terms-status');
+    if (!el) return;
+    const a = termsState.acceptance;
+    let text, warn = false;
+    if (!termsState.loaded) text = 'a verificar…';
+    else if (termsState.error) { text = 'Não foi possível ler a aceitação (' + termsState.error + '). O envio fica parado.'; warn = true; }
+    else if (a) text = 'Aceites por ' + a.names + ' em ' + new Date(a.acceptedAt).toLocaleString('pt-PT') + ' · versão ' + a.termsVersion + (a.termsIsDraft ? ' (rascunho)' : '') + ' · evento ' + a.eventCode + '.';
+    else {
+      text = 'Ainda não aceites para o evento ' + EVENT.code + ' (versão ' + TERMS_VERSION + ').' +
+        (EVENT.uploadEnabled ? ' Por isso o envio está parado: as capturas ficam guardadas neste iPad até os noivos aceitarem.' : ' Com o envio ligado, nada sai do iPad sem esta aceitação.');
+      warn = EVENT.uploadEnabled;
+    }
+    if (TERMS_IS_DRAFT) text += ' Texto em rascunho, não revisto por advogado.';
+    el.textContent = (warn ? 'Atenção — ' : '') + text;
+    el.classList.toggle('op-warn', warn);
+    const exp = document.getElementById('op-terms-export');
+    if (exp) exp.disabled = !a;
+  }
+  function exportAcceptance() {
+    const a = termsState.acceptance;
+    if (!operatorUnlocked || !a) return;
+    const name = 'termos-aceites-' + a.eventCode + '-v' + a.termsVersion.replace(/[^a-z0-9.-]/gi, '') + '.json';
+    const file = new File([JSON.stringify({ eventCode: a.eventCode, names: a.names, eventDate: a.eventDate, acceptedAt: a.acceptedAt,
+      termsVersion: a.termsVersion, termsIsDraft: a.termsIsDraft, termsSha256: a.termsSha256, acceptedText: a.acceptedText }, null, 2)],
+      name, { type: 'application/json' });
+    const canShare = navigator.share && navigator.canShare && (() => { try { return navigator.canShare({ files: [file] }); } catch (_) { return false; } })();
+    if (canShare) {
+      navigator.share({ files: [file] }).then(() => operatorMsg('Aceitação exportada.'))
+        .catch(e => operatorMsg(e && e.name === 'AbortError' ? 'Exportação cancelada.' : 'A exportação falhou: ' + ((e && (e.message || e.name)) || 'erro')));
+    } else {
+      legacyDownload(file, name);
+      operatorMsg('Este browser não partilha ficheiros — a aceitação foi descarregada.');
+    }
+  }
+
   // ─── OFFLINE APP SHELL (sw.js) ─────────────────
   // The service worker lets the home-screen app open with no network. Its
   // state is shown ONLY in the operator panel: a guest never sees a service
@@ -2672,6 +2991,7 @@
     }
     requestPersistence();
     checkStorage(false);
+    loadAcceptance().then(refreshOutboxUi);
     refreshOutboxUi();
     scheduleDrain(1500); // resume a queue left from a previous session
   })();
