@@ -265,28 +265,49 @@
     background-image: radial-gradient(circle at 30% 30%, color-mix(in srgb, var(--accent) 5%, transparent) 0%, transparent 50%),
       radial-gradient(circle at 70% 70%, color-mix(in srgb, var(--accent) 7%, transparent) 0%, transparent 50%); }
   .strip-content { position:relative; z-index:1; display:flex; flex-direction:row;
-    align-items:center; gap:40px; }
-  .double-strip-frame { background:var(--white); padding:10px;
-    box-shadow:0 4px 40px color-mix(in srgb, var(--ink) 12%, transparent); display:flex; flex-direction:row;
-    gap:0; position:relative; }
-  .single-strip { display:flex; flex-direction:column; padding:8px 8px 18px 8px; position:relative; }
-  .single-strip + .single-strip { border-left: 2px dashed #bbb; }
-  .cut-icon { position:absolute; top:50%; left:-13px; transform:translateY(-50%);
-    font-size:16px; background:var(--white); padding:2px 0; line-height:1; }
-  .strip-photo { display:block; width:clamp(130px, 11vw, 172px); height:clamp(174px, 14.7vw, 230px);
-    object-fit:cover; margin-bottom:6px; filter:grayscale(100%); }
-  .strip-photo:last-of-type { margin-bottom:0; }
-  .strip-monogram { position:relative; width:clamp(84px, 7vw, 108px);
-    height:clamp(84px, 7vw, 108px); margin:14px auto 0; }
-  .strip-monogram svg { position:absolute; inset:0; width:100%; height:100%;
-    animation:spin 30s linear infinite; }
-  .strip-monogram .mini-letters { position:absolute; inset:0; display:flex;
-    align-items:center; justify-content:center;
-    font-family:var(--font-display); font-size:30px; font-weight:300;
-    color:var(--accent); letter-spacing:-1px; line-height:1; }
+    align-items:center; gap:clamp(32px, 3.6vw, 56px); padding:0 32px; }
+  /* The preview IS the printed sheet (composed on the canvas), shown like a
+     postcard: what the guest sees is exactly what is saved and printed. */
+  .sheet-preview { display:block; height:min(74vh, 760px); aspect-ratio:1181 / 1748; width:auto;
+    background:var(--white); box-shadow:0 4px 40px color-mix(in srgb, var(--ink) 12%, transparent); }
   .strip-actions { display:flex; flex-direction:column; gap:16px; align-items:flex-start; }
   .strip-title { font-family:var(--font-display); font-size:clamp(34px, 3.1vw, 48px); font-weight:300; color:var(--accent); margin-bottom:6px; }
-  .strip-sub { font-size:var(--body-md); font-weight:300; color:var(--ink-soft); line-height:1.6; max-width:30ch; margin-bottom:28px; }
+  .strip-sub { font-size:var(--body-md); font-weight:300; color:var(--ink-soft); line-height:1.6; max-width:30ch; margin-bottom:18px; }
+  .strip-buttons { display:flex; flex-wrap:wrap; gap:16px 20px; align-items:center; }
+  .strip-print-note { font-size:var(--label-md); font-weight:300; color:var(--ink-soft); }
+  .strip-print-note[hidden] { display:none; }
+  /* Copies stepper (print only, 1–PRINT_MAX_COPIES). Hidden while printing is off. */
+  .copies { display:flex; align-items:center; gap:14px; }
+  .copies[hidden] { display:none; }
+  .copies-label { font-size:var(--body-md); font-weight:300; color:var(--ink); min-width:4.5em; }
+  .copies-btn { width:56px; height:56px; border:1px solid var(--accent-pale); background:transparent; color:var(--accent);
+    display:flex; align-items:center; justify-content:center; cursor:pointer; transition:background 0.15s, transform 0.1s; }
+  .copies-btn svg { width:22px; height:22px; }
+  .copies-btn:active { background:var(--accent-faint); transform:scale(0.97); }
+  .copies-btn:disabled { opacity:0.35; cursor:default; }
+  .copies-num { font-family:var(--font-display); font-size:clamp(34px, 3vw, 44px); font-weight:300; color:var(--accent);
+    min-width:1.2em; text-align:center; line-height:1; }
+  @media (orientation: portrait) {
+    .strip-content { flex-direction:column; gap:24px; }
+    .sheet-preview { height:min(56vh, 700px); }
+    .strip-actions { align-items:center; text-align:center; }
+    .strip-buttons { justify-content:center; }
+  }
+
+  /* ── PRINT (AirPrint → Canon Selphy CP1500, postcard 100×148 mm) ── */
+  /* On screen the print container never shows. When printing, ONLY it shows:
+     one page per copy, each page exactly the postcard, no margins. */
+  #print-root { display:none; }
+  @media print {
+    @page { size:100mm 148mm; margin:0; }
+    html, body { width:auto; height:auto; overflow:visible; background:#fff; }
+    body > *:not(#print-root) { display:none !important; }
+    #print-root { display:block; }
+    .print-page { width:100mm; height:148mm; overflow:hidden; break-after:page; page-break-after:always;
+      -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+    .print-page:last-child { break-after:auto; page-break-after:auto; }
+    .print-page img { display:block; width:100%; height:100%; object-fit:cover; }
+  }
 
   /* ── THANKS ── */
   #screen-thanks { background:var(--ground); }
@@ -494,7 +515,7 @@
      monogram, the pulsing heart) are stopped; the recording indicator keeps
      pulsing because it carries real state — it tells a guest they are live. */
   @media (prefers-reduced-motion: reduce) {
-    .monogram-ring svg, .strip-monogram svg { animation:none; }
+    .monogram-ring svg { animation:none; }
     .thanks-portrait { animation:none; }
     .countdown-number.pulse, .photo-big-num { animation:none; }
     .screen { transition:none; }
@@ -506,6 +527,8 @@
 
 <!-- hidden canvas for compositing the strip -->
 <canvas id="strip-canvas"></canvas>
+<!-- Print-only container: N copies of the sheet as N pages (see @media print). -->
+<div id="print-root" aria-hidden="true"></div>
 
 <!-- ══ SCREEN 1: WELCOME ══ -->
 <div id="screen-welcome" class="screen active">
@@ -722,45 +745,24 @@
     <path class="orn-soft" d="M40,15 Q45,8 52,12 Q55,18 48,22 Q41,20 40,15Z"/>
   </svg>
   <div class="strip-content">
-    <div class="double-strip-frame">
-      <!-- strip A -->
-      <div class="single-strip">
-        <img class="strip-photo" id="strip-img-0" src="" alt="foto 1"/>
-        <img class="strip-photo" id="strip-img-1" src="" alt="foto 2"/>
-        <img class="strip-photo" id="strip-img-2" src="" alt="foto 3"/>
-        <div class="strip-monogram">
-          <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
-            <path id="strip-cp-A" d="M110,110 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0" fill="none"/>
-            <text class="ring-text" font-family="Jost, sans-serif" font-size="11" font-weight="200" letter-spacing="8">
-              <textPath href="#strip-cp-A">CASAMENTO  ✦  JOÃO  &amp;  CONSTANÇA  ✦  </textPath>
-            </text>
-          </svg>
-          <div class="mini-letters">J&amp;C</div>
-        </div>
-      </div>
-      <!-- strip B (identical) -->
-      <div class="single-strip">
-        <img class="strip-photo" id="strip-img-3" src="" alt="foto 1"/>
-        <img class="strip-photo" id="strip-img-4" src="" alt="foto 2"/>
-        <img class="strip-photo" id="strip-img-5" src="" alt="foto 3"/>
-        <div class="strip-monogram">
-          <svg viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg">
-            <path id="strip-cp-B" d="M110,110 m-90,0 a90,90 0 1,1 180,0 a90,90 0 1,1 -180,0" fill="none"/>
-            <text class="ring-text" font-family="Jost, sans-serif" font-size="11" font-weight="200" letter-spacing="8">
-              <textPath href="#strip-cp-B">CASAMENTO  ✦  JOÃO  &amp;  CONSTANÇA  ✦  </textPath>
-            </text>
-          </svg>
-          <div class="mini-letters">J&amp;C</div>
-        </div>
-      </div>
-    </div>
+    <img class="sheet-preview" id="strip-sheet-img" alt="A vossa tira de fotos">
     <div class="strip-actions">
       <div class="strip-title">A vossa strip!</div>
-      <div class="strip-sub">Duas cópias — uma para guardar, outra para levar. Cortar na linha.</div>
-      <button class="btn-main" onclick="downloadStrip()">Imprimir</button>
-      <button style="margin-top:8px; background:transparent; border:none; font-family:var(--font-body);
-        font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--ink-faint);
-        cursor:pointer; padding:8px 0;" onclick="retakePhotos()">Repetir fotos</button>
+      <div class="strip-sub" id="strip-sub">Fica guardada para o João e a Constança.</div>
+      <div class="copies" id="strip-copies" hidden>
+        <span class="copies-label">Cópias</span>
+        <button class="copies-btn" id="copies-minus" type="button" aria-label="Menos uma cópia" onclick="stepCopies(-1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/></svg></button>
+        <span class="copies-num" id="copies-num" aria-live="polite">1</span>
+        <button class="copies-btn" id="copies-plus" type="button" aria-label="Mais uma cópia" onclick="stepCopies(1)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.25" stroke-linecap="round" aria-hidden="true"><path d="M5 12h14"/><path d="M12 5v14"/></svg></button>
+      </div>
+      <div class="strip-buttons">
+        <button class="btn-main" id="strip-save" onclick="saveStripImage()">Guardar</button>
+        <button class="btn-outline" id="strip-print" onclick="printStrip()">Imprimir</button>
+      </div>
+      <div class="strip-print-note" id="strip-print-note" hidden>Impressão não disponível neste evento</div>
+      <button class="btn-retry" onclick="retakePhotos()">Repetir fotos</button>
     </div>
   </div>
 </div>
@@ -817,6 +819,10 @@
     // past midnight) the video questions come from QUESTIONS_NIGHT instead of
     // QUESTIONS. Active from unlockAt inclusive to endAt exclusive.
     midnight: { enabled: true, unlockAt: '00:00', endAt: '06:00' },
+    // On-site printing (print add-on): Imprimir sends the strip to the Canon
+    // Selphy CP1500 via AirPrint. Off until the founder enables it per event;
+    // while off, Imprimir is visibly disabled and the copies stepper is hidden.
+    printEnabled: false,
   };
 
   // ─── Capture settings derived from EVENT ───────
@@ -856,6 +862,7 @@
   // default alone (unchanged behaviour). Safari honours videoBitsPerSecond
   // (MediaRecorder, Safari 14.1+), but the real file sizes must be checked on
   // the iPad (device test T11).
+  const PRINT_ENABLED = EVENT.printEnabled === true;
   const VIDEO_BITS_PER_SECOND = VIDEO_DURATION_SEC > 120
     ? Math.floor((80 * 1000 * 1000 * 8) / VIDEO_DURATION_SEC) - 128000 : null;
 
@@ -1398,199 +1405,244 @@
     }
   }
 
-  function showStripPreview() {
-    for (let i = 0; i < 3; i++) {
-      document.getElementById('strip-img-' + i).src = photoCaptures[i];
-      document.getElementById('strip-img-' + (i + 3)).src = photoCaptures[i];
+  // ─── PHOTO SHEET (print format) ───────────────
+  // One composition per sheet, sized for the Canon Selphy CP1500's postcard
+  // paper: 100×148 mm at 300 dpi = 1181×1748 px (features/photo-strip-print-
+  // format.md, decision of 2026-10-24; Canon spec: 300×300 dpi, postcard
+  // borderless 100.0×148.0 mm). Borderless printing enlarges the image slightly
+  // and trims the edges (~4 mm per side reported on Canon's support forum), so
+  // nothing important sits within SHEET_SAFE of an edge.
+  // PRINT_LAYOUT — the founder can switch:
+  //   'grid'  (default) 2×2: three 3:4 photos + the monogram as the 4th tile.
+  //           Fills the sheet; every photo the same size; photos print near
+  //           their native capture resolution.
+  //   'strip' the classic 3-photo strip, centred, monogram below. Closest to
+  //           the previous look, but leaves wide white margins either side.
+  //   'hero'  photo 1 large, photos 2 and 3 small below, monogram at the foot.
+  // All three keep the 3:4 crop of capturePhoto() and the on-screen guide.
+  const PRINT_LAYOUT = 'grid';
+  const SHEET_W = 1181, SHEET_H = 1748, SHEET_SAFE = 71; // 6 mm
+  const PRINT_MAX_COPIES = 3;
+
+  function sheetLayout(layout) {
+    const X0 = SHEET_SAFE, Y0 = SHEET_SAFE, W = SHEET_W - 2 * SHEET_SAFE, H = SHEET_H - 2 * SHEET_SAFE;
+    const G = 24;
+    const r34 = w => Math.round(w * 4 / 3);
+    if (layout === 'strip') {
+      const MONO = 250;
+      const ph = Math.floor((H - MONO - 2 * G) / 3), pw = Math.round(ph * 0.75);
+      const x = Math.round((SHEET_W - pw) / 2);
+      const photos = [0, 1, 2].map(i => ({ x, y: Y0 + i * (ph + G), w: pw, h: ph }));
+      const top = Y0 + 3 * ph + 2 * G;
+      return { photos, mono: { cx: SHEET_W / 2, cy: top + (Y0 + H - top) / 2, r: 92 } };
     }
-    goTo('strip');
+    if (layout === 'hero') {
+      const MONO = 230;
+      const wl = Math.floor((H - MONO - 2 * G + G * 2 / 3) / 2); // 4/3·wl + G + 4/3·(wl−G)/2 + G + MONO = H
+      const hl = r34(wl);
+      const ws = Math.floor((wl - G) / 2), hs = r34(ws);
+      const x = Math.round((SHEET_W - wl) / 2), y = Y0;
+      const photos = [{ x, y, w: wl, h: hl },
+        { x, y: y + hl + G, w: ws, h: hs }, { x: x + wl - ws, y: y + hl + G, w: ws, h: hs }];
+      const top = y + hl + G + hs;
+      return { photos, mono: { cx: SHEET_W / 2, cy: top + (Y0 + H - top) / 2, r: 88 } };
+    }
+    // 'grid'
+    const tw = Math.floor((W - G) / 2), th = r34(tw);
+    const gh = 2 * th + G, y = Math.round(Y0 + (H - gh) / 2);
+    const x1 = X0, x2 = X0 + tw + G;
+    const photos = [{ x: x1, y, w: tw, h: th }, { x: x2, y, w: tw, h: th }, { x: x1, y: y + th + G, w: tw, h: th }];
+    return { photos, mono: { cx: x2 + tw / 2, cy: y + th + G + th / 2, r: Math.round(tw * 0.34) } };
+  }
+
+  // Draws the sheet on #strip-canvas from photoCaptures. Resolves with the
+  // canvas; rejects (and the caller tells the guest) if a photo can't decode.
+  function composeSheet(layout) {
+    layout = layout || PRINT_LAYOUT;
+    return Promise.all(photoCaptures.slice(0, 3).map(src => new Promise((ok, no) => {
+      const img = new Image();
+      img.onload = () => ok(img);
+      img.onerror = () => no(new Error('foto ilegível'));
+      img.src = src;
+    }))).then(imgs => {
+      if (imgs.length < 3) throw new Error('faltam fotos');
+      const canvas = document.getElementById('strip-canvas');
+      canvas.width = SHEET_W;
+      canvas.height = SHEET_H;
+      const ctx = canvas.getContext('2d');
+      // The printed monogram uses the same role tokens as the screen.
+      const INK_RING = themeColor('--accent-pressed');
+      const INK_LETTERS = themeColor('--accent');
+      // White to the very edge (borderless print), no border line: a hairline
+      // near the edge would be trimmed unevenly by the printer.
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, SHEET_W, SHEET_H);
+
+      const drawCover = (img, dx, dy, dw, dh) => {
+        // centre cover-crop to the slot's aspect (3:4, same as capturePhoto)
+        const targetAR = dw / dh, srcW = img.naturalWidth, srcH = img.naturalHeight;
+        let sx, sy, sw, sh;
+        if (srcW / srcH > targetAR) { sh = srcH; sw = Math.round(sh * targetAR); sx = Math.round((srcW - sw) / 2); sy = 0; }
+        else { sw = srcW; sh = Math.round(sw / targetAR); sx = 0; sy = Math.round((srcH - sh) / 2); }
+        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
+      };
+      // The welcome-page monogram: circular text ring + "J&C" centre letters
+      const drawMonogram = (cx, cy, radius) => {
+        ctx.save();
+        ctx.fillStyle = INK_RING;
+        const ringFontSize = Math.max(10, Math.round(radius * 0.16));
+        ctx.font = `200 ${ringFontSize}px Jost, "Helvetica Neue", Arial, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const ringText = 'CASAMENTO   ✦   JOÃO  &  CONSTANÇA   ✦   ';
+        const n = ringText.length;
+        for (let i = 0; i < n; i++) {
+          const theta = (i / n) * 2 * Math.PI - Math.PI / 2; // start at top
+          ctx.save();
+          ctx.translate(cx + radius * Math.cos(theta), cy + radius * Math.sin(theta));
+          ctx.rotate(theta + Math.PI / 2);
+          ctx.fillText(ringText[i], 0, 0);
+          ctx.restore();
+        }
+        ctx.restore();
+        ctx.save();
+        ctx.fillStyle = INK_LETTERS;
+        ctx.font = `300 ${Math.round(radius * 0.85)}px "Cormorant Garamond", Georgia, serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('J&C', cx, cy);
+        ctx.restore();
+      };
+
+      const L = sheetLayout(layout);
+      L.photos.forEach((r, j) => {
+        drawCover(imgs[j], r.x, r.y, r.w, r.h);
+        // B&W (the captures already are; this keeps the sheet B&W whatever the source)
+        const id = ctx.getImageData(r.x, r.y, r.w, r.h);
+        const d = id.data;
+        for (let p = 0; p < d.length; p += 4) {
+          const g = d[p] * 0.299 + d[p + 1] * 0.587 + d[p + 2] * 0.114;
+          d[p] = d[p + 1] = d[p + 2] = g;
+        }
+        ctx.putImageData(id, r.x, r.y);
+      });
+      drawMonogram(L.mono.cx, L.mono.cy, L.mono.r);
+      return canvas;
+    });
+  }
+
+  let stripCopies = 1;
+  let stripSavedForSession = false; // this set of 3 photos is already in the outbox
+  function renderCopies() {
+    document.getElementById('copies-num').textContent = stripCopies;
+    document.getElementById('copies-minus').disabled = stripCopies <= 1;
+    document.getElementById('copies-plus').disabled = stripCopies >= PRINT_MAX_COPIES;
+  }
+  function stepCopies(d) {
+    stripCopies = Math.min(PRINT_MAX_COPIES, Math.max(1, stripCopies + d));
+    renderCopies();
+  }
+
+  function showStripPreview() {
+    stripSavedForSession = false;
+    stripCopies = 1;
+    document.getElementById('print-root').textContent = '';
+    composeSheet().then(canvas => {
+      document.getElementById('strip-sheet-img').src = canvas.toDataURL('image/jpeg', 0.9);
+      // Printing off (EVENT.printEnabled = false): Imprimir stays visible but
+      // disabled (founder's call), with a one-line reason; the stepper is hidden.
+      document.getElementById('strip-print').disabled = !PRINT_ENABLED;
+      document.getElementById('strip-print-note').hidden = PRINT_ENABLED;
+      document.getElementById('strip-copies').hidden = !PRINT_ENABLED;
+      document.getElementById('strip-sub').textContent = PRINT_ENABLED
+        ? 'Escolhe quantas cópias queres imprimir. A tira fica também guardada para o João e a Constança.'
+        : 'Fica guardada para o João e a Constança.';
+      renderCopies();
+      goTo('strip');
+    }).catch(e => {
+      alert('Não foi possível montar a tira de fotos (' + (e.message || e.name) + '). Repete as fotos, por favor.');
+      retakePhotos();
+    });
   }
 
   let stripSaving = false;
+  function stripButtons(busy, label) {
+    const save = document.getElementById('strip-save');
+    document.querySelectorAll('#screen-strip .strip-actions button').forEach(b => {
+      b.disabled = busy || (b.id === 'strip-print' && !PRINT_ENABLED) ||
+        (b.id === 'copies-minus' && stripCopies <= 1) || (b.id === 'copies-plus' && stripCopies >= PRINT_MAX_COPIES);
+    });
+    save.textContent = label || 'Guardar';
+    save.style.opacity = busy ? '0.6' : '1';
+  }
+  // Saves the sheet through the outbox funnel (once per set of photos).
+  // Resolves true when saved (or saved earlier), false if the canvas failed.
+  function saveSheetOnce() {
+    if (stripSavedForSession) return Promise.resolve(true);
+    return composeSheet().then(canvas => new Promise(resolve => {
+      canvas.toBlob(async blob => {
+        if (!blob || !blob.size) { resolve(false); return; }
+        await saveCapture(blob, 'photo', 'jpg'); // visible alert + fallback download inside on failure
+        stripSavedForSession = true;
+        resolve(true);
+      }, 'image/jpeg', 0.96);
+    })).catch(() => false);
+  }
 
-  function downloadStrip() {
+  // Guardar: save to the outbox (what the old "Imprimir" did), then Thank you.
+  async function saveStripImage() {
     if (stripSaving) return; // double-tap guard
     stripSaving = true;
-    const stripBtn = document.querySelector('#screen-strip .btn-main');
-    const stripBtnLabel = stripBtn ? stripBtn.textContent : 'Imprimir';
-    if (stripBtn) { stripBtn.textContent = 'A guardar…'; stripBtn.style.opacity = '0.6'; stripBtn.disabled = true; }
-    // "Repetir fotos" too — a retake mid-save would be interrupted by Thank you.
-    const stripOtherBtns = [...document.querySelectorAll('#screen-strip .strip-actions button')].filter(b => b !== stripBtn);
-    stripOtherBtns.forEach(b => { b.disabled = true; });
-    const stripDone = () => {
-      stripSaving = false;
-      if (stripBtn) { stripBtn.textContent = stripBtnLabel; stripBtn.style.opacity = '1'; stripBtn.disabled = false; }
-      stripOtherBtns.forEach(b => { b.disabled = false; });
-    };
-    // Standard photobooth format (features/photo-strip-print-format.md):
-    // one 4×6" sheet at 300 DPI = 1200×1800, printed on the Selphy CP1500 and
-    // cut down the middle into two identical 2×6" strips (600×1800 each).
-    // Each strip occupies exactly half the canvas (no cut-zone gap).
-    // Photos stay 3:4 portrait to match capturePhoto() and the on-screen framing
-    // guide. With three of them stacked in 6", the height is the binding
-    // constraint (~380px wide each), so the side margins are wider than the top.
-    const CANVAS_W = 1200;
-    const CANVAS_H = 1800;
-    const STRIP_W = CANVAS_W / 2; // 600 = 2" at 300 DPI
-    const PAD = 36;                // top margin (also insets the cut line)
-    const PHOTO_GAP = 14;
-    const MONOGRAM_DIAMETER = 160;
-    const MONOGRAM_GAP_TOP = 24;   // space between last photo and monogram
-    const PAD_BOTTOM = 30;
-    // The printed monogram uses the same role tokens as the screen. The neutral
-    // greys below (sheet border, cut line, scissors) are print guides, not theme.
-    const INK_RING = themeColor('--accent-pressed');
-    const INK_LETTERS = themeColor('--accent');
-    // 3 portrait 3:4 photos stacked vertically — fills remaining vertical space
-    const PHOTO_H = Math.floor(
-      (CANVAS_H - PAD - PHOTO_GAP * 2 - MONOGRAM_GAP_TOP - MONOGRAM_DIAMETER - PAD_BOTTOM) / 3
-    );
-    const PHOTO_W = Math.round(PHOTO_H * 0.75); // 3:4 portrait
-    const PHOTO_X_PAD = Math.floor((STRIP_W - PHOTO_W) / 2); // equal margin both sides of strip
+    stripButtons(true, 'A guardar…');
+    const ok = await saveSheetOnce();
+    stripSaving = false;
+    stripButtons(false);
+    if (!ok) { alert('Não foi possível criar a tira de fotos. Toca outra vez em Guardar.'); return; }
+    document.getElementById('thanks-sub').textContent = 'A vossa strip ficou lindíssima! O João e a Constança vão adorar.';
+    showThanks();
+  }
 
-    const canvas = document.getElementById('strip-canvas');
-    canvas.width = CANVAS_W;
-    canvas.height = CANVAS_H;
-    const ctx = canvas.getContext('2d');
-
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
-
-    ctx.strokeStyle = '#e0ddd8';
-    ctx.lineWidth = 2;
-    ctx.strokeRect(1, 1, CANVAS_W - 2, CANVAS_H - 2);
-
-    // dashed cut line straight down the middle
-    const cutX = CANVAS_W / 2;
-    ctx.save();
-    ctx.setLineDash([10, 7]);
-    ctx.strokeStyle = '#bbbbbb';
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(cutX, PAD);
-    ctx.lineTo(cutX, CANVAS_H - PAD);
-    ctx.stroke();
-    ctx.restore();
-
-    ctx.font = '24px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#888';
-    ctx.fillText('✂', cutX, PAD + 16);
-    ctx.save();
-    ctx.translate(cutX, CANVAS_H - PAD - 4);
-    ctx.rotate(Math.PI);
-    ctx.fillText('✂', 0, 0);
-    ctx.restore();
-
-    // preload images then draw both strips
-    const imgs = [];
-    let preloaded = 0;
-    let imgFailed = false;
-    for (let i = 0; i < 3; i++) {
-      const img = new Image();
-      img.onload = () => {
-        imgs[i] = img;
-        preloaded++;
-        if (preloaded < 3) return;
-
-        const drawCover = (img, dx, dy, dw, dh) => {
-          // force 3:4 portrait crop from center of source image
-          const targetAR = dw / dh; // e.g. ~0.75 for portrait slot
-          const srcW = img.naturalWidth;
-          const srcH = img.naturalHeight;
-          let sx, sy, sw, sh;
-          if (srcW / srcH > targetAR) {
-            // source is wider than target — crop sides
-            sh = srcH;
-            sw = Math.round(sh * targetAR);
-            sx = Math.round((srcW - sw) / 2);
-            sy = 0;
-          } else {
-            // source is taller than target — crop top/bottom
-            sw = srcW;
-            sh = Math.round(sw / targetAR);
-            sx = 0;
-            sy = Math.round((srcH - sh) / 2);
-          }
-          ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-        };
-
-        // Draws the welcome-page monogram: circular text ring + "J&C" centre letters
-        const drawMonogram = (cx, cy, radius) => {
-          // outer ring text
-          ctx.save();
-          ctx.fillStyle = INK_RING;
-          const ringFontSize = Math.max(10, Math.round(radius * 0.16));
-          ctx.font = `200 ${ringFontSize}px Jost, "Helvetica Neue", Arial, sans-serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          const ringText = 'CASAMENTO   ✦   JOÃO  &  CONSTANÇA   ✦   ';
-          const n = ringText.length;
-          for (let i = 0; i < n; i++) {
-            const theta = (i / n) * 2 * Math.PI - Math.PI / 2; // start at top
-            const x = cx + radius * Math.cos(theta);
-            const y = cy + radius * Math.sin(theta);
-            ctx.save();
-            ctx.translate(x, y);
-            ctx.rotate(theta + Math.PI / 2);
-            ctx.fillText(ringText[i], 0, 0);
-            ctx.restore();
-          }
-          ctx.restore();
-          // centre J&C letters
-          ctx.save();
-          ctx.fillStyle = INK_LETTERS;
-          ctx.font = `300 ${Math.round(radius * 0.85)}px "Cormorant Garamond", Georgia, serif`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('J&C', cx, cy);
-          ctx.restore();
-        };
-
-        const drawOneStrip = (xStart) => {
-          for (let j = 0; j < 3; j++) {
-            const x = xStart + PHOTO_X_PAD;
-            const y = PAD + j * (PHOTO_H + PHOTO_GAP);
-            drawCover(imgs[j], x, y, PHOTO_W, PHOTO_H);
-            // B&W conversion
-            const id = ctx.getImageData(x, y, PHOTO_W, PHOTO_H);
-            const d = id.data;
-            for (let p = 0; p < d.length; p += 4) {
-              const g = d[p] * 0.299 + d[p+1] * 0.587 + d[p+2] * 0.114;
-              d[p] = d[p+1] = d[p+2] = g;
-            }
-            ctx.putImageData(id, x, y);
-          }
-          // monogram centred in the bottom margin of the strip
-          const photosBottom = PAD + 3 * PHOTO_H + 2 * PHOTO_GAP;
-          const monogramCY = photosBottom + MONOGRAM_GAP_TOP + MONOGRAM_DIAMETER / 2;
-          drawMonogram(xStart + STRIP_W / 2, monogramCY, MONOGRAM_DIAMETER / 2);
-        };
-
-        drawOneStrip(0);
-        drawOneStrip(STRIP_W);
-
-        // Save to the outbox. Thank you only after the write has committed —
-        // previously it was shown before toBlob had even produced the file.
-        canvas.toBlob(async blob => {
-          if (!blob || !blob.size) {
-            stripDone();
-            alert('Não foi possível criar a tira de fotos. Toca outra vez em ' + stripBtnLabel + '.');
-            return;
-          }
-          await saveCapture(blob, 'photo', 'jpg');
-          stripDone();
-          document.getElementById('thanks-sub').textContent = 'A vossa strip ficou lindíssima! O João e a Constança vão adorar.';
-          showThanks();
-        }, 'image/jpeg', 0.96);
-      };
-      img.onerror = () => {
-        if (imgFailed) return; // one alert, not three
-        imgFailed = true;
-        stripDone();
-        alert('Não foi possível montar a tira de fotos. Repete as fotos, por favor.');
-      };
-      img.src = photoCaptures[i];
+  // Imprimir (only when EVENT.printEnabled): saves first — a print is never the
+  // only copy — then prints N copies as N pages via the browser print dialog.
+  // On iPad, window.print() opens the iOS AirPrint sheet: a web page CANNOT
+  // skip that sheet, choose the printer or the paper for the guest; the
+  // operator selects the Selphy (and postcard paper) there. Whether iPadOS
+  // honours @page size / borderless for the Selphy must be checked with a real
+  // print (device test owed). window.print() may return before the sheet closes
+  // (iOS), so nothing here depends on it having printed.
+  async function printStrip() {
+    if (!PRINT_ENABLED || stripSaving) return;
+    stripSaving = true;
+    stripButtons(true, 'A preparar…');
+    const ok = await saveSheetOnce();
+    if (!ok) {
+      stripSaving = false; stripButtons(false);
+      alert('Não foi possível criar a tira de fotos para imprimir. Toca outra vez em Imprimir.');
+      return;
+    }
+    preparePrint(stripCopies);
+    try {
+      window.print();
+    } catch (e) {
+      alert('A impressão falhou (' + (e.message || e.name) + '). A tira ficou guardada. Chama o operador.');
+    }
+    stripSaving = false;
+    stripButtons(false);
+    document.getElementById('thanks-sub').textContent = 'A vossa strip ficou lindíssima! O João e a Constança vão adorar.';
+    showThanks();
+  }
+  // Fills the print-only container with n identical pages of the current sheet.
+  function preparePrint(n) {
+    const src = document.getElementById('strip-sheet-img').src;
+    const root = document.getElementById('print-root');
+    root.textContent = '';
+    for (let i = 0; i < Math.min(PRINT_MAX_COPIES, Math.max(1, n)); i++) {
+      const page = document.createElement('div');
+      page.className = 'print-page';
+      const img = document.createElement('img');
+      img.src = src; img.alt = '';
+      page.appendChild(img);
+      root.appendChild(page);
     }
   }
 
