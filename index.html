@@ -4,7 +4,20 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
 <title>J & C — Booth</title>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet">
+<!-- Home-screen app (iPad): opens full-screen without Safari chrome, with its
+     own storage (where the capture outbox lives). Relative URLs so the app
+     works from a GitHub Pages sub-path such as /grao/. The colours are the
+     --ground token's value (a manifest can't read CSS); keep them in sync. -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Booth J&amp;C">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f7f4ef">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<!-- crossorigin: makes the stylesheet a CORS response so the service worker
+     can see its status before caching it for offline use (sw.js). -->
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Jost:wght@200;300;400&display=swap" rel="stylesheet" crossorigin="anonymous">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   :root {
@@ -1872,6 +1885,9 @@
         <div class="op-stat"><dt>Evento</dt><dd id="op-event">—</dd></div>
         <div class="op-stat"><dt>Nesta sessão</dt><dd id="op-session">—</dd></div>
         <div class="op-stat"><dt>Duração do vídeo</dt><dd id="op-video">—</dd></div>
+        <div class="op-stat"><dt>Versão da app</dt><dd id="op-version">—</dd></div>
+        <div class="op-stat op-wide"><dt>Cópia offline pronta</dt><dd id="op-offline">—</dd></div>
+        <div class="op-stat op-wide"><dt>Aberta como app do ecrã principal</dt><dd id="op-standalone">—</dd></div>
         <div class="op-stat op-wide"><dt>Último erro</dt><dd id="op-error">—</dd></div>
       </dl>
       <div class="op-actions">
@@ -2366,6 +2382,7 @@
     setDd('op-event', EVENT.code + (EVENT.operatorPin === '0000' ? ' · PIN por defeito, muda-o' : ''), EVENT.operatorPin === '0000');
     setDd('op-session', `${outboxState.saved} guardadas · ${outboxState.uploaded} enviadas` + (outboxState.fallbacks ? ` · ${outboxState.fallbacks} em descarga de recurso` : ''), !!outboxState.fallbacks);
     setDd('op-video', ptDuration(VIDEO_DURATION_SEC) + (videoDurationNote ? ' — ' + videoDurationNote : ''), !!videoDurationNote);
+    renderShellStatus();
     const le = outboxState.lastError;
     setDd('op-error', le ? le.message + ' (' + fmtTime(le.at) + ')' : 'nenhum', !!le);
     const retry = document.getElementById('op-retry');
@@ -2455,6 +2472,7 @@
     document.getElementById('op-panel').hidden = false;
     operatorMsg('');
     checkStorage(false);
+    refreshShellStatus().then(() => { if (operatorUnlocked) renderOperatorPanel(); });
     refreshOutboxUi();
     prepareExportBatch();
     if (operatorRefreshTimer) clearInterval(operatorRefreshTimer);
@@ -2577,6 +2595,76 @@
   window.addEventListener('offline', () => { outboxState.status = 'offline'; refreshOutboxUi(); });
   document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { refreshOutboxUi(); if (!outboxState.running) scheduleDrain(1000); } });
   setInterval(() => { if (activeScreenId() === 'welcome') refreshOutboxUi(); }, 30000); // keep "oldest age" honest
+
+  // ─── OFFLINE APP SHELL (sw.js) ─────────────────
+  // The service worker lets the home-screen app open with no network. Its
+  // state is shown ONLY in the operator panel: a guest never sees a service
+  // worker problem, the operator always can. Nothing here ever reloads the page.
+  const shellState = { reason: null, error: null, version: null, ready: null, fonts: 0, waiting: null, controlled: false };
+  function isStandalone() {
+    return navigator.standalone === true ||
+      (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches) ||
+      (window.matchMedia && window.matchMedia('(display-mode: fullscreen)').matches);
+  }
+  function askWorker(sw) {
+    return new Promise(resolve => {
+      const ch = new MessageChannel();
+      const t = setTimeout(() => resolve(null), 2000);
+      ch.port1.onmessage = e => { clearTimeout(t); resolve(e.data); };
+      try { sw.postMessage({ type: 'grao-status' }, [ch.port2]); } catch (e) { clearTimeout(t); resolve(null); }
+    });
+  }
+  async function refreshShellStatus() {
+    if (shellState.reason) return;
+    try {
+      const reg = await navigator.serviceWorker.getRegistration();
+      shellState.controlled = !!navigator.serviceWorker.controller;
+      if (!reg || !reg.active) { shellState.version = null; shellState.ready = false; }
+      else {
+        const s = await askWorker(reg.active);
+        shellState.version = s ? s.version : null;
+        shellState.ready = !!(s && s.shellReady);
+        shellState.fonts = s ? s.fonts : 0;
+      }
+      const w = reg && (reg.waiting || reg.installing);
+      shellState.waiting = w ? ((await askWorker(w)) || {}).version || 'a instalar' : null;
+    } catch (e) {
+      shellState.error = 'estado ilegível: ' + (e.message || e.name);
+    }
+  }
+  function renderShellStatus() {
+    const sa = isStandalone();
+    setDd('op-standalone', sa ? 'sim'
+      : 'não: abre pelo ícone no ecrã principal (no separador do Safari a fila de capturas é outra)', !sa);
+    if (shellState.reason) {
+      setDd('op-version', '—');
+      setDd('op-offline', 'não: ' + shellState.reason, true);
+      return;
+    }
+    let v = shellState.version || '—';
+    if (shellState.waiting) v += ' · nova versão ' + shellState.waiting + ' entra quando a app for fechada e reaberta';
+    setDd('op-version', v);
+    if (shellState.error) { setDd('op-offline', 'não: ' + shellState.error, true); return; }
+    if (shellState.ready === null) { setDd('op-offline', 'a verificar…'); return; }
+    setDd('op-offline', shellState.ready
+      ? 'sim' + (shellState.fonts ? '' : ' (sem as letras: offline usa um tipo de letra do sistema)')
+      : 'não: abre a app uma vez com rede e espera alguns segundos', !shellState.ready);
+  }
+  (function registerShell() {
+    if (!('serviceWorker' in navigator)) { shellState.reason = 'este navegador não suporta'; return; }
+    if (!/^https?:$/.test(location.protocol)) { shellState.reason = 'aberta como ficheiro local (' + location.protocol + ')'; return; }
+    navigator.serviceWorker.register('sw.js', { scope: './', updateViaCache: 'none' })
+      .then(reg => {
+        const track = w => w && w.addEventListener('statechange', () => {
+          if (w.state === 'redundant' && !reg.active) shellState.error = 'a instalação falhou (ficheiros em falta?)';
+          refreshShellStatus().then(() => { if (operatorUnlocked) renderOperatorPanel(); });
+        });
+        track(reg.installing);
+        reg.addEventListener('updatefound', () => track(reg.installing));
+        return refreshShellStatus();
+      })
+      .catch(e => { shellState.error = 'registo falhou: ' + (e.message || e.name); });
+  })();
 
   (function outboxLaunch() {
     if (EVENT.uploadEnabled && !/^[a-z0-9]+(-[a-z0-9]+)*$/.test(EVENT.code)) {
