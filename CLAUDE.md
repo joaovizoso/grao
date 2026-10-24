@@ -34,7 +34,7 @@ Tuning effort is often a better lever than switching model. Avoid fanning out ma
 
 - **Single HTML file app.** No build step, no bundler, no package.json, no frameworks (no React/Vue/jQuery). Everything — HTML, CSS, JS — lives in one `.html` file per client/event (e.g. `joao-constanca-booth.html`).
 - **Runtime target:** Safari on iPad (the actual kiosk browser today) and/or hosted as a static page on GitHub Pages. Safari/iOS quirks are first-class constraints, not edge cases — see Known Issues.
-- **No application backend** (no database, no accounts). All capture, processing, and file generation happens client-side in the browser via `getUserMedia`, `MediaRecorder`, and `<canvas>`. **Captures no longer trigger a download.** Every capture goes through one `saveCapture` funnel into an on-device IndexedDB outbox (no Safari save prompt). A drain loop uploads each one to a Cloudflare Worker → R2 (EU jurisdiction bucket) and deletes the local copy only after the server confirms the same key, size and SHA-256. Upload is off by default (`EVENT.uploadEnabled = false`) until the Worker is deployed and the GDPR prerequisites are done; the operator panel (3s long-press on the welcome monogram + PIN) exports pending captures meanwhile. There is still no database and no user accounts. See [features/backend-infrastructure.md](features/backend-infrastructure.md), [worker/README.md](worker/README.md) and [features/backend-phase1-device-tests.md](features/backend-phase1-device-tests.md). **Phase 1 has only been tested in Chromium; the on-device iPad tests are still owed.**
+- **No application backend** (no database, no accounts). All capture, processing, and file generation happens client-side in the browser via `getUserMedia`, `MediaRecorder`, and `<canvas>`. **Captures no longer trigger a download.** Every capture goes through one `saveCapture` funnel into an on-device IndexedDB outbox (no Safari save prompt). A drain loop uploads each one to a Cloudflare Worker → R2 (EU jurisdiction bucket) and deletes the local copy only after the server confirms the same key, size and SHA-256. Upload is off by default (`EVENT.uploadEnabled = false`) until the Worker is deployed and the GDPR prerequisites are done; the operator panel (3s long-press on the welcome monogram + PIN) exports pending captures meanwhile. There is still no database and no user accounts. See [features/backend-infrastructure.md](features/backend-infrastructure.md), [worker/README.md](worker/README.md) and [features/backend-phase1-device-tests.md](features/backend-phase1-device-tests.md). The app is also an **installable offline shell** (`manifest.webmanifest`, `sw.js`, `icons/`; network-first so updates are picked up whenever online, fonts cached). **Couple terms** are accepted in the operator panel (Termos do evento), recorded on the device, and uploads are blocked without a matching acceptance. **Modo Meia-Noite** swaps to a second question set between `EVENT.midnight.unlockAt` and `endAt` (default 00:00–06:00). **Everything above has only been tested in Chromium; the on-device iPad tests are still owed.**
 - **Screen flow (5 screens, 6 for the Video path), all within one page, shown/hidden via JS state:**
   1. **Welcome** — mode selection (Video / Photo strip / Boomerang)
   2. **Instructions** — brief explanation of the chosen mode
@@ -47,23 +47,24 @@ Tuning effort is often a better lever than switching model. Avoid fanning out ma
 
 | Mode | Button size | Behavior |
 |---|---|---|
-| **Video** | Large (primary) | 5s pre-roll countdown showing the question, 60s recording, 3 rotating questions (cycles per guest/session), followed by a Review/Retry screen before saving, auto-downloads as `.webm` |
-| **Photo strip** | Small (secondary) | 3 photos, 3→2→1 countdown per shot, 800ms pause between shots, converted to B&W, portrait 3:4 crop per photo, laid out as a double strip (2 identical 2×6" strips side by side with a dashed cut line) on a 1200×1800px sheet (= 4×6" at 300 DPI, the Canon Selphy CP1500 paper size; the Selphy has no cutter, so the sheet is cut by hand) — saved as `.jpg` |
+| **Video** | Large (primary) | 5s pre-roll countdown showing the question, recording of `EVENT.videoDurationSec` seconds (default 60), 3 rotating questions (cycles per guest/session), followed by a Review/Retry screen before saving, saved to the on-device outbox as `.webm`/`.mp4` (see Architecture) |
+| **Photo strip** | Small (secondary) | 3 photos, 3→2→1 countdown per shot, 800ms pause, converted to B&W, 3:4 portrait crop (with an on-screen framing guide showing exactly the cropped area), composed on **one Canon Selphy CP1500 postcard sheet, 1181×1748 px (100×148 mm @300dpi), no cut line**, with ~6 mm clear for the printer's borderless crop. Three candidate layouts live behind `PRINT_LAYOUT` (`grid` default, `strip`, `hero`). **Guardar** saves the sheet to the outbox. **Imprimir** (1–3 copies stepper, AirPrint via `window.print()` with `@page 100mm 148mm`) is built but **disabled** (`EVENT.printEnabled = false`). |
 | **Boomerang** | Small (secondary) | Records 1.5s at 20fps, builds a forward+reverse ping-pong cycle repeated to fill 10s, plays back via a canvas render loop for on-screen preview, exports via `captureStream()` + `MediaRecorder` with MP4/H.264 tried before WebM, try/catch + watchdog around the recorder lifecycle, and a visible alert if export isn't supported or silently fails (see Known Issues #2 — still unconfirmed on a real Safari/iPad device) |
 
 ### Design System
 
 - **Colors** — these are the actual `:root` tokens in `index.html`. *(Corrected 2026-10-22: this section previously documented a black/white/gold palette that does not exist anywhere in the code — the app has never had a black or a gold token. Don't reintroduce it.)*
-  - Sage green (primary accent, buttons, headings): `--green: #5a6b4a`
-  - Sage light (active/pressed state): `--green-light: #7a8f67`
-  - Sage pale (eyebrows, numerals, hairlines on green): `--green-pale: #c8d4be`
-  - Sage faint (pressed state on light surfaces): `--green-faint: #edf0e9`
-  - Cream (primary background): `--cream: #f7f4ef`
-  - Warm brown (body text): `--brown: #3a3028`
-  - Brown mid (secondary text — the lightest tone safe on cream): `--brown-mid: #6b5d50`
-  - Brown light (`--brown-light: #a89880`) — **decorative only**. It fails contrast on cream (~2.3:1); never use it for text or controls.
+  - Sage green (primary accent, buttons, headings): `--accent: #5a6b4a`
+  - Sage light (active/pressed state): `--accent-pressed: #7a8f67`
+  - Sage pale (eyebrows, numerals, hairlines on green): `--accent-pale: #c8d4be`
+  - Sage faint (pressed state on light surfaces): `--accent-faint: #edf0e9`
+  - Cream (primary background): `--ground: #f7f4ef`
+  - Warm brown (body text): `--ink: #3a3028`
+  - Brown mid (secondary text — the lightest tone safe on cream): `--ink-soft: #6b5d50`
+  - Brown light (`--ink-faint: #a89880`) — **decorative only**. It fails contrast on cream (~2.3:1); never use it for text or controls.
   - White: `--white: #ffffff`
-  - Dark ground for camera screens: `#1c2218` (hardcoded, not yet a token)
+  - Dark ground behind the camera screens: `--camera: #1c2218`
+  - **All theme colours flow from these role tokens** (refactored 2026-10-24; SVG uses `currentColor`, the strip canvas reads them with `getComputedStyle`), so a palette swap is a `:root` override. Never hardcode a theme colour again. Five curated palettes (Quinta, Azulejo, Douro, Sintra, Atlântico) are in [features/config-menu.md](features/config-menu.md). Semantic colours (recording red) stay fixed.
 - **Typography:**
   - Display font: **Cormorant Garamond** (headings, monogram, questions, numerals — romantic/editorial feel)
   - Body font: **Jost** (UI copy, instructions, buttons)
@@ -82,14 +83,13 @@ When touching CSS or markup, preserve this visual language — it's a wedding pr
 
 Live status for these also lives in [STATUS.md](STATUS.md) — check there first for the current state before assuming this list is current; it drifted out of sync with the code once already (corrected 2026-07-31).
 
-1. ~~Photo strip downloads landscape instead of portrait.~~ **FIXED — verified in code, 2026-07-31.**
-   `downloadStrip` composites a two-up sheet of **2×6" strips** (the standard photobooth format, founder-decided) onto a `1200×1800` canvas (= 4×6" at 300 DPI), with 3:4 photo slots and a cover-crop in `drawCover` matching `capturePhoto`'s 3:4 crop. (History: `1800×1200` landscape → `1200×2400` portrait, which gave non-standard 2×8" strips → `1200×1800` on 2026-10-23.) Each strip has ~110px of white margin either side, a consequence of keeping 3:4 photos; whether to fill the width instead is a founder decision. Not yet confirmed on an actual Canon Selphy CP1500 print — do a real print test before treating this as fully closed.
+1. ~~Photo strip downloads landscape instead of portrait.~~ **FIXED in code; print test owed.**
+   Format history: `1800×1200` landscape → `1200×2400` portrait (non-standard 2×8" strips) → `1200×1800` two-up 2×6" (2026-10-23) → **a single composition on the Selphy CP1500's own 100×148 mm postcard sheet (1181×1748 px), no cut line, 1–3 copies** (2026-10-24, founder-decided; ends hand-cutting). Still unconfirmed on a real Selphy print, and whether iPadOS AirPrint honours the paper size/borderless setting — Canon's pages only state AirPrint for Mac. Do a real print test before treating this as closed.
 
 2. **Boomerang export on Safari iOS is MITIGATED, not confirmed fixed.**
    `downloadBoomerang` now tries MP4/H.264 mime types before WebM and shows a visible alert if no `captureStream`/`MediaRecorder` support exists — real progress, no longer hard-coded Chrome-only. It still fundamentally depends on `canvas.captureStream()`, the exact API this issue originally flagged as unreliable on Safari; none of the alternate architectures (frame-level `MediaRecorder` off the raw stream, GIF/APNG, post-event reconstruction) were adopted. **Fixed 2026-07-31:** `new MediaRecorder(...)` and `.start()` are now wrapped in try/catch, `onerror` is handled, and a watchdog timeout (sized off the render loop's known frame count/pacing) fires if `onstop` never arrives — any of these failure paths now show a visible alert and reset the UI (stop button spinner, restore preview) instead of leaving the guest on a stuck "A processar…" button. An empty-`chunks` case in `onstop` (recorder ran but produced zero data) is also now treated as a failure with the same alert, rather than downloading/emailing an empty file. This closes the silent-failure gap in code, but it is **still unconfirmed on a real device**: nobody has verified on the kiosk iPad's actual Safari version that `captureStream()`-based export produces a playable file end-to-end. That underlying architectural question (whether `captureStream()` is the right approach on Safari at all, vs. one of the alternatives above) is unchanged by this fix — an on-device Safari/iPad test is still required before this issue can be closed.
 
-3. **Video recording duration is hardcoded (now 60s, was 15s) — still not configurable.**
-   Groundwork for the plan/config system (priority #3 below) is still open. Also newly documented: there is now a video review/retry screen between Recording and Thank you (guest watches their take with sound and chooses Guardar or Repetir; no visible countdown since 2026-10-23; invisible 3-minute idle save) — the 5-screen model further down is stale for the video path specifically; it's effectively 6 screens there.
+3. ~~Video recording duration is hardcoded.~~ **FIXED 2026-10-24:** `EVENT.videoDurationSec` (default 60, clamped 10–300) drives the timer, ring, auto-stop and the PT-PT instruction text. The video review screen shows the take with sound and the guest chooses Guardar or Repetir; no visible countdown; an invisible 3-minute idle save.
 
 4. **No admin/config panel.**
    Confirmed still absent — `QUESTIONS` is a hardcoded array, no config object exists anywhere in the file.
@@ -159,5 +159,5 @@ Don't jump ahead to later priorities (e.g. building hardware integration code) w
 - This is a **service business**, not a SaaS product yet — grao is sold per-event (Basic 349€+VAT / Premium 599€+VAT) with an operator physically present, not a self-serve kiosk left unattended. Design decisions should assume a human operator is nearby to help a confused guest or restart a stuck capture — the UI doesn't need to defend against every possible user error as if unsupervised.
 - **Photo strip, boomerang, unlimited questions and QR/remote recording are Premium-only.** (Personalisation — names, palette, logo — is on **both** plans since 2026-10-24: the founder decided restricting it made no sense. Pricing/website copy must follow.) — when adding features, keep in mind whether they should be gated, even before the gating mechanism itself exists.
 - **Print-on-site and soundproof cabin are paid add-ons** (+100€ / +200€) on top of either plan — they are not plan-differentiators, they're independent upsells.
-- **The couple/client gets all content after the event** via a private digital gallery (both plans) — there is currently no in-app upload/delivery mechanism described; assume delivery happens out-of-band (manual transfer) until told otherwise.
+- **The couple/client gets all content after the event** via a private digital gallery (both plans) — in-app upload to the cloud exists but is off by default; delivering a link/gallery to the couple is still a manual founder action (backend Phase 2).
 - **João & Constança's wedding is the first real test event** — the current HTML file and its hardcoded monogram/questions/branding reflect that specific event, not a generic template yet. Treat it as the reference implementation to generalize from, not as throwaway code.

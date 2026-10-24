@@ -56,4 +56,4 @@ A dark "Gala" preset (black-tie evening) was considered and left out: on a dark 
 
 - **2026-10-23** — Founder specified the menu. Five palette presets produced with the `frontend-design` skill, contrast-checked (all pass) and rendered in the app. Open decisions recorded above, notably the Basic/Premium gating of branding fields and the token refactor prerequisite. Not approved to build.
 - **2026-10-24** — Founder decided personalisation is available on both Basic and Premium (resolves open point 6). Role-based colour tokens (prerequisite) are being built overnight; the menu itself is next.
-
+- **2026-10-24** — Prerequisite done: all theme colours flow from role tokens (`--accent`, `--accent-pressed`, `--accent-pale`, `--accent-faint`, `--ground`, `--ink`, `--ink-soft`, `--ink-faint`, `--camera`); verified pixel-identical to before (washes ≤2/255 from `color-mix` blending) and by injecting the Azulejo palette. Applying a preset is now a `:root` override. `EVENT.videoDurationSec` also exists. The menu UI itself is not built.
