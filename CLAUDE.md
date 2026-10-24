@@ -108,7 +108,7 @@ The product is sold as two plans; the app should eventually gate features by an 
 | Photo strip | — | ✓ |
 | Boomerang | — | ✓ |
 | Edited compilation (post-event) | — | ✓ |
-| Custom branding (monogram, colors, event names) | — | ✓ |
+| Personalisation (couple names, monogram, colour palette, logo/images) | ✓ | ✓ |
 | QR code + remote recordings | — | ✓ |
 | Private digital gallery | ✓ | ✓ |
 
@@ -157,7 +157,7 @@ Don't jump ahead to later priorities (e.g. building hardware integration code) w
 ## Business Context (why decisions look the way they do)
 
 - This is a **service business**, not a SaaS product yet — grao is sold per-event (Basic 349€+VAT / Premium 599€+VAT) with an operator physically present, not a self-serve kiosk left unattended. Design decisions should assume a human operator is nearby to help a confused guest or restart a stuck capture — the UI doesn't need to defend against every possible user error as if unsupervised.
-- **Photo strip, boomerang, unlimited questions, branding, and QR/remote recording are Premium-only** — when adding features, keep in mind whether they should be gated, even before the gating mechanism itself exists.
+- **Photo strip, boomerang, unlimited questions and QR/remote recording are Premium-only.** (Personalisation — names, palette, logo — is on **both** plans since 2026-10-24: the founder decided restricting it made no sense. Pricing/website copy must follow.) — when adding features, keep in mind whether they should be gated, even before the gating mechanism itself exists.
 - **Print-on-site and soundproof cabin are paid add-ons** (+100€ / +200€) on top of either plan — they are not plan-differentiators, they're independent upsells.
 - **The couple/client gets all content after the event** via a private digital gallery (both plans) — there is currently no in-app upload/delivery mechanism described; assume delivery happens out-of-band (manual transfer) until told otherwise.
 - **João & Constança's wedding is the first real test event** — the current HTML file and its hardcoded monogram/questions/branding reflect that specific event, not a generic template yet. Treat it as the reference implementation to generalize from, not as throwaway code.

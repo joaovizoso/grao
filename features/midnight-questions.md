@@ -1,6 +1,6 @@
 # Modo Meia-Noite (perguntas que desbloqueiam à noite)
 
-**Status:** proposed (bloqueado em dev)
+**Status:** approved by the founder 2026-10-24 — being built (available on both plans)
 **Plan tier:** Premium (extensão do formato de perguntas, que já é Premium quando personalizado)
 **Proposed date:** 2026-08-19
 
@@ -41,3 +41,4 @@ nem a copy já escrita.
 - **2026-08-19** — Proposta e registada (marca competitiva do Mots d'Amour). Copy
   pronta ([marketer]). Bloqueada em dev (gatilho horário + config layer). Sem
   decisão de construir ainda.
+- **2026-10-24** — Founder approved building it, on **both plans**, plus a repo list of question/theme suggestions (`questions/sugestoes.md`). Built overnight as `EVENT.midnight` (`unlockAt`/`endAt`, default 00:00–06:00 local) + `QUESTIONS_NIGHT`. The "do not advertise before it is built and tested" rule stands until the on-device check.
