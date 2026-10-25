@@ -379,6 +379,14 @@
     color:var(--ink-soft); cursor:pointer; padding:10px 0;
     border-bottom:1px solid var(--ink-faint); }
   .btn-retry:active { color:var(--accent); border-bottom-color:var(--accent); }
+  /* Repetir / Cancelar side by side; Cancelar asks before it deletes anything. */
+  .rv-row { display:flex; gap:clamp(24px, 2.4vw, 40px); align-items:center; }
+  .rv-confirm { display:none; flex-direction:column; align-items:flex-start; gap:6px; }
+  .rv-confirm-text { font-size:var(--body-md); font-weight:300; color:var(--ink-soft); line-height:1.5;
+    max-width:26ch; margin-bottom:14px; }
+  .video-review-actions.confirming .rv-normal { display:none; }
+  .video-review-actions.confirming .video-review-sub { display:none; }
+  .video-review-actions.confirming .rv-confirm { display:flex; }
   /* Shown only when Safari refused to autoplay the preview with sound. */
   .video-review-frame { position:relative; }
   .review-sound { position:absolute; left:50%; bottom:clamp(28px, 3vw, 44px); transform:translateX(-50%);
@@ -714,8 +722,16 @@
     <div class="video-review-actions">
       <div class="video-review-title">A tua mensagem</div>
       <div class="video-review-sub">Vê o teu vídeo. Queres guardar ou tentar outra vez?</div>
-      <button class="btn-main" onclick="saveAndFinishVideo()">Guardar</button>
-      <button class="btn-retry" onclick="tryVideoAgain()">Repetir</button>
+      <button class="btn-main rv-normal" onclick="saveAndFinishVideo()">Guardar</button>
+      <div class="rv-row rv-normal">
+        <button class="btn-retry" onclick="tryVideoAgain()">Repetir</button>
+        <button class="btn-retry" onclick="askCancelVideo()">Cancelar</button>
+      </div>
+      <div class="rv-confirm" role="alertdialog" aria-live="polite">
+        <div class="rv-confirm-text">Apagar esta gravação? Não fica guardada em lado nenhum.</div>
+        <button class="btn-main" onclick="cancelVideoConfirmed()">Sim, apagar</button>
+        <button class="btn-retry" onclick="cancelVideoBack()">Não, voltar</button>
+      </div>
     </div>
   </div>
 </div>
@@ -877,14 +893,14 @@
   // Modo Meia-Noite: romantic with a wink, never crude, nothing that
   // humiliates or outs anyone; fine with grandparents and children around.
   const QUESTIONS_NIGHT = [
-    "Que história dos noivos só se conta depois da meia-noite? (A versão para todas as idades.)",
-    "Faz o brinde da meia-noite: a que é que os noivos vão brindar daqui a 10 anos?",
-    "Declara-te: diz aos noivos, olhos nos olhos da câmara, porque é que gostas tanto deles.",
-    "Quem é o rei ou a rainha da pista esta noite? Prova-o com o teu melhor passo de dança.",
-    "Que música vai ficar para sempre colada a esta noite — e porquê?",
-    "Confessa: qual foi o momento mais bonito do dia que ninguém viu?",
-    "Que promessa farias aos noivos às três da manhã que manterias às três da tarde?",
-    "Dá aos noivos um conselho para as próximas mil noites — o mais elegante que conseguires."
+    "Dá aos noivos um conselho para a noite de núpcias que não dirias à frente da avó.",
+    "Qual é a frase de engate mais desastrosa que já ouviste? Faz a reconstituição.",
+    "Quantos dias de lua de mel até o casal ver a luz do dia? Justifica a tua aposta.",
+    "Descreve o beijo perfeito em dez segundos. Demonstração só com o ar, por favor.",
+    "Qual é a coisa mais atrevida que já sussurraste a alguém ao ouvido?",
+    "Verdade ou consequência: dá aos noivos uma consequência para a noite de núpcias.",
+    "Que música devia tocar na noite de núpcias? Sê específico e sem pudores.",
+    "Confessa: qual foi o primeiro pensamento impuro que tiveste hoje?"
   ];
 
   // ─── Modo Meia-Noite (derived from EVENT.midnight) ───
@@ -1186,6 +1202,7 @@
     player.src = url;
     const soundBtn = document.getElementById('review-sound');
     soundBtn.hidden = true;
+    document.querySelector('.video-review-actions').classList.remove('confirming');
     goTo('video-review');
     // No visible countdown: the guest takes as long as they like and chooses
     // Guardar or Repetir. Only the invisible idle net above can save for them.
@@ -1222,6 +1239,27 @@
   }
 
   let videoSaving = false;
+
+  // Cancelar: the guest wants neither to save nor to retry. The take only ever
+  // existed in memory (it reaches the outbox on Guardar), so discarding it leaves
+  // nothing behind. A confirmation guards against an accidental tap deleting a
+  // guest's message. If the guest opens the confirmation and walks away, the idle
+  // safety net still SAVES the take: deleting needs an explicit "Sim, apagar".
+  function askCancelVideo() {
+    if (videoSaving) return;
+    document.querySelector('.video-review-actions').classList.add('confirming');
+  }
+  function cancelVideoBack() {
+    document.querySelector('.video-review-actions').classList.remove('confirming');
+  }
+  function cancelVideoConfirmed() {
+    if (videoSaving) return;
+    teardownVideoReview();
+    videoBlob = null;
+    recordedChunks = [];
+    document.querySelector('.video-review-actions').classList.remove('confirming');
+    goTo('welcome');
+  }
 
   async function saveAndFinishVideo() {
     // Guard: a double-tap on "Guardar" must not save twice.

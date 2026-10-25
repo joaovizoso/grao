@@ -18,12 +18,12 @@ Está planeado um menu de definições no painel do operador para escolher as pe
 - **Curta o suficiente para ler em 5 segundos**, de pé, com pouca luz, talvez sem óculos. Uma ideia por pergunta. Idealmente menos de 110 caracteres.
 - **Ninguém fica mal na fotografia.** Nada sobre ex-namorados, pesos, idades, dinheiro, bebedeiras, gafes de alguém concreto ou "segredos" que exponham uma pessoa.
 - **Nada que obrigue alguém a revelar a sua vida íntima** (orientação sexual, relações, gravidezes, saúde, religião, política). Também nada que pressuponha que o convidado tem par.
-- **Avós e crianças estão na sala.** A piscadela de olho é bem-vinda; o duplo sentido explícito não. Se a pergunta faria corar a avó dos noivos, fica de fora.
+- **Avós e crianças estão na sala (perguntas do dia).** A piscadela de olho é bem-vinda; o duplo sentido não. Se a pergunta faria corar a avó dos noivos, fica de fora. **O Modo Meia-Noite é a exceção, de propósito:** é para adultos (ver essa secção).
 - **Nada de "Qual foi o maior erro..." ou "O que mudarias no noivo/a...".** O vídeo é um presente para os noivos, para ver daqui a 20 anos.
 - **Inclusivo.** Prefere "os noivos", "o casal", "eles" a fórmulas que pressupõem noivo e noiva.
 - **Testa em voz alta.** Se soa a formulário, reescreve.
 
-Marcação de tom: **[terno]** emotivo · **[leve]** humor suave · **[piscadela]** atrevido q.b., só para o Modo Meia-Noite.
+Marcação de tom: **[terno]** emotivo · **[leve]** humor suave · **[piscadela]** atrevido q.b. · **[picante]** adulto (NSFW, só para o Modo Meia-Noite).
 
 ---
 
@@ -90,56 +90,63 @@ Marcação de tom: **[terno]** emotivo · **[leve]** humor suave · **[piscadela
 
 ---
 
-## Modo Meia-Noite (~30)
+## Modo Meia-Noite (~30) — adultos
 
-Tom: romântico com piscadela de olho. Atrevido q.b., elegante, nunca brejeiro. Pensa "conversa à mesa às duas da manhã com a avó ainda a dançar", não "despedida de solteiro".
+**Tom (decisão do fundador, 2026-10-24): mais NSFW.** Atrevido, com duplo sentido e humor de adultos, à hora em que a festa já aqueceu. Pensa "despedida de solteiro sem ninguém humilhado", não "conversa com a avó". Mantém-se uma linha: **sugestivo, nunca explícito**, e ninguém é exposto.
+
+**Antes de ligar o modo:**
+- É para adultos. As crianças (e muitas vezes os avós) já foram embora à meia-noite, mas **o ecrã mostra a pergunta a quem passar**. Se ainda houver crianças na sala, atrasa `unlockAt` em `EVENT.midnight` (por exemplo `'01:00'`) ou desliga com `enabled: false`.
+- Avisa os noivos e confirma que é este o tom que querem.
+- O convidado só fala de **si próprio** ou de coisas inventadas. Nada que exponha uma pessoa concreta (ex-parceiros, o que o noivo "fez com quem"), nada que obrigue a revelar a vida íntima de alguém, nada que humilhe.
+- O vídeo é um presente para os noivos. Atrevido sim, de mau gosto não.
 
 **Embutidas na app por defeito (`QUESTIONS_NIGHT`)** — marcadas com ★.
 
-### A festa
-1. ★ Quem é o rei ou a rainha da pista esta noite? Prova-o com o teu melhor passo de dança. [leve]
-2. ★ Que música vai ficar para sempre colada a esta noite — e porquê? [leve]
-3. Descreve esta festa em três palavras — a terceira tem de ser inventada. [leve]
-4. Quem é que vai ter a melhor história amanhã ao pequeno-almoço? (Não digas nomes, só pistas.) [piscadela]
-5. Mostra-nos o passo de dança que os noivos vão tentar esquecer. [piscadela]
-6. Qual foi o momento em que percebeste que esta festa ia ficar para a história? [leve]
+### Noite de núpcias
+1. ★ Dá aos noivos um conselho para a noite de núpcias que não dirias à frente da avó. [picante]
+2. ★ Verdade ou consequência: dá aos noivos uma consequência para a noite de núpcias. [picante]
+3. ★ Que música devia tocar na noite de núpcias? Sê específico e sem pudores. [picante]
+4. ★ Quantos dias de lua de mel até o casal ver a luz do dia? Justifica a tua aposta. [picante]
+5. Que objeto devia constar da mala de lua de mel e nunca aparecer nas fotografias? [picante]
+6. Dá uma nota de 0 a 10 ao quarto de hotel dos noivos. Só vale a pena responder se for 10. [piscadela]
+7. Qual é o aviso que devia estar pendurado na porta do quarto esta noite? [piscadela]
 
-### Brindes da meia-noite
-7. ★ Faz o brinde da meia-noite: a que é que os noivos vão brindar daqui a 10 anos? [terno]
-8. Brinda às coisas que só acontecem depois da meia-noite. [piscadela]
-9. Faz um brinde ao "para sempre" — com a voz mais solene que conseguires. [leve]
-10. Ergue o copo ao primeiro beijo dos noivos. Sabes onde foi? [piscadela]
+### Beijos e engates
+8. ★ Descreve o beijo perfeito em dez segundos. Demonstração só com o ar, por favor. [picante]
+9. ★ Qual é a frase de engate mais desastrosa que já ouviste? Faz a reconstituição. [picante]
+10. Dá a tua melhor frase de engate para usar nesta festa, agora. [picante]
+11. Onde é o sítio mais inesperado onde um beijo é uma boa ideia? [picante]
+12. Faz o teu olhar de "vamos embora já" durante cinco segundos. [piscadela]
+13. Como se diz "estás com bom ar" sem dizer nada? Mostra. [piscadela]
 
-### Declarações
-11. ★ Declara-te: diz aos noivos, olhos nos olhos da câmara, porque é que gostas tanto deles. [terno]
-12. ★ Confessa: qual foi o momento mais bonito do dia que ninguém viu? [terno]
-13. Diz aos noivos uma coisa que só tens coragem de dizer a esta hora. [piscadela]
-14. Faz uma serenata de 10 segundos ao casal. Afinação opcional. [leve]
-15. Que elogio guardaste o dia todo para dizer agora? [terno]
+### Confissões
+14. ★ Confessa: qual foi o primeiro pensamento impuro que tiveste hoje? [picante]
+15. ★ Qual é a coisa mais atrevida que já sussurraste a alguém ao ouvido? [picante]
+16. Qual foi a coisa mais corajosa que já fizeste por alguém de quem gostavas? [piscadela]
+17. Que desculpa darias amanhã para explicar a cara com que vais acordar? [piscadela]
+18. Qual foi a mensagem mais comprometedora que já enviaste ao destinatário errado? [picante]
+19. Completa: "Se estas paredes falassem, diriam que eu…" [picante]
 
-### Histórias com piscadela
-16. ★ Que história dos noivos só se conta depois da meia-noite? (A versão para todas as idades.) [piscadela]
-17. Quem deu o primeiro passo: ele, ela, ou o destino? Conta o que sabes. [piscadela]
-18. Qual foi o encontro mais desastrado dos noivos que conheces? [leve]
-19. Revela uma mania adorável de um dos noivos. [leve]
-20. Que alcunha secreta achas que eles têm um para o outro? [piscadela]
+### Desafios
+20. Faz a tua melhor imitação de um sussurro sedutor. Material: a frase "traz-me mais gelo". [picante]
+21. Conta uma piada de adultos em 15 segundos. Sem nomes. [picante]
+22. Dá aos noivos três palavras que só se dizem de madrugada. [picante]
+23. Mostra o teu passo de dança mais sedutor, ou o mais ridículo (ambos servem). [piscadela]
+24. Diz "saúde" de um modo que deixe toda a gente a corar. [picante]
 
-### Promessas e conselhos à meia-luz
-21. ★ Que promessa farias aos noivos às três da manhã que manterias às três da tarde? [piscadela]
-22. ★ Dá aos noivos um conselho para as próximas mil noites — o mais elegante que conseguires. [piscadela]
-23. Qual é o segredo para continuar a namorar depois de casar? [terno]
-24. Que surpresa devia um fazer ao outro no primeiro aniversário? [terno]
-25. Como se mantém a chama acesa? Responde como um poeta. [piscadela]
-26. Qual deve ser a música da primeira dança daqui a 25 anos? [terno]
+### Brindes sem pudor
+25. Faz um brinde aos noivos que não pudesse ser feito antes das duas da manhã. [picante]
+26. Brinda a tudo o que fica na pista e não vai para a fotografia oficial. [piscadela]
+27. Ergue o copo às primeiras vezes: o primeiro olhar, o primeiro beijo, a primeira discussão. [piscadela]
 
-### Desafios rápidos
-27. Faz o teu melhor olhar apaixonado para a câmara durante 5 segundos. [leve]
-28. Manda um beijo aos noivos — no estilo de cinema. [piscadela]
-29. Diz "amo-vos" em todas as línguas que souberes. [leve]
-30. Termina a frase: "O amor depois da meia-noite é…" [piscadela]
+### Para quem prefere mais suave (podem ir para qualquer hora)
+28. Declara-te: diz aos noivos, olhos nos olhos da câmara, porque é que gostas tanto deles. [terno]
+29. Que elogio guardaste o dia todo para dizer agora? [terno]
+30. Qual é o segredo para continuar a namorar depois de casar? [terno]
 
-### Fora da lista (exemplos do que evitar)
+### Fora da lista (exemplos do que evitar, mesmo à meia-noite)
 - "Qual é o maior segredo do noivo que a noiva não sabe?" — expõe alguém.
-- "Com quem é que já te beijaste nesta festa?" — íntimo, pode envergonhar ou "outar" alguém.
+- "Com quem é que já te beijaste nesta festa?" — pode envergonhar ou "outar" alguém.
 - "Conta a pior bebedeira dos noivos." — humilhante e fica gravado para sempre.
-- Qualquer pergunta sobre a noite de núpcias — os avós e as crianças estão na sala.
+- Qualquer pergunta que descreva atos sexuais de forma explícita, ou sobre uma pessoa concreta na sala.
+- Perguntas que pressupõem que o convidado tem ou quis ter um par.
