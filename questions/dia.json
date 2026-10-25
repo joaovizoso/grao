@@ -1,0 +1,11 @@
+{
+  "set": "dia",
+  "nome": "Perguntas do dia (predefinidas)",
+  "espelho_de": "QUESTIONS em index.html",
+  "nota": "Cópia exata das perguntas embutidas na app. A app usa o array embutido, não este ficheiro. Ao mudar um, muda o outro.",
+  "questions": [
+    "Que conselho darias ao casal para daqui a 20 anos?",
+    "Faz um brinde — improvisa o discurso que nunca darias ao microfone.",
+    "Conta uma memória tua com um dos noivos que nunca vais esquecer."
+  ]
+}

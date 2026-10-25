@@ -1,7 +1,7 @@
 # Modo Meia-Noite (perguntas que desbloqueiam à noite)
 
-**Status:** proposed (bloqueado em dev)
-**Plan tier:** Premium (extensão do formato de perguntas, que já é Premium quando personalizado)
+**Status:** approved by the founder 2026-10-24 — being built (available on both plans)
+**Plan tier:** both plans (founder, 2026-10-24).
 **Proposed date:** 2026-08-19
 
 ## Summary
@@ -41,3 +41,6 @@ nem a copy já escrita.
 - **2026-08-19** — Proposta e registada (marca competitiva do Mots d'Amour). Copy
   pronta ([marketer]). Bloqueada em dev (gatilho horário + config layer). Sem
   decisão de construir ainda.
+- **2026-10-24** — Founder approved building it, on **both plans**, plus a repo list of question/theme suggestions (`questions/sugestoes.md`). Built overnight as `EVENT.midnight` (`unlockAt`/`endAt`, default 00:00–06:00 local) + `QUESTIONS_NIGHT`. The "do not advertise before it is built and tested" rule stands until the on-device check.
+- **2026-10-24 (built)** — `EVENT.midnight = {enabled, unlockAt:'00:00', endAt:'06:00'}` (iPad local time, handles windows that wrap past midnight); 8 night questions (`QUESTIONS_NIGHT`), separate rotation per set, Repetir keeps the same question; in the window the Welcome subtitle becomes the headline and the countdown label says "Modo Meia-Noite"; outside it every screen is pixel-identical to before. 24/24 Chromium tests incl. exact 00:00/06:00 boundaries (`?nowTime=`/`?nowHour=` hooks). `questions/sugestoes.md`: 41 day + 30 night questions with house rules; `dia.json`/`noite.json` mirror the embedded arrays. Open: keep the night headline on the Welcome screen? Not yet checked on the iPad.
+- **2026-10-24** — Founder: keep the night headline on the Welcome screen while the mode is active.
