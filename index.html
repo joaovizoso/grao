@@ -1033,13 +1033,31 @@
     }, 1000);
   }
 
+  // MP4 (H.264 + AAC) first: it plays everywhere the couple will open it
+  // (iPhone, QuickTime, Windows, TVs), which WebM does not. WebM is only the
+  // fallback for browsers that can't record MP4 (older Chrome/Firefox). Safari
+  // records MP4 natively. Order matters: the first supported entry wins.
+  const VIDEO_MIME_CANDIDATES = [
+    'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+    'video/mp4;codecs=avc1,mp4a.40.2',
+    'video/mp4;codecs=h264,aac',
+    'video/mp4',
+    'video/webm;codecs=vp9,opus',
+    'video/webm;codecs=vp8,opus',
+    'video/webm',
+  ];
+  function pickVideoMime() {
+    try { return VIDEO_MIME_CANDIDATES.find(m => MediaRecorder.isTypeSupported(m)) || ''; }
+    catch (e) { return ''; }
+  }
+
   function startRecording() {
     document.getElementById('rec-preview').srcObject = mediaStream;
     goTo('recording');
     recordedChunks = [];
-    const mimeType = MediaRecorder.isTypeSupported('video/webm;codecs=vp9') ? 'video/webm;codecs=vp9'
-      : MediaRecorder.isTypeSupported('video/webm') ? 'video/webm' : 'video/mp4';
-    const recOpts = { mimeType };
+    const mimeType = pickVideoMime();
+    const recOpts = mimeType ? { mimeType } : {}; // {} = let the browser choose its own default
+    if (!mimeType) noteError('Nenhum formato de vídeo preferido é suportado — a usar o formato por defeito do navegador');
     if (VIDEO_BITS_PER_SECOND) recOpts.videoBitsPerSecond = VIDEO_BITS_PER_SECOND;
     mediaRecorder = new MediaRecorder(mediaStream, recOpts);
     mediaRecorder.ondataavailable = e => { if (e.data.size > 0) recordedChunks.push(e.data); };
