@@ -23,7 +23,7 @@
  * Bump CACHE_VERSION on every deploy that changes this file or the shell. The
  * operator panel shows it ("Versão da app").
  */
-const CACHE_VERSION = '2026-10-24.1';
+const CACHE_VERSION = '2026-11-01.1';
 const SHELL_CACHE = 'grao-shell-' + CACHE_VERSION;
 const FONT_CACHE = 'grao-fonts-v1'; // font URLs are content-addressed; survives shell bumps
 const SHELL_FILES = [

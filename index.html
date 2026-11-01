@@ -1520,12 +1520,14 @@
   // and trims the edges (~4 mm per side reported on Canon's support forum), so
   // nothing important sits within SHEET_SAFE of an edge.
   // PRINT_LAYOUT — the founder can switch:
-  //   'grid'  (default) 2×2: three 3:4 photos + the monogram as the 4th tile.
-  //           Fills the sheet; every photo the same size; photos print near
-  //           their native capture resolution.
-  //   'strip' the classic 3-photo strip, centred, monogram below. Closest to
-  //           the previous look, but leaves wide white margins either side.
-  //   'hero'  photo 1 large, photos 2 and 3 small below, monogram at the foot.
+  //   'grid'  (default) 2×2: three 3:4 photos + the couple's names and date
+  //           as the 4th tile. Fills the sheet; every photo the same size;
+  //           photos print near their native capture resolution.
+  //   'strip' the classic 3-photo strip, centred, names and date below.
+  //           Leaves wide paper margins either side.
+  //   'hero'  photo 1 large, photos 2 and 3 small below, names at the foot.
+  // Identity (2026-11-01): paper ground, B&W photos in bordeaux frames,
+  // names in "letra recortada"; any text on the sheet is ≥ 50 px (12 pt).
   // All three keep the 3:4 crop of capturePhoto() and the on-screen guide.
   const PRINT_LAYOUT = 'grid';
   const SHEET_W = 1181, SHEET_H = 1748, SHEET_SAFE = 71; // 6 mm
@@ -1533,107 +1535,226 @@
 
   function sheetLayout(layout) {
     const X0 = SHEET_SAFE, Y0 = SHEET_SAFE, W = SHEET_W - 2 * SHEET_SAFE, H = SHEET_H - 2 * SHEET_SAFE;
-    const G = 24;
+    // Gap wide enough that a frame's solid shadow (SHEET_FRAME.shadow) never
+    // touches the next photo.
+    const G = 44;
     const r34 = w => Math.round(w * 4 / 3);
     if (layout === 'strip') {
-      const MONO = 250;
-      const ph = Math.floor((H - MONO - 2 * G) / 3), pw = Math.round(ph * 0.75);
+      const BAND = 260;
+      const ph = Math.floor((H - BAND - 2 * G) / 3), pw = Math.round(ph * 0.75);
       const x = Math.round((SHEET_W - pw) / 2);
       const photos = [0, 1, 2].map(i => ({ x, y: Y0 + i * (ph + G), w: pw, h: ph }));
       const top = Y0 + 3 * ph + 2 * G;
-      return { photos, mono: { cx: SHEET_W / 2, cy: top + (Y0 + H - top) / 2, r: 92 } };
+      return { photos, names: { x: X0, y: top + 16, w: W, h: Y0 + H - top - 16, stacked: false } };
     }
     if (layout === 'hero') {
-      const MONO = 230;
-      const wl = Math.floor((H - MONO - 2 * G + G * 2 / 3) / 2); // 4/3·wl + G + 4/3·(wl−G)/2 + G + MONO = H
+      const BAND = 240;
+      const wl = Math.floor((H - BAND - 2 * G + G * 2 / 3) / 2); // 4/3·wl + G + 4/3·(wl−G)/2 + G + BAND = H
       const hl = r34(wl);
       const ws = Math.floor((wl - G) / 2), hs = r34(ws);
       const x = Math.round((SHEET_W - wl) / 2), y = Y0;
       const photos = [{ x, y, w: wl, h: hl },
         { x, y: y + hl + G, w: ws, h: hs }, { x: x + wl - ws, y: y + hl + G, w: ws, h: hs }];
       const top = y + hl + G + hs;
-      return { photos, mono: { cx: SHEET_W / 2, cy: top + (Y0 + H - top) / 2, r: 88 } };
+      return { photos, names: { x: X0, y: top + 16, w: W, h: Y0 + H - top - 16, stacked: false } };
     }
     // 'grid'
-    const tw = Math.floor((W - G) / 2), th = r34(tw);
+    const tw = Math.floor((W - G - SHEET_FRAME.shadow) / 2), th = r34(tw); // shadow stays inside the safe area
     const gh = 2 * th + G, y = Math.round(Y0 + (H - gh) / 2);
     const x1 = X0, x2 = X0 + tw + G;
     const photos = [{ x: x1, y, w: tw, h: th }, { x: x2, y, w: tw, h: th }, { x: x1, y: y + th + G, w: tw, h: th }];
-    return { photos, mono: { cx: x2 + tw / 2, cy: y + th + G + th / 2, r: Math.round(tw * 0.34) } };
+    return { photos, names: { x: x2, y: y + th + G, w: tw, h: th, stacked: true } };
+  }
+
+  // The identity's photo frame at print scale (300 dpi): ~1.2 mm bordeaux
+  // outline, ~4.7 mm corners, ~1.2 mm solid offset shadow (no blur).
+  const SHEET_FRAME = { line: 14, radius: 56, shadow: 14 };
+  const SHEET_NAMES = { first: 'Constança', second: 'João', date: '18.06.2027' };
+
+  // The sheet is drawn in Chewy; wait for it (bounded) so the first sheet of
+  // the night isn't drawn in a fallback face. If Chewy can't load (offline
+  // with no cached copy), the sheet is still drawn — capture never waits on a
+  // font — and the operator panel's "Último erro" says so.
+  let sheetFontNoted = false;
+  function sheetFontsReady() {
+    if (!document.fonts || !document.fonts.load) return Promise.resolve(false);
+    const text = SHEET_NAMES.first + ' & ' + SHEET_NAMES.second + ' ~ ' + SHEET_NAMES.date;
+    const loaded = () => {
+      try { return [...document.fonts].some(f => f.family.replace(/["']/g, '') === 'Chewy' && f.status === 'loaded'); }
+      catch (e) { return false; }
+    };
+    const load = document.fonts.load('100px Chewy', text).then(loaded, loaded);
+    const timeout = new Promise(r => setTimeout(() => r(loaded()), 3000));
+    return Promise.race([load, timeout]).then(ok => {
+      if (!ok && !sheetFontNoted && typeof noteError === 'function') {
+        sheetFontNoted = true;
+        noteError('Tira de fotos: o tipo de letra Chewy não carregou, a folha usou um tipo de letra do sistema');
+      }
+      return ok;
+    });
   }
 
   // Draws the sheet on #strip-canvas from photoCaptures. Resolves with the
   // canvas; rejects (and the caller tells the guest) if a photo can't decode.
   function composeSheet(layout) {
     layout = layout || PRINT_LAYOUT;
-    return Promise.all(photoCaptures.slice(0, 3).map(src => new Promise((ok, no) => {
+    const photosP = Promise.all(photoCaptures.slice(0, 3).map(src => new Promise((ok, no) => {
       const img = new Image();
       img.onload = () => ok(img);
       img.onerror = () => no(new Error('foto ilegível'));
       img.src = src;
-    }))).then(imgs => {
+    })));
+    return Promise.all([photosP, sheetFontsReady()]).then(([imgs]) => {
       if (imgs.length < 3) throw new Error('faltam fotos');
       const canvas = document.getElementById('strip-canvas');
       canvas.width = SHEET_W;
       canvas.height = SHEET_H;
       const ctx = canvas.getContext('2d');
-      // The printed monogram uses the same role tokens as the screen.
-      const INK_RING = themeColor('--accent-pressed');
-      const INK_LETTERS = themeColor('--accent');
-      // White to the very edge (borderless print), no border line: a hairline
+      const PAPER = themeColor('--paper');
+      const LINE = themeColor('--cut-line');
+      const AMP = themeColor('--accent');
+      const FILL = themeColor('--cut-fill');
+      // Paper to the very edge (borderless print), no border line: a hairline
       // near the edge would be trimmed unevenly by the printer.
-      ctx.fillStyle = '#ffffff';
+      ctx.fillStyle = PAPER;
       ctx.fillRect(0, 0, SHEET_W, SHEET_H);
 
-      const drawCover = (img, dx, dy, dw, dh) => {
-        // centre cover-crop to the slot's aspect (3:4, same as capturePhoto)
-        const targetAR = dw / dh, srcW = img.naturalWidth, srcH = img.naturalHeight;
+      // Rounded-rect path by hand (ctx.roundRect needs Safari 16+).
+      const rr = (x, y, w, h, r) => {
+        ctx.beginPath();
+        ctx.moveTo(x + r, y);
+        ctx.arcTo(x + w, y, x + w, y + h, r);
+        ctx.arcTo(x + w, y + h, x, y + h, r);
+        ctx.arcTo(x, y + h, x, y, r);
+        ctx.arcTo(x, y, x + w, y, r);
+        ctx.closePath();
+      };
+      // Centre cover-crop to the slot's aspect (3:4, same as capturePhoto),
+      // then B&W, on an offscreen canvas so only the photo is desaturated.
+      const bwPhoto = (img, w, h) => {
+        const c = document.createElement('canvas'); c.width = w; c.height = h;
+        const x = c.getContext('2d');
+        const targetAR = w / h, srcW = img.naturalWidth, srcH = img.naturalHeight;
         let sx, sy, sw, sh;
         if (srcW / srcH > targetAR) { sh = srcH; sw = Math.round(sh * targetAR); sx = Math.round((srcW - sw) / 2); sy = 0; }
         else { sw = srcW; sh = Math.round(sw / targetAR); sx = 0; sy = Math.round((srcH - sh) / 2); }
-        ctx.drawImage(img, sx, sy, sw, sh, dx, dy, dw, dh);
-      };
-      // The welcome-page monogram: circular text ring + "J&C" centre letters
-      const drawMonogram = (cx, cy, radius) => {
-        ctx.save();
-        ctx.fillStyle = INK_RING;
-        const ringFontSize = Math.max(10, Math.round(radius * 0.16));
-        ctx.font = `200 ${ringFontSize}px Jost, "Helvetica Neue", Arial, sans-serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        const ringText = 'CASAMENTO   ✦   JOÃO  &  CONSTANÇA   ✦   ';
-        const n = ringText.length;
-        for (let i = 0; i < n; i++) {
-          const theta = (i / n) * 2 * Math.PI - Math.PI / 2; // start at top
-          ctx.save();
-          ctx.translate(cx + radius * Math.cos(theta), cy + radius * Math.sin(theta));
-          ctx.rotate(theta + Math.PI / 2);
-          ctx.fillText(ringText[i], 0, 0);
-          ctx.restore();
-        }
-        ctx.restore();
-        ctx.save();
-        ctx.fillStyle = INK_LETTERS;
-        ctx.font = `300 ${Math.round(radius * 0.85)}px "Cormorant Garamond", Georgia, serif`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('J&C', cx, cy);
-        ctx.restore();
-      };
-
-      const L = sheetLayout(layout);
-      L.photos.forEach((r, j) => {
-        drawCover(imgs[j], r.x, r.y, r.w, r.h);
+        x.drawImage(img, sx, sy, sw, sh, 0, 0, w, h);
         // B&W (the captures already are; this keeps the sheet B&W whatever the source)
-        const id = ctx.getImageData(r.x, r.y, r.w, r.h);
-        const d = id.data;
+        const id = x.getImageData(0, 0, w, h), d = id.data;
         for (let p = 0; p < d.length; p += 4) {
           const g = d[p] * 0.299 + d[p + 1] * 0.587 + d[p + 2] * 0.114;
           d[p] = d[p + 1] = d[p + 2] = g;
         }
-        ctx.putImageData(id, r.x, r.y);
-      });
-      drawMonogram(L.mono.cx, L.mono.cy, L.mono.r);
+        x.putImageData(id, 0, 0);
+        return c;
+      };
+      // Photo in the identity's frame. The slot keeps the 3:4 crop; the
+      // shadow falls into the gap to the right/below.
+      const framedPhoto = (img, r) => {
+        const { line: B, radius: R, shadow: S } = SHEET_FRAME;
+        ctx.fillStyle = LINE;
+        rr(r.x + S, r.y + S, r.w, r.h, R); ctx.fill();
+        ctx.save();
+        rr(r.x, r.y, r.w, r.h, R); ctx.clip();
+        ctx.drawImage(bwPhoto(img, r.w, r.h), r.x, r.y);
+        ctx.restore();
+        ctx.strokeStyle = LINE; ctx.lineWidth = B;
+        rr(r.x + B / 2, r.y + B / 2, r.w - B, r.h - B, R - B / 2); ctx.stroke();
+      };
+      // "Letra recortada" on canvas: solid offset shadow, outline under the
+      // fill (paint-order: stroke fill), paper fill. Centred on (cx, baseline y).
+      const cutText = (txt, cx, y, size, w, sh) => {
+        ctx.save();
+        ctx.font = `${size}px Chewy, "Avenir Next", "Arial Rounded MT Bold", sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.lineJoin = 'round';
+        ctx.fillStyle = LINE; ctx.strokeStyle = LINE; ctx.lineWidth = w * 2;
+        for (const d of [sh, sh + Math.max(1, Math.round(sh / 4))]) {
+          ctx.strokeText(txt, cx + d, y + d); ctx.fillText(txt, cx + d, y + d);
+        }
+        ctx.strokeText(txt, cx, y);
+        ctx.fillStyle = FILL; ctx.fillText(txt, cx, y);
+        ctx.restore();
+      };
+      const plainText = (txt, cx, y, size, color) => {
+        ctx.save();
+        ctx.font = `${size}px Chewy, "Avenir Next", "Arial Rounded MT Bold", sans-serif`;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.fillStyle = color;
+        ctx.fillText(txt, cx, y);
+        ctx.restore();
+      };
+      // The heart from the screens' corner doodles, as a line drawing.
+      const drawHeart = (cx, top, size) => {
+        const k = size / 30; // the doodle's heart is ~30 units tall (y 50–80)
+        ctx.save();
+        ctx.translate(cx - 52 * k, top - 50 * k); ctx.scale(k, k);
+        ctx.strokeStyle = AMP; ctx.lineWidth = 10 / k; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+        ctx.beginPath();
+        ctx.moveTo(52, 80); ctx.bezierCurveTo(40, 72, 35, 63, 39, 57); ctx.bezierCurveTo(43, 51, 50, 52, 52, 58);
+        ctx.bezierCurveTo(54, 52, 61, 51, 65, 57); ctx.bezierCurveTo(69, 63, 64, 72, 52, 80); ctx.closePath();
+        ctx.stroke();
+        ctx.restore();
+      };
+      const widthAt = (txt, size) => {
+        ctx.font = `${size}px Chewy, "Avenir Next", "Arial Rounded MT Bold", sans-serif`;
+        return ctx.measureText(txt).width;
+      };
+      // "~ 18.06.2027 ~": cut letters tracked by hand (canvas letterSpacing
+      // isn't available on older iPadOS Safari), so the dots aren't swallowed
+      // by the outline.
+      const drawDate = (txt, cx, y, D) => {
+        const track = Math.round(D * 0.12), ws = [...txt].map(ch => widthAt(ch, D));
+        const tw = ws.reduce((a, w) => a + w, 0) + track * (ws.length - 1);
+        let x = cx - tw / 2;
+        [...txt].forEach((ch, i) => { cutText(ch, x + ws[i] / 2, y, D, 3.5, 4); x += ws[i] + track; });
+        plainText('~', cx - tw / 2 - D * 0.6, y, D, AMP);
+        plainText('~', cx + tw / 2 + D * 0.6, y, D, AMP);
+      };
+      // Names + date, sized to fit the box. Stacked (grid tile): the "&"
+      // smaller, plain bordeaux, on its own line. One line (strip/hero band).
+      // Smallest text on the sheet is the date: ≥ 60 px = 14 pt at 300 dpi.
+      const drawNames = (b) => {
+        const { first, second, date } = SHEET_NAMES;
+        const cx = b.x + b.w / 2;
+        if (b.stacked) {
+          let F = 150;
+          const fit = b.w - 50;
+          F = Math.min(F, Math.floor(F * fit / widthAt(first, F)));
+          const amp = Math.round(F * 0.62), D = Math.max(64, Math.round(F * 0.56));
+          // Baseline-to-baseline steps leave room for the "ç" descender and
+          // the "ã" tilde around the "&".
+          const HEART = 84, s1 = 0.22 * F + 0.8 * amp, s2 = 0.16 * F + 0.8 * F, s3 = 0.3 * F + 1.05 * D;
+          const block = HEART + 44 + 0.8 * F + s1 + s2 + s3;
+          let y = b.y + (b.h - block) / 2;
+          drawHeart(cx, y, HEART);
+          y += HEART + 44 + F * 0.8;
+          cutText(first, cx, y, F, 6, 7);
+          y += s1; plainText('&', cx, y, amp, AMP);
+          y += s2; cutText(second, cx, y, F, 6, 7);
+          y += s3;
+          drawDate(date, cx, y, D);
+        } else {
+          let F = 112;
+          const amp = Math.round(F * 0.6);
+          const gap = F * 0.25;
+          const total = () => widthAt(first, F) + widthAt(second, F) + widthAt('&', amp) + 2 * gap;
+          const t = total();
+          if (t > b.w - 40) F = Math.floor(F * (b.w - 40) / t);
+          const a = Math.round(F * 0.6), D = 60, g = F * 0.25;
+          const w1 = widthAt(first, F), w2 = widthAt(second, F), wa = widthAt('&', a);
+          const tw = w1 + wa + w2 + 2 * g;
+          const y = b.y + F * 0.9;
+          let x = cx - tw / 2;
+          cutText(first, x + w1 / 2, y, F, 5, 6); x += w1 + g;
+          plainText('&', x + wa / 2, y, a, AMP); x += wa + g;
+          cutText(second, x + w2 / 2, y, F, 5, 6);
+          const yd = y + D * 1.45;
+          drawDate(date, cx, yd, D);
+        }
+      };
+
+      const L = sheetLayout(layout);
+      L.photos.forEach((r, j) => framedPhoto(imgs[j], r));
+      drawNames(L.names);
       return canvas;
     });
   }
