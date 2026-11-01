@@ -7,7 +7,8 @@
 <!-- Home-screen app (iPad): opens full-screen without Safari chrome, with its
      own storage (where the capture outbox lives). Relative URLs so the app
      works from a GitHub Pages sub-path such as /grao/. theme-color is the
-     --ground token's value (a manifest can't read CSS); keep it in sync. -->
+     light --ground token's value (a manifest can't read CSS); keep it in sync.
+     applyColorScheme() rewrites it at runtime when the booth is in dark mode. -->
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -27,6 +28,9 @@
         overridden by a mode; only a new palette preset changes them.
      2. ROLES (--accent, --ground, --ink, …): what every rule in this file,
         the inline SVG (currentColor) and the sheet canvas (themeColor) read.
+        Light roles live on :root AND .theme-light: the canvas probes with
+        .theme-light so the printed sheet is always drawn in the light
+        identity, whatever the screen mode. Dark roles: see DARK MODE below.
      Contrast (WCAG, computed): ink/ground 12.3, ink/paper 13.6,
      accent/ground 7.3, accent/paper 8.0, cream-on-accent 7.3. --ink-soft is
      4.43 on --ground (FAILS 4.5 for body text) and 4.90 on --paper: use it
@@ -47,7 +51,7 @@
     --c-night-soft: #C9B39F;    /* modo escuro: secundário */
     --c-night-line: #4D2B31;    /* modo escuro: linhas */
   }
-  :root {
+  :root, .theme-light {
     --accent: var(--c-bordeaux);              /* buttons, titles, outlines, cut-letter lines */
     --accent-pressed: var(--c-bordeaux-dark); /* button shadow / pressed fill */
     --accent-pale: var(--c-night-accent);     /* accent on the dark camera ground (ring, dots) */
@@ -71,6 +75,29 @@
     --camera-text: var(--c-night-text);
     --camera-shade: color-mix(in srgb, var(--c-night) 64%, black);
     --white: #ffffff;
+  }
+  /* ── DARK MODE (screen only, never print) ──
+     Chosen by EVENT.colorScheme ('light' default | 'dark' | 'auto'), which
+     sets data-theme on <html>. 'auto' follows prefers-color-scheme — off by
+     default because iPadOS "Automatic" flips to dark at sunset, mid-wedding.
+     Contrast: text/ground 14.3, text/card 13.0, soft/ground 8.6, soft/card
+     7.8, accent/ground 11.3, accent/card 10.2, ground-on-accent 11.3. */
+  @media screen {
+    :root[data-theme="dark"] {
+      --accent: var(--c-night-accent);
+      --accent-pressed: color-mix(in srgb, var(--c-night-accent) 55%, var(--c-night));
+      --accent-faint: color-mix(in srgb, var(--c-night-accent) 16%, var(--c-night-card));
+      --ground: var(--c-night);
+      --paper: var(--c-night-card);
+      --line: var(--c-night-line);
+      --ink: var(--c-night-text);
+      --ink-soft: var(--c-night-soft);
+      --ink-faint: color-mix(in srgb, var(--c-night-soft) 45%, var(--c-night));
+      --on-accent: var(--c-night);
+      --cut-fill: var(--c-night-text);
+      --cut-line: var(--c-bordeaux);
+      color-scheme: dark;
+    }
   }
   :root {
     --font-display: 'Chewy', 'Avenir Next', 'Arial Rounded MT Bold', system-ui, sans-serif;
@@ -364,7 +391,9 @@
 
   /* ── PRINT (AirPrint → Canon Selphy CP1500, postcard 100×148 mm) ── */
   /* On screen the print container never shows. When printing, ONLY it shows:
-     one page per copy, each page exactly the postcard, no margins. */
+     one page per copy, each page exactly the postcard, no margins. The page
+     is the canvas image (always drawn in the LIGHT identity); dark-mode
+     tokens are screen-only, so print is always light. */
   #print-root { display:none; }
   @media print {
     @page { size:100mm 148mm; margin:0; }
@@ -890,6 +919,11 @@
     // Selphy CP1500 via AirPrint. Off until the founder enables it per event;
     // while off, Imprimir is visibly disabled and the copies stepper is hidden.
     printEnabled: false,
+    // Screen colour scheme: 'light' (default), 'dark' (the identity's dark
+    // palette) or 'auto' (follows the iPad's appearance). Not 'auto' by
+    // default: iPadOS "Automatic" turns dark at sunset, which would change
+    // the booth's look in the middle of the party. Print is always light.
+    colorScheme: 'light',
   };
 
   // ─── Capture settings derived from EVENT ───────
@@ -930,6 +964,9 @@
   // (MediaRecorder, Safari 14.1+), but the real file sizes must be checked on
   // the iPad (device test T11).
   const PRINT_ENABLED = EVENT.printEnabled === true;
+  const COLOR_SCHEME = ['light', 'dark', 'auto'].includes(EVENT.colorScheme) ? EVENT.colorScheme : 'light';
+  if (EVENT.colorScheme !== undefined && COLOR_SCHEME !== EVENT.colorScheme)
+    console.warn('EVENT.colorScheme inválido (' + EVENT.colorScheme + '), a usar light');
   const VIDEO_BITS_PER_SECOND = VIDEO_DURATION_SEC > 120
     ? Math.floor((80 * 1000 * 1000 * 8) / VIDEO_DURATION_SEC) - 128000 : null;
 
@@ -1157,6 +1194,23 @@
     const r = ring && ring.r && ring.r.baseVal ? ring.r.baseVal.value : 44;
     return 2 * Math.PI * r;
   }
+
+  // Dark mode is a set of role-token overrides on html[data-theme="dark"]
+  // (screen only). theme-color follows, so the iPad's status bar matches.
+  (function applyColorScheme() {
+    const root = document.documentElement;
+    const mq = window.matchMedia ? window.matchMedia('(prefers-color-scheme: dark)') : null;
+    const set = () => {
+      const dark = COLOR_SCHEME === 'dark' || (COLOR_SCHEME === 'auto' && !!mq && mq.matches);
+      root.setAttribute('data-theme', dark ? 'dark' : 'light');
+      const meta = document.querySelector('meta[name="theme-color"]');
+      if (meta) meta.setAttribute('content', getComputedStyle(document.body).backgroundColor);
+    };
+    set();
+    if (COLOR_SCHEME === 'auto' && mq) {
+      if (mq.addEventListener) mq.addEventListener('change', set); else if (mq.addListener) mq.addListener(set);
+    }
+  })();
 
   applyNightCopy();
   setInterval(() => { if (document.getElementById('screen-welcome').classList.contains('active')) applyNightCopy(); }, 30000);
@@ -1596,6 +1650,8 @@
 
   // Draws the sheet on #strip-canvas from photoCaptures. Resolves with the
   // canvas; rejects (and the caller tells the guest) if a photo can't decode.
+  // Always the LIGHT identity (themeColor reads the light roles), whatever
+  // the screen's colour scheme.
   function composeSheet(layout) {
     layout = layout || PRINT_LAYOUT;
     const photosP = Promise.all(photoCaptures.slice(0, 3).map(src => new Promise((ok, no) => {
@@ -1883,16 +1939,19 @@
   // ─── SHARED ────────────────────────────────────
 
   // Resolve a colour token (e.g. '--accent') to a concrete rgb() string for
-  // <canvas>, which can't read CSS variables. Read off :root via
-  // getComputedStyle, then resolved through a probe element so the result is
-  // always a plain rgb()/rgba() even if a preset defines the token with
-  // color-mix() (canvas fillStyle silently ignores strings it can't parse).
+  // <canvas>, which can't read CSS variables. The probe carries .theme-light,
+  // which re-declares the LIGHT role tokens on itself, so the printed sheet
+  // is always drawn in the light identity even while the screen is dark.
+  // Resolving through the probe's `color` also turns a preset's color-mix()
+  // into a plain colour (canvas fillStyle silently ignores strings it can't
+  // parse).
   function themeColor(name) {
-    const raw = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
     const probe = document.createElement('span');
+    probe.className = 'theme-light';
     probe.style.display = 'none';
-    probe.style.color = raw || 'currentColor';
     document.body.appendChild(probe);
+    const raw = getComputedStyle(probe).getPropertyValue(name).trim();
+    probe.style.color = raw ? 'var(' + name + ')' : 'currentColor';
     const resolved = getComputedStyle(probe).color;
     probe.remove();
     if (!raw) console.warn('themeColor: token ' + name + ' is not defined');
